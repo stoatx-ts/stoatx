@@ -1,5 +1,5 @@
 {
-  "name": "@marshmallow/docs",
+  "name": "@marshmallow-stoat/docs",
   "version": "0.0.0",
   "description": "Documentation for Marshmallow bot",
   "main": "dist/index.js",

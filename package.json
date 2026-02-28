@@ -1,5 +1,5 @@
 {
-  "name": "marshmallow-monorepo",
+  "name": "marshmallow-stoat-monorepo",
   "version": "1.0.0",
   "description": "Moderation bot for Stoat and documentation fot the bot",
   "private": true,
