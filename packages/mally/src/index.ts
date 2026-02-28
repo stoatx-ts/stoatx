@@ -25,8 +25,10 @@ export {
   isStoatClass,
   getCommandOptions,
   getSimpleCommands,
+  getGuards,
   buildCommandMetadata,
   buildSimpleCommandMetadata,
+  METADATA_KEYS,
 } from './decorators';
 
 export type { SimpleCommandDefinition } from './decorators';
