@@ -12,7 +12,7 @@
   },
   "keywords": ["stoat", "moderation", "bot", "documentation", "stoatbot"],
   "homepage": "https://docs.marshmallow-stoat.com",
-  "author": "ispik <contact@marshmallow-stoat.com",
+  "author": "ispik <ispik@ispik.dev>",
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@10.28.0",
   "devDependencies": {

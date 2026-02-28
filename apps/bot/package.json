@@ -9,7 +9,7 @@
     "start": "node --env-file=.env dist/index.js",
     "format": "prettier --write ."
   },
-  "private": "true",
+  "private": true,
   "keywords": [],
   "author": "",
   "license": "ISC",
