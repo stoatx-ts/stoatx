@@ -1,11 +1,15 @@
 {
   "name": "stoatx",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A high-performance, decorator-based command handler for the Stoat ecosystem.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Arsabutispik/stoatx"
+    "url": "git+https://github.com/stoatx-ts/stoatx.git"
   },
+  "bugs": {
+    "url": "https://github.com/stoatx-ts/stoatx/issues"
+  },
+  "homepage": "https://github.com/stoatx-ts/stoatx#readme",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
