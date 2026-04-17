@@ -12,7 +12,7 @@ import { METADATA_KEYS } from "./keys";
  * import { Guard, Stoat, SimpleCommand, CommandContext } from 'stoatx';
  *
  * // Define a guard
- * class NotBot implements MallyGuard {
+ * class NotBot implements StoatxGuard {
  *   run(ctx: CommandContext): boolean {
  *     return !ctx.message.author.bot;
  *   }

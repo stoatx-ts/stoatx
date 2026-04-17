@@ -1,4 +1,4 @@
-import { Context, SimpleCommand, Stoat } from "stoatx";
+import { CommandContext as Context, SimpleCommand, Stoat } from "stoatx";
 
 @Stoat()
 export class GeneralCommands {

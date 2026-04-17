@@ -4,7 +4,7 @@ import type { RegisteredCommand } from "../registry";
  * Global store for all decorated classes and commands
  * This allows automatic registration without directory scanning
  */
-class DecoratorStore {
+export class DecoratorStore {
   private static instance: DecoratorStore;
 
   /** Stoat classes with their SimpleCommand methods */

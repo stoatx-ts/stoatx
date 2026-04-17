@@ -80,7 +80,7 @@ export class CommandRegistry {
       }
     }
 
-    console.log(`[Mally] Loaded ${this.commands.size} command(s)`);
+    console.log(`[Stoatx] Loaded ${this.commands.size} command(s)`);
   }
 
   /**
@@ -115,7 +115,9 @@ export class CommandRegistry {
       await this.loadFile(file, baseDir);
     }
 
-    console.log(`[Mally] Auto-discovered ${candidateFiles} candidate file(s), loaded ${this.commands.size} command(s)`);
+    console.log(
+      `[Stoatx] Auto-discovered ${candidateFiles} candidate file(s), loaded ${this.commands.size} command(s)`,
+    );
   }
 
   private getDefaultAutoDiscoveryPatterns(): string[] {
@@ -130,7 +132,7 @@ export class CommandRegistry {
         source.includes("Stoat") ||
         source.includes("SimpleCommand") ||
         source.includes("Command") ||
-        source.includes("mally:command")
+        source.includes("stoatx:command")
       );
     } catch {
       // If the file can't be pre-read, fall back to attempting import.
@@ -145,7 +147,7 @@ export class CommandRegistry {
     const name = metadata.name.toLowerCase();
 
     if (this.commands.has(name)) {
-      console.warn(`[Mally] Duplicate command name: ${name}. Skipping...`);
+      console.warn(`[Stoatx] Duplicate command name: ${name}. Skipping...`);
       return;
     }
 
@@ -156,7 +158,7 @@ export class CommandRegistry {
     for (const alias of metadata.aliases) {
       const aliasLower = alias.toLowerCase();
       if (this.aliases.has(aliasLower) || this.commands.has(aliasLower)) {
-        console.warn(`[Mally] Duplicate alias: ${aliasLower}. Skipping...`);
+        console.warn(`[Stoatx] Duplicate alias: ${aliasLower}. Skipping...`);
         continue;
       }
       this.aliases.set(aliasLower, name);
@@ -247,23 +249,23 @@ export class CommandRegistry {
    * @private
    */
   private validateGuards(commandClass: Function, commandName: string): void {
-    const guards: Function[] = Reflect.getMetadata("mally:command:guards", commandClass) || [];
+    const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", commandClass) || [];
 
     for (const GuardClass of guards) {
       const guardInstance = new (GuardClass as any)();
 
       if (typeof guardInstance.run !== "function") {
         console.error(
-          `[Mally] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a run() method.`,
+          `[Stoatx] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a run() method.`,
         );
         process.exit(1);
       }
 
       if (typeof guardInstance.guardFail !== "function") {
         console.error(
-          `[Mally] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a guardFail() method.`,
+          `[Stoatx] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a guardFail() method.`,
         );
-        console.error(`[Mally] All guards must implement guardFail() to handle failed checks.`);
+        console.error(`[Stoatx] All guards must implement guardFail() to handle failed checks.`);
         process.exit(1);
       }
     }
@@ -286,7 +288,7 @@ export class CommandRegistry {
         this.registerStoatClassCommands(stoatClass, stoatInstance, filePath, baseDir);
       }
     } catch (error) {
-      console.error(`[Mally] Failed to load command file: ${filePath}`, error);
+      console.error(`[Stoatx] Failed to load command file: ${filePath}`, error);
     }
   }
 
@@ -296,7 +298,7 @@ export class CommandRegistry {
 
     if (simpleCommands.length === 0) {
       console.warn(
-        `[Mally] Class ${stoatClass.name} is decorated with @Stoat but has no @SimpleCommand methods. Skipping...`,
+        `[Stoatx] Class ${stoatClass.name} is decorated with @Stoat but has no @SimpleCommand methods. Skipping...`,
       );
       this.processedStoatClasses.add(stoatClass);
       return;
@@ -305,7 +307,7 @@ export class CommandRegistry {
     for (const cmdDef of simpleCommands) {
       const method = (instance as any)[cmdDef.methodName];
       if (typeof method !== "function") {
-        console.warn(`[Mally] Method ${cmdDef.methodName} not found on ${stoatClass.name}. Skipping...`);
+        console.warn(`[Stoatx] Method ${cmdDef.methodName} not found on ${stoatClass.name}. Skipping...`);
         continue;
       }
 

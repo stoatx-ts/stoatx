@@ -36,22 +36,14 @@ Make sure to enable decorators in your `tsconfig.json`:
 ```typescript
 // index.ts
 import "reflect-metadata";
-import { Client } from "stoat.js";
-import { MallyHandler } from "stoatx";
+import { Client } from "stoatx";
 
-const client = new Client();
-
-const handler = new MallyHandler({
-  client,
+const client = new Client({
   prefix: "!",
   owners: ["your-user-id"],
 });
 
-await handler.init();
-
-client.on("messageCreate", (message) => {
-  handler.handleMessage(message);
-});
+await client.initCommands();
 
 client.login("your-token");
 ```
@@ -161,7 +153,7 @@ interface Context {
 ## Handler Options
 
 ```typescript
-interface MallyHandlerOptions {
+interface StoatxHandlerOptions {
   client: Client;
   commandsDir?: string; // Legacy mode: explicitly scan this directory
   discovery?: {
@@ -169,7 +161,7 @@ interface MallyHandlerOptions {
     include?: string[]; // Glob patterns per root
     ignore?: string[]; // Additional ignore globs
   };
-  prefix: string | ((ctx: { serverId?: string }) => string | Promise<string>);
+  prefix: string  ((ctx: { serverId?: string }) => string  Promise<string>);
   owners?: string[]; // Owner user IDs
   extensions?: string[]; // File extensions (default: ['.js', '.mjs', '.cjs'])
   disableMentionPrefix?: boolean; // Disable @bot prefix
@@ -182,8 +174,7 @@ interface MallyHandlerOptions {
 ## Dynamic Prefix
 
 ```typescript
-const handler = new MallyHandler({
-  client,
+const client = new Client({
   prefix: async ({ serverId }) => {
     // Fetch from database, etc.
     return serverId ? await getServerPrefix(serverId) : "!";
@@ -191,8 +182,7 @@ const handler = new MallyHandler({
 });
 
 // Optional: constrain auto-discovery to specific roots/patterns
-const scopedHandler = new MallyHandler({
-  client,
+const scopedClient = new Client({
   prefix: "!",
   discovery: {
     roots: [process.cwd()],
@@ -201,8 +191,7 @@ const scopedHandler = new MallyHandler({
 });
 
 // TypeScript source discovery is opt-in and requires a TS runtime loader (tsx/ts-node)
-const tsRuntimeHandler = new MallyHandler({
-  client,
+const tsRuntimeClient = new Client({
   prefix: "!",
   extensions: [".ts"],
   discovery: {

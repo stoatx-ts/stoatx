@@ -1,43 +1,61 @@
 import "reflect-metadata";
 import { CommandRegistry, RegisteredCommand } from "./registry";
-import type { CommandContext, CommandMetadata, MallyDiscoveryOptions, MallyHandlerOptions } from "./types";
-import { Client, Message } from "stoat.js";
+import type { CommandContext, CommandMetadata, StoatxDiscoveryOptions, StoatxHandlerOptions } from "./types";
+import { Client as StoatClient, Message } from "stoat.js";
 
 /**
- * MallyHandler - The execution engine for commands
- *
- * Handles message parsing, middleware execution, and command dispatching
+ * Client - An extended Client that integrates StoatxHandler directly
  *
  * @example
  * ```ts
- * import { MallyHandler } from 'stoatx';
- * import { Client } from 'stoat.js';
+ * import { Client } from 'stoatx';
  *
- * const client = new Client();
- *
- * const handler = new MallyHandler({
- *   client,
+ * const client = new Client({
  *   prefix: '!',
  *   owners: ['owner-user-id'],
  * });
  *
- * await handler.init();
- *
- * client.on('message', (message) => {
- *   handler.handleMessage(message);
- * });
+ * await client.initCommands();
  * ```
  */
-export class MallyHandler {
-  private readonly commandsDir?: string;
-  private readonly discoveryOptions?: MallyDiscoveryOptions;
+export class Client extends StoatClient {
+  public readonly handler: StoatxHandler;
+
+  constructor(options: Omit<StoatxHandlerOptions, "client">) {
+    super();
+    this.handler = new StoatxHandler({ ...options, client: this });
+
+    // Automatically hook up the message handler
+    this.on("messageCreate", async (message) => {
+      await this.handler.handle(message);
+    });
+  }
+
+  /**
+   * Initialize the StoatxHandler commands
+   */
+  async initCommands(): Promise<void> {
+    await this.handler.init();
+  }
+}
+
+/**
+ * StoatxHandler - The execution engine for commands
+ *
+ * Handles message parsing, middleware execution, and command dispatching
+ *
+ * @internal This class is not intended to be instantiated directly. Use the `Client` from `stoatx` instead.
+ */
+export class StoatxHandler {
+  private readonly commandsDir: string | undefined;
+  private readonly discoveryOptions: StoatxDiscoveryOptions | undefined;
   private readonly prefixResolver: string | ((ctx: { serverId?: string }) => string | Promise<string>);
   private readonly owners: Set<string>;
   private readonly registry: CommandRegistry;
   private readonly cooldowns: Map<string, Map<string, number>> = new Map();
   private readonly disableMentionPrefix: boolean;
-  private readonly client: Client;
-  constructor(options: MallyHandlerOptions) {
+  private readonly client: StoatClient;
+  constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
     this.commandsDir = options.commandsDir;
     this.discoveryOptions = options.discovery;
@@ -212,7 +230,7 @@ export class MallyHandler {
     }
 
     // Guard checks - use classConstructor for guard metadata
-    const guards: Function[] = Reflect.getMetadata("mally:command:guards", classConstructor) || [];
+    const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", classConstructor) || [];
     for (const guardClass of guards) {
       const guardInstance = new (guardClass as any)();
       if (typeof guardInstance.run === "function") {
@@ -221,7 +239,7 @@ export class MallyHandler {
           if (typeof guardInstance.guardFail === "function") {
             await guardInstance.guardFail(ctx);
           } else {
-            console.error("[Mally] Guard check failed but no guardFail method defined on", guardClass.name);
+            console.error("[Stoatx] Guard check failed but no guardFail method defined on", guardClass.name);
           }
           return false;
         }
@@ -255,7 +273,7 @@ export class MallyHandler {
       if (typeof (instance as any).onError === "function") {
         await (instance as any).onError(ctx, error as Error);
       } else {
-        console.error(`[Mally] Error in command ${metadata.name}:`, error);
+        console.error(`[Stoatx] Error in command ${metadata.name}:`, error);
         await ctx.reply(`An error occurred: ${(error as Error).message}`);
       }
       return false;
