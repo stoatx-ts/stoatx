@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- [#15](https://github.com/stoatx-ts/stoatx/pull/15) [`6922557`](https://github.com/stoatx-ts/stoatx/commit/6922557a61c58535194ccee058b4ca6a453e769d) Thanks [@Arsabutispik](https://github.com/Arsabutispik)! - feat: add `@On` and `@Once` decorators for event handling
+
+  Introduced the `@On` and `@Once` method decorators to allow easy binding of client events directly within `@Stoat()` decorated classes.
+  - Methods marked with `@On("eventName")` will execute every time the event is emitted.
+  - Methods marked with `@Once("eventName")` will execute only the first time the event is emitted.
+  - Event handlers automatically receive the event arguments followed by the `Client` instance.
+  - Updated startup logs to display the number of loaded events alongside commands.
+
+- [#12](https://github.com/stoatx-ts/stoatx/pull/12) [`46e3a94`](https://github.com/stoatx-ts/stoatx/commit/46e3a947c1e99831a07f63204b1c8ee4739c7571) Thanks [@Arsabutispik](https://github.com/Arsabutispik)! - - **stoatx**: Exported `DecoratorStore` to fix unused class IDE warnings, updated internal property typings on `StoatxHandler`, and restricted `StoatxHandler` to a type-only export to ensure users leverage the wrapper `Client` directly.
+  - **@stoatx/bot**: Wrapped the initialization flow in an async `main()` function to resolve Node.js warnings regarding unsettled top-level awaits.
+
 ## 0.2.0
 
 ### Minor Changes

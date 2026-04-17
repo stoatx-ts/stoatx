@@ -1,6 +1,6 @@
 {
   "name": "stoatx",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A high-performance, decorator-based command handler for the Stoat ecosystem.",
   "repository": {
     "type": "git",
