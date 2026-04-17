@@ -1,4 +1,4 @@
-import { Client, Message } from "stoat.js";
+import { Client as StoatClient, Message } from "stoat.js";
 
 /**
  * Permission types for commands
@@ -55,7 +55,7 @@ export interface CommandMetadata {
  */
 export interface CommandContext {
   /** The client instance */
-  client: Client;
+  client: StoatClient;
   /** The raw message content */
   content: string;
   /** The author ID */
@@ -86,7 +86,7 @@ export interface StoatLifecycle {
   onCooldown?(ctx: CommandContext, remaining: number): Promise<void>;
 }
 
-export interface MallyGuard {
+export interface StoatxGuard {
   run(ctx: CommandContext): Promise<boolean> | boolean;
   guardFail?(ctx: CommandContext): Promise<void> | void;
 }
@@ -94,7 +94,7 @@ export interface MallyGuard {
 /**
  * Discovery options for automatic command module loading
  */
-export interface MallyDiscoveryOptions {
+export interface StoatxDiscoveryOptions {
   /** Root directories to scan (default: [process.cwd()]) */
   roots?: string[];
   /** Glob patterns relative to each root */
@@ -106,13 +106,13 @@ export interface MallyDiscoveryOptions {
 /**
  * Handler options
  */
-export interface MallyHandlerOptions {
+export interface StoatxHandlerOptions {
   /** The client instance */
-  client: Client;
+  client: StoatClient;
   /** Directory to scan for command modules (absolute path) */
   commandsDir?: string;
   /** Auto-discovery options used when commandsDir is not provided */
-  discovery?: MallyDiscoveryOptions;
+  discovery?: StoatxDiscoveryOptions;
   /** Command prefix or prefix resolver function */
   prefix: string | ((ctx: { serverId?: string }) => string | Promise<string>);
   /** Owner IDs for owner-only commands */
