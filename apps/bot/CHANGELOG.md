@@ -1,5 +1,17 @@
 # @stoatx/bot
 
+## 0.1.0
+
+### Minor Changes
+
+- [#12](https://github.com/stoatx-ts/stoatx/pull/12) [`46e3a94`](https://github.com/stoatx-ts/stoatx/commit/46e3a947c1e99831a07f63204b1c8ee4739c7571) Thanks [@Arsabutispik](https://github.com/Arsabutispik)! - - **stoatx**: Exported `DecoratorStore` to fix unused class IDE warnings, updated internal property typings on `StoatxHandler`, and restricted `StoatxHandler` to a type-only export to ensure users leverage the wrapper `Client` directly.
+  - **@stoatx/bot**: Wrapped the initialization flow in an async `main()` function to resolve Node.js warnings regarding unsettled top-level awaits.
+
+### Patch Changes
+
+- Updated dependencies [[`6922557`](https://github.com/stoatx-ts/stoatx/commit/6922557a61c58535194ccee058b4ca6a453e769d), [`46e3a94`](https://github.com/stoatx-ts/stoatx/commit/46e3a947c1e99831a07f63204b1c8ee4739c7571)]:
+  - stoatx@0.3.0
+
 ## 0.0.4
 
 ### Patch Changes
