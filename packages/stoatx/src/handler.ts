@@ -65,8 +65,8 @@ export class Client extends StoatClient {
  * ```
  */
 export class StoatxHandler {
-  private readonly commandsDir?: string;
-  private readonly discoveryOptions?: StoatxDiscoveryOptions;
+  private readonly commandsDir: string | undefined;
+  private readonly discoveryOptions: StoatxDiscoveryOptions | undefined;
   private readonly prefixResolver: string | ((ctx: { serverId?: string }) => string | Promise<string>);
   private readonly owners: Set<string>;
   private readonly registry: CommandRegistry;
