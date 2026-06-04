@@ -2,7 +2,7 @@ min_version = { soft = "2026.5.15", hard = "2026.5.12" }
 
 [tools]
 node = "26.2.0"
-pnpm = "11.3.0"
+pnpm = "11.5.1"
 gh = "2.92.0"
 "aqua:git-town/git-town" = "23.0.1"
 
