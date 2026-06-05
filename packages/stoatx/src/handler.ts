@@ -314,6 +314,22 @@ export class StoatxHandler {
       return false;
     }
 
+    // Permissions check
+    if (metadata.permissions) {
+      const server = ctx.message.server;
+      const member = server ? await server.members.fetch(ctx.authorId) : null;
+
+      if (!member || !member.permissions.has(metadata.permissions)) {
+        if (typeof (instance as any).onMissingPermissions === 'function') {
+          const missing = member?.permissions.missing(metadata.permissions) || [];
+          await (instance as any).onMissingPermissions(ctx, missing);
+        } else {
+          await ctx.reply('You do not have permission to use this command.');
+        }
+        return false;
+      }
+    }
+
     // Guard checks - use classConstructor for guard metadata
     const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", classConstructor) || [];
     for (const guardClass of guards) {
