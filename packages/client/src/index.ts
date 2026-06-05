@@ -38,3 +38,4 @@ export * from "./utils/permissions";
 export * from "./utils/Collector";
 export * from "./utils/MessageCollector";
 export * from "./utils/ReactionCollector";
+export * from "./utils/BitField";

@@ -1,17 +1,4 @@
-import { Client as StoatClient, Message } from "@stoatx/client";
-
-/**
- * Permission types for commands
- */
-export type Permission =
-  | "SendMessages"
-  | "ManageMessages"
-  | "ManageChannels"
-  | "ManageServer"
-  | "KickMembers"
-  | "BanMembers"
-  | "Administrator"
-  | (string & {});
+import { Client as StoatClient, Message, PermissionResolvable } from "@stoatx/client";
 
 /**
  * Simple command options passed to @SimpleCommand decorator
@@ -25,7 +12,7 @@ export interface SimpleCommandOptions {
   /** Command aliases */
   aliases?: string[];
   /** Required permissions to run the command */
-  permissions?: Permission[];
+  permissions?: PermissionResolvable[];
   /** Command category (auto-detected from directory if not provided) */
   category?: string;
   /** Cooldown in milliseconds */
@@ -45,7 +32,7 @@ export interface CommandMetadata {
   name: string;
   description: string;
   aliases: string[];
-  permissions: Permission[];
+  permissions: PermissionResolvable[];
   category: string;
   cooldown: number;
   cooldownStorage?: string;
@@ -87,6 +74,8 @@ export interface StoatLifecycle {
   onError?(ctx: CommandContext, error: Error): Promise<void> | void;
   /** Optional: Called when a cooldown is active */
   onCooldown?(ctx: CommandContext, remaining: number): Promise<void> | void;
+  /** Optional: Called when user doesn't have the permissions needed */
+  onMissingPermissions?(ctx: CommandContext, missing: PermissionResolvable[]): Promise<void> | void;
 
   /** Allows the class to contain other methods (such as your commands) */
   [method: string]: any;
