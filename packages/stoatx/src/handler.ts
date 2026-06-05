@@ -320,11 +320,11 @@ export class StoatxHandler {
       const member = server ? await server.members.fetch(ctx.authorId) : null;
 
       if (!member || !member.permissions.has(metadata.permissions)) {
-        if (typeof (instance as any).onMissingPermissions === 'function') {
+        if (typeof (instance as any).onMissingPermissions === "function") {
           const missing = member?.permissions.missing(metadata.permissions) || [];
           await (instance as any).onMissingPermissions(ctx, missing);
         } else {
-          await ctx.reply('You do not have permission to use this command.');
+          await ctx.reply("You do not have permission to use this command.");
         }
         return false;
       }
