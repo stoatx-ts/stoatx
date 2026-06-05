@@ -2,7 +2,7 @@ import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import type { Server } from "./Server";
 import * as util from "node:util";
-import { Permissions, type PermissionResolvable } from "../utils/permissions";
+import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
 
 export class Role extends Base {
@@ -11,7 +11,7 @@ export class Role extends Base {
   public color: string | null = null;
   public hoist: boolean = false;
   public rank: number = 0;
-  public permissions: bigint = 0n;
+  private _permissions: bigint = 0n;
 
   constructor(client: Client, data: any, serverId: string) {
     super(client, data);
@@ -32,12 +32,12 @@ export class Role extends Base {
       try {
         if (typeof data.permissions === "object" && data.permissions !== null) {
           const allowPerms = data.permissions.a ?? data.permissions[0] ?? 0;
-          this.permissions = BigInt(allowPerms);
+          this._permissions = BigInt(allowPerms);
         } else {
-          this.permissions = BigInt(data.permissions);
+          this._permissions = BigInt(data.permissions);
         }
       } catch {
-        this.permissions = 0n;
+        this._permissions = 0n;
       }
     }
   }
@@ -51,12 +51,10 @@ export class Role extends Base {
   }
 
   /**
-   * Checks whether this role has a specific permission.
-   * @param permission The permission to check for.
-   * @returns True if the role has the permission.
+   * Permissions for this role
    */
-  public hasPermission(permission: PermissionResolvable): boolean {
-    return Permissions.has(this.permissions, permission);
+  public get permissions(): Permissions {
+    return new Permissions(this._permissions);
   }
 
   /**

@@ -1,3 +1,5 @@
+import { BitField } from './BitField';
+
 export const PermissionFlags = {
   // Server permissions
   ManageChannel: 1n << 0n,
@@ -47,31 +49,33 @@ export const PermissionFlags = {
 } as const;
 
 export type PermissionString = keyof typeof PermissionFlags;
-export type PermissionResolvable = bigint | PermissionString | PermissionResolvable[];
+export type PermissionResolvable = PermissionString | bigint | number | Permissions | PermissionResolvable[];
 
-export class Permissions {
-  /**
-   * Converts a string, BigInt, or array of strings into a single BigInt
-   */
-  public static resolve(permission: PermissionResolvable): bigint {
-    if (typeof permission === "bigint") return permission;
+export class Permissions extends BitField {
+  public static override Flags = PermissionFlags as unknown as Record<string, number | bigint>;
+  public static override DefaultBit = 0n;
 
-    if (typeof permission === "string") {
-      return PermissionFlags[permission] ?? 0n;
-    }
-
-    if (Array.isArray(permission)) {
-      return permission.reduce<bigint>((acc, p) => acc | this.resolve(p), 0n);
-    }
-
-    return 0n;
+  public static override resolve(bit?: PermissionResolvable): bigint {
+    return super.resolve(bit) as bigint;
   }
 
-  /**
-   * Checks if a specific permission bit exists
-   */
-  public static has(totalPermissions: bigint, permissionToCheck: PermissionResolvable): boolean {
-    const resolvedCheck = this.resolve(permissionToCheck);
-    return (totalPermissions & resolvedCheck) === resolvedCheck;
+  public override has(bit: PermissionResolvable): boolean {
+    return super.has(bit);
+  }
+
+  public override any(bit: PermissionResolvable): boolean {
+    return super.any(bit);
+  }
+
+  public override missing(bits: PermissionResolvable): PermissionString[] {
+    return super.missing(bits) as PermissionString[];
+  }
+
+  public override add(...bits: PermissionResolvable[]): this {
+    return super.add(...bits);
+  }
+
+  public override remove(...bits: PermissionResolvable[]): this {
+    return super.remove(...bits);
   }
 }

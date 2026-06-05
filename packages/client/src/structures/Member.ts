@@ -2,7 +2,7 @@ import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import type { User } from "./User";
 import type { Server } from "./Server";
-import { Permissions, PermissionFlags, PermissionResolvable } from "../utils/permissions";
+import { Permissions, PermissionFlags } from "../utils/permissions";
 import * as util from "node:util";
 import { MemberBanOptions, MemberEditOptions } from "../managers/MemberManager";
 import { MemberRoleManager } from "../managers/MemberRoleManager";
@@ -72,21 +72,21 @@ export class Member extends Base {
   }
 
   /** Calculates the member's total permissions using BigInt */
-  public get permissions(): bigint {
+  public get permissions(): Permissions {
     const server = this.server;
-    if (!server) return 0n;
+    if (!server) return new Permissions(0n);
+
+    if (server.ownerId === this.id) {
+      return new Permissions(PermissionFlags.GrantAllSafe);
+    }
 
     let totalPerms = server.defaultPermissions ?? 0n;
 
     for (const role of this.roles.cache.values()) {
-      totalPerms |= BigInt(role.permissions);
+      totalPerms |= BigInt(role.permissions.bitfield);
     }
 
-    if (server.ownerId === this.id) {
-      return PermissionFlags.GrantAllSafe;
-    }
-
-    return totalPerms;
+    return new Permissions(totalPerms);
   }
 
   /** Get avatar URL for this member, or null if they don't have one.
@@ -156,11 +156,6 @@ export class Member extends Base {
 
   public async setNickname(nickname: string): Promise<Member> {
     return this.edit({ nickname });
-  }
-
-  /** Checks if the member has a specific permission */
-  public hasPermission(permission: PermissionResolvable): boolean {
-    return Permissions.has(this.permissions, permission);
   }
 
   /**
