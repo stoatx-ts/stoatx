@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.6.0...stoatx-v0.7.0) (2026-06-06)
+
+
+### Features
+
+* rewrite permissions ([#59](https://github.com/stoatx-ts/stoatx/issues/59)) ([67c521b](https://github.com/stoatx-ts/stoatx/commit/67c521b22243ae421bc328a9d95dc45f90c54bc4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 0.4.0
+  * peerDependencies
+    * @stoatx/client bumped from ^0.2.2 to ^0.4.0
+
 ## [0.6.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.5.5...stoatx-v0.6.0) (2026-05-30)
 
 
