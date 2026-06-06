@@ -4,6 +4,7 @@ import type { Server } from "./Server";
 import * as util from "node:util";
 import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
+import { Attachment } from "./Attachment";
 
 export class Role extends Base {
   public serverId: string;
@@ -11,6 +12,7 @@ export class Role extends Base {
   public color: string | null = null;
   public hoist: boolean = false;
   public rank: number = 0;
+  public icon: Attachment | null = null;
   private _permissions: bigint = 0n;
 
   constructor(client: Client, data: any, serverId: string) {
@@ -28,6 +30,7 @@ export class Role extends Base {
     if (data.color !== undefined) this.color = data.color;
     if (data.hoist !== undefined) this.hoist = data.hoist;
     if (data.rank !== undefined) this.rank = data.rank;
+    if (data.icon !== undefined) this.icon = new Attachment(this.client, data.icon);
     if (data.permissions !== undefined) {
       try {
         if (typeof data.permissions === "object" && data.permissions !== null) {
@@ -68,7 +71,7 @@ export class Role extends Base {
    * await role.fetch();
    * console.log(`Role updated, current name: ${role.name}`);
    */
-  public async fetch(force: boolean = true): Promise<this> {
+  public async fetch(force: boolean = true): Promise<Role> {
     let server = this.server;
 
     if (!server) {
@@ -86,12 +89,12 @@ export class Role extends Base {
    * @throws {Error} If the API request fails (e.g., lack of permissions).
    * @example
    * // Change the role's name and color
-   * await role.edit({ name: "Senior Admin", colour: "#FFD700" });
+   * await role.edit({ name: "Senior Admin", color: "#FFD700" });
    *
    * // Remove the custom color from the role
-   * await role.edit({ colour: null });
+   * await role.edit({ color: null });
    */
-  public async edit(options: RoleEditOptions): Promise<this> {
+  public async edit(options: RoleEditOptions): Promise<Role> {
     let server = this.server;
     if (!server) server = await this.client.servers.fetch(this.serverId);
 
@@ -127,7 +130,7 @@ export class Role extends Base {
    *   allow: ["ManageChannel", "SendMessage"]
    * });
    */
-  public async setPermissions(options: RolePermissionOptions): Promise<this> {
+  public async setPermissions(options: RolePermissionOptions): Promise<Role> {
     let server = this.server;
     if (!server) server = await this.client.servers.fetch(this.serverId);
 
@@ -145,7 +148,7 @@ export class Role extends Base {
    * await role.setPosition(2);
    * console.log(`Role moved to rank: ${role.rank}`);
    */
-  public async setPosition(newPosition: number): Promise<this> {
+  public async setPosition(newPosition: number): Promise<Role> {
     let server = this.server;
     if (!server) server = await this.client.servers.fetch(this.serverId);
 
@@ -160,6 +163,70 @@ export class Role extends Base {
     await server.roles.setRanks(filteredRoles);
 
     return this;
+  }
+
+  /**
+   * Change the name for this role
+   * @param name The new name for the role
+   * @returns A promise that resolves to this updated Role object.
+   * @throws {Error} If API request fails.
+   * @example
+   * // Change the role's name
+   * await role.setName("New Role Name");
+   * console.log(`Role's new name: ${role.name}`);
+   */
+  public async setName(name: string): Promise<Role> {
+    return await this.edit({ name });
+  }
+
+  /**
+   * Change the color for this role, it can be a HEX or CSS colours
+   * @param {[string]} color The new color for the role
+   * @returns A promise that resolves to this updated Role object.
+   * @throws {Error} If API request fails
+   * @example
+   * // Change the role's color
+   * await role.setColour("#FF0000");
+   * console.log(`Role's new color: ${role.color}`);
+   *
+   * // Use CSS color linear-graident
+   * await role.setColour("linear-gradient(90deg, #FF0000, #0000FF)");
+   * console.log(`Role's new color: ${role.color}`);
+   *
+   * // Remove the custom color from the role
+   * await role.setColour(null);
+   * console.log(`Role's color removed, current color: ${role.color}`);
+   */
+  public async setColor(color: string | null): Promise<Role> {
+    return await this.edit({ color });
+  }
+
+  /**
+   * Edit the icon of this role
+   * @param icon Autumn ID for the new icon, or null to remove the custom icon
+   * @returns A promise that resolves to this updated Role object.
+   * @throws {Error} If API request fails
+   * @example
+   * // Set a new icon for the role
+   * await role.setIcon("AUTUMN_ID_FOR_ICON");
+   * console.log(`Role's new icon: ${role.icon}`);
+   */
+  public async setIcon(icon: string | null): Promise<Role> {
+    return await this.edit({ icon });
+  }
+
+  /**
+   * Change the hoist status for this role
+   * @param hoist The new hoist status for the role
+   * @returns A promise that resolves to this updated Role object.
+   * @throws {Error} If API request fails
+   * @example
+   * // Enable hoisting for the role
+   * await role.setHoist(true);
+   * console.log(`Role is now hoisted: ${role.hoist}`);
+   */
+  public async setHoist(hoist: boolean): Promise<Role> {
+    return await this.edit({ hoist });
   }
 
   /**
