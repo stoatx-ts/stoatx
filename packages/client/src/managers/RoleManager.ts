@@ -10,9 +10,14 @@ export interface RoleCreateOptions {
 }
 
 export interface RoleEditOptions {
+  // Role name
   name?: string;
-  colour?: string | null;
+  // Role color
+  color?: string | null;
+  // Whether this role should be displayed separately
   hoist?: boolean;
+  // Provide an Autumn attachment ID
+  icon?: string | null;
 }
 
 export interface RolePermissionOptions {
@@ -171,7 +176,7 @@ export class RoleManager extends BaseManager<string, Role> {
 
   /**
    * Edits an existing role in the server.
-   * @param role The RoleResolvable to edit.
+   * @param role The {@link RoleResolvable} to edit.
    * @param options The fields to update.
    * @returns A promise that resolves to the updated Role.
    * @throws {TypeError} If invalid options or RoleResolvable are provided.
@@ -196,11 +201,18 @@ export class RoleManager extends BaseManager<string, Role> {
     if (options.hoist !== undefined) payload.hoist = options.hoist;
 
     // 3. Handle the "Remove" magic for colors
-    if (options.colour !== undefined) {
-      if (options.colour === null) {
+    if (options.color !== undefined) {
+      if (options.color === null) {
         remove.push("Colour");
       } else {
-        payload.colour = options.colour;
+        payload.colour = options.color;
+      }
+    }
+    if (options.icon !== undefined) {
+      if (options.icon === null) {
+        remove.push("Icon");
+      } else {
+        payload.icon = options.icon;
       }
     }
 
