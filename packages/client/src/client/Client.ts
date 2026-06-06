@@ -32,7 +32,9 @@ export interface ClientEvents {
   serverDelete: [server: Server | string];
   userUpdate: [oldUser: User, newUser: User];
   serverMemberJoin: [member: Member];
-  serverMemberLeave: [member: Member];
+  serverMemberLeave: [member: Member | { serverId: string; userId: string }];
+  serverBanAdd: [member: Member | { serverId: string; userId: string }];
+  serverMemberKick: [member: Member | { serverId: string; userId: string }];
 }
 
 export interface ClientOptions {
