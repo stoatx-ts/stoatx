@@ -94,7 +94,7 @@ export class RESTManager {
     return `${method}:${endpoint}`;
   }
 
-  public makeRequest(method: string, endpoint: string, body?: any): Promise<any> {
+  public makeRequest<T = unknown>(method: string, endpoint: string, body?: any): Promise<T> {
     const routeKey = this.getRouteKey(method, endpoint);
 
     let bucket = this.buckets.get(routeKey);
@@ -210,20 +210,20 @@ export class RESTManager {
     return data.id;
   }
 
-  public get(endpoint: string) {
+  public get<T = unknown>(endpoint: string): Promise<T> {
     return this.makeRequest("GET", endpoint);
   }
-  public post(endpoint: string, body?: any) {
+  public post<T = unknown>(endpoint: string, body?: any): Promise<T> {
     return this.makeRequest("POST", endpoint, body);
   }
-  public patch(endpoint: string, body?: any) {
+  public patch<T = unknown>(endpoint: string, body?: any): Promise<T> {
     return this.makeRequest("PATCH", endpoint, body);
   }
-  public delete(endpoint: string, body?: any) {
+  public delete<T = unknown>(endpoint: string, body?: any): Promise<T> {
     return this.makeRequest("DELETE", endpoint, body);
   }
 
-  async put(endpoint: string, body?: any) {
+  async put<T = unknown>(endpoint: string, body?: any): Promise<T> {
     return this.makeRequest("PUT", endpoint, body);
   }
 }

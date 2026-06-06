@@ -5,8 +5,8 @@ import type { Client } from "../client/Client";
 import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
-import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import { Message as RawMessage, BulkMessageResponse, DataMessageSend, DataEditMessage } from "stoat-api";
 
 export type MessageResolvable = Message | string;
 
@@ -31,19 +31,19 @@ export class MessageManager extends BaseManager<string, Message> {
   /**
    * Tell BaseManager how to find the ID for Messages
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawMessage): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a Message
    */
-  protected construct(data: any): Message {
+  protected construct(data: RawMessage): Message {
     return new Message(this.client, data);
   }
 
   public async fetch(id: string): Promise<Message> {
-    const data = await this.client.rest.get(`/channels/${this.channel.id}/messages/${id}`);
+    const data = await this.client.rest.get<RawMessage>(`/channels/${this.channel.id}/messages/${id}`);
     return this._add(data);
   }
 
@@ -72,13 +72,26 @@ export class MessageManager extends BaseManager<string, Message> {
     const queryString = params.toString();
     const endpoint = `/channels/${this.channel.id}/messages${queryString ? `?${queryString}` : ""}`;
 
-    const data = await this.client.rest.get(endpoint);
+    const data = await this.client.rest.get<BulkMessageResponse>(endpoint);
 
-    const rawMessages = Array.isArray(data) ? data : data.messages || [];
+    let rawMessages: RawMessage[];
 
-    if (!Array.isArray(data) && data.users) {
-      for (const userData of data.users) {
-        this.client.users._add(userData);
+    if (Array.isArray(data)) {
+      rawMessages = data;
+    } else {
+      rawMessages = data.messages;
+
+      if (data.users) {
+        for (const userData of data.users) {
+          this.client.users._add(userData);
+        }
+      }
+      if (data.members && this.channel.isText()) {
+        const serverId = this.channel.serverId;
+        const server = await this.client.servers.fetch(serverId);
+        for (const memberData of data.members) {
+          server.members._add(memberData);
+        }
       }
     }
 
@@ -104,22 +117,26 @@ export class MessageManager extends BaseManager<string, Message> {
    * @returns A promise that resolves to the sent Message.
    */
   public async send(contentOrOptions: MessageOptions | string): Promise<Message> {
-    const payload: any = typeof contentOrOptions === "string" ? { content: contentOrOptions } : { ...contentOrOptions }; // Spread to avoid mutating the user's original object
+    const opts = typeof contentOrOptions === "string" ? { content: contentOrOptions } : contentOrOptions;
 
-    if (payload.embeds) {
-      payload.embeds = payload.embeds.map((embed: any) =>
-        typeof embed.toJSON === "function" ? embed.toJSON() : embed,
-      );
+    const payload: DataMessageSend = {};
+
+    if (opts.embeds && opts.embeds.length) {
+      payload.embeds = opts.embeds.map((embed: any) => (typeof embed.toJSON === "function" ? embed.toJSON() : embed));
     }
-    if (payload.attachments) {
-      payload.attachments = await Promise.all(
-        payload.attachments.map((attachment: AttachmentBuilder | string) =>
-          resolveAttachment(this.client.rest, attachment, "attachments"),
-        ),
+    if (opts.attachments && opts.attachments.length > 0) {
+      const resolved = await Promise.all(
+        opts.attachments.map((attachment) => resolveAttachment(this.client.rest, attachment, "attachments")),
       );
+
+      const validAttachments = resolved.filter((id): id is string => id !== undefined);
+
+      if (validAttachments.length > 0) {
+        payload.attachments = validAttachments;
+      }
     }
 
-    const data = await this.client.rest.post(`/channels/${this.channel.id}/messages`, payload);
+    const data = await this.client.rest.post<RawMessage>(`/channels/${this.channel.id}/messages`, payload);
 
     return new Message(this.client, data);
   }
@@ -132,23 +149,26 @@ export class MessageManager extends BaseManager<string, Message> {
    */
   public async edit(message: MessageResolvable, contentOrOptions: string | MessageOptions): Promise<Message> {
     const id = this.resolveId(message);
-    const payload: MessageOptions =
-      typeof contentOrOptions === "string" ? { content: contentOrOptions } : { ...contentOrOptions };
 
-    if (payload.embeds) {
-      payload.embeds = payload.embeds.map((embed: any) =>
-        typeof embed.toJSON === "function" ? embed.toJSON() : embed,
-      );
+    const opts = typeof contentOrOptions === "string" ? { content: contentOrOptions } : contentOrOptions;
+
+    const payload: DataEditMessage = {};
+
+    if (opts.content !== undefined) {
+      payload.content = opts.content;
     }
 
-    const data = await this.client.rest.patch(`/channels/${this.channel.id}/messages/${id}`, payload);
-    const existing = this.cache.get(id);
-    if (existing) {
-      existing._patch(data);
-      return existing;
+    if (opts.embeds !== undefined) {
+      if (opts.embeds === null) {
+        payload.embeds = [];
+      } else {
+        payload.embeds = opts.embeds.map((embed) => ("toJSON" in embed ? embed.toJSON() : embed));
+      }
     }
 
-    return new Message(this.client, data);
+    const data = await this.client.rest.patch<RawMessage>(`/channels/${this.channel.id}/messages/${id}`, payload);
+
+    return this._add(data);
   }
 
   /**

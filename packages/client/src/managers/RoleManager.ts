@@ -6,6 +6,16 @@ import { PermissionResolvable, Permissions } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import {
+  Role as RawRole,
+  DataCreateRole,
+  NewRoleResponse,
+  DataEditRole,
+  FieldsRole,
+  DataSetServerRolePermission,
+  Server as RawServer,
+  DataEditRoleRanks,
+} from "stoat-api";
 
 export interface RoleCreateOptions {
   name: string;
@@ -44,14 +54,14 @@ export class RoleManager extends BaseManager<string, Role> {
   /**
    * Tell BaseManager how to find the ID for Roles
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawRole): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a Role
    */
-  protected construct(data: any): Role {
+  protected construct(data: RawRole): Role {
     return new Role(this.client, data, this.server.id);
   }
 
@@ -62,8 +72,8 @@ export class RoleManager extends BaseManager<string, Role> {
    * @param idParam An optional ID parameter if the payload wraps the role object.
    * @returns The newly created or updated Role object.
    */
-  public override _add(data: any, idParam?: string): Role {
-    const id = idParam ?? data._id ?? data.id;
+  public override _add(data: RawRole, idParam?: string): Role {
+    const id = idParam ?? data._id;
     const existing = this.cache.get(id);
 
     if (existing) {
@@ -134,13 +144,13 @@ export class RoleManager extends BaseManager<string, Role> {
       throw new TypeError("A valid role 'name' (string) must be provided.");
     }
 
-    const payload: any = {
+    const payload: DataCreateRole = {
       name: options.name,
     };
 
-    const data = await this.client.rest.post(`/servers/${this.server.id}/roles`, payload);
+    const data = await this.client.rest.post<NewRoleResponse>(`/servers/${this.server.id}/roles`, payload);
 
-    return this._add(data);
+    return this._add(data.role);
   }
 
   /**
@@ -171,7 +181,7 @@ export class RoleManager extends BaseManager<string, Role> {
 
     const id = this.resolveId(role);
 
-    const data = await this.client.rest.get(`/servers/${this.server.id}/roles/${id}`);
+    const data = await this.client.rest.get<RawRole>(`/servers/${this.server.id}/roles/${id}`);
 
     return this._add(data);
   }
@@ -196,8 +206,8 @@ export class RoleManager extends BaseManager<string, Role> {
     }
 
     const id = this.resolveId(role);
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataEditRole = {};
+    const remove: FieldsRole[] = [];
 
     if (options.name !== undefined) payload.name = options.name;
     if (options.hoist !== undefined) payload.hoist = options.hoist;
@@ -214,7 +224,10 @@ export class RoleManager extends BaseManager<string, Role> {
       if (options.icon === null) {
         remove.push("Icon");
       } else {
-        payload.icon = await resolveAttachment(this.client.rest, options.icon, "icons");
+        const resolvedIcon = await resolveAttachment(this.client.rest, options.icon, "icons");
+        if (resolvedIcon !== undefined) {
+          payload.icon = resolvedIcon;
+        }
       }
     }
 
@@ -226,7 +239,7 @@ export class RoleManager extends BaseManager<string, Role> {
       return this.fetch(id);
     }
 
-    const data = await this.client.rest.patch(`/servers/${this.server.id}/roles/${id}`, payload);
+    const data = await this.client.rest.patch<RawRole>(`/servers/${this.server.id}/roles/${id}`, payload);
 
     return this._add(data, id);
   }
@@ -282,14 +295,14 @@ export class RoleManager extends BaseManager<string, Role> {
     const allowBigInt = options.allow !== undefined ? Permissions.resolve(options.allow) : 0n;
     const denyBigInt = options.deny !== undefined ? Permissions.resolve(options.deny) : 0n;
 
-    const payload = {
+    const payload: DataSetServerRolePermission = {
       permissions: {
         allow: Number(allowBigInt),
         deny: Number(denyBigInt),
       },
     };
 
-    const data = await this.client.rest.put(`/servers/${this.server.id}/permissions/${id}`, payload);
+    const data = await this.client.rest.put<RawServer>(`/servers/${this.server.id}/permissions/${id}`, payload);
 
     // The fucking API returns a Server object
     this.server._patch(data);
@@ -315,11 +328,11 @@ export class RoleManager extends BaseManager<string, Role> {
 
     const mappedIds = ranks.map((role) => this.resolveId(role));
 
-    const payload = {
+    const payload: DataEditRoleRanks = {
       ranks: mappedIds,
     };
 
-    const data = await this.client.rest.put(`/servers/${this.server.id}/roles`, payload);
+    const data = await this.client.rest.put<RawServer>(`/servers/${this.server.id}/roles`, payload);
 
     this.server._patch(data);
 

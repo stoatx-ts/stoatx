@@ -2,6 +2,8 @@ import { User, UserProfile, UserStatus } from "../structures/User";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
+import { User as RawUser, DataEditUser, FieldsUser, Channel as RawChannel } from "stoat-api"
+
 export type UserResolvable = User | string;
 
 export interface UserEditOptions {
@@ -19,14 +21,14 @@ export class UserManager extends BaseManager<string, User> {
   /**
    * Tell BaseManager how to find the ID for Users
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawUser): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a User
    */
-  protected construct(data: any): User {
+  protected construct(data: RawUser): User {
     return new User(this.client, data);
   }
 
@@ -90,7 +92,7 @@ export class UserManager extends BaseManager<string, User> {
 
     const id = this.resolveId(user);
 
-    const data = await this.client.rest.get(`/users/${id}`);
+    const data = await this.client.rest.get<RawUser>(`/users/${id}`);
 
     return this._add(data);
   }
@@ -105,7 +107,7 @@ export class UserManager extends BaseManager<string, User> {
    * console.log(`Logged in as ${me.tag}`);
    */
   public async fetchMe() {
-    const data = await this.client.rest.get(`/users/@me`);
+    const data = await this.client.rest.get<RawUser>(`/users/@me`);
 
     return this._add(data);
   }
@@ -130,8 +132,8 @@ export class UserManager extends BaseManager<string, User> {
       throw new TypeError("UserEditOptions must be a valid object.");
     }
 
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataEditUser = {};
+    const remove: FieldsUser[] = [];
 
     if (options.displayName !== undefined) {
       if (options.displayName === null) remove.push("DisplayName");
@@ -177,7 +179,7 @@ export class UserManager extends BaseManager<string, User> {
       return this.fetch("@me");
     }
 
-    const data = await this.client.rest.patch(`/users/@me`, payload);
+    const data = await this.client.rest.patch<RawUser>(`/users/@me`, payload);
 
     return this._add(data);
   }
@@ -215,7 +217,7 @@ export class UserManager extends BaseManager<string, User> {
       if (dmChannel) return dmChannel;
     }
 
-    const data = await this.client.rest.get(`/users/${id}/dm`);
+    const data = await this.client.rest.get<RawChannel>(`/users/${id}/dm`);
     return this.client.channels._add(data) as DMChannel;
   }
 }

@@ -9,6 +9,7 @@ import { BaseManager } from "./BaseManager";
 import { MessageResolvable } from "./MessageManager";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import { Channel as RawChannel, DataEditChannel, FieldsChannel, DataSetRolePermissions, DataDefaultChannelPermissions } from "stoat-api";
 
 export type ChannelResolvable = BaseChannel | string;
 
@@ -38,11 +39,11 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     super(client, limit);
   }
 
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawChannel): string {
+    return data._id;
   }
 
-  protected construct(data: any): BaseChannel {
+  protected construct(data: RawChannel): BaseChannel {
     return createChannel(this.client, data);
   }
 
@@ -113,7 +114,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     }
 
     const id = this.resolveId(channel);
-    const data = await this.client.rest.get(`/channels/${id}`);
+    const data = await this.client.rest.get<RawChannel>(`/channels/${id}`);
 
     return this._add(data);
   }
@@ -134,8 +135,8 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
       throw new TypeError("ChannelEditOptions must be a valid object.");
     }
 
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataEditChannel = {};
+    const remove: FieldsChannel[] = [];
 
     if (options.name !== undefined) payload.name = options.name;
     if (options.owner !== undefined) payload.owner = options.owner;
@@ -150,14 +151,21 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     }
 
     if (options.icon !== undefined) {
-      if (options.icon === null) remove.push("Icon");
-      else payload.icon = await resolveAttachment(this.client.rest, options.icon, "icons");
+      if (options.icon === null) {
+        remove.push("Icon");
+      } else {
+        const resolvedIcon = await resolveAttachment(this.client.rest, options.icon, "icons");
+
+        if (resolvedIcon !== undefined) {
+          payload.icon = resolvedIcon;
+        }
+      }
     }
 
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(channel);
 
-    const data = await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload);
+    const data = await this.client.rest.patch<RawChannel>(`/channels/${this.resolveId(channel)}`, payload);
     return this._add(data);
   }
 
@@ -191,14 +199,14 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     const allowBigInt = options.allow !== undefined ? Permissions.resolve(options.allow) : 0n;
     const denyBigInt = options.deny !== undefined ? Permissions.resolve(options.deny) : 0n;
 
-    const payload = {
+    const payload: DataSetRolePermissions = {
       permissions: {
         allow: Number(allowBigInt),
         deny: Number(denyBigInt),
       },
     };
 
-    const data = await this.client.rest.put(`/channels/${id}/permissions/${roleId}`, payload);
+    const data = await this.client.rest.put<RawChannel>(`/channels/${id}/permissions/${roleId}`, payload);
     return this._add(data);
   }
 
@@ -225,11 +233,11 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     const id = this.resolveId(channel);
     const permBigInt = Permissions.resolve(permissions);
 
-    const payload = {
+    const payload: DataDefaultChannelPermissions = {
       permissions: Number(permBigInt),
     };
 
-    const data = await this.client.rest.put(`/channels/${id}/permissions/default`, payload);
+    const data = await this.client.rest.put<RawChannel>(`/channels/${id}/permissions/default`, payload);
     return this._add(data);
   }
 

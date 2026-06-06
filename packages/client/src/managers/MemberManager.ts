@@ -5,6 +5,7 @@ import type { Server } from "../structures/Server";
 import * as util from "node:util";
 import { User } from "../structures/User";
 import { BaseManager } from "./BaseManager";
+import { AllMemberResponse, DataMemberEdit, FieldsMember, Member as RawMember, DataBanCreate } from "stoat-api";
 
 export type MemberResolvable = Member | User | string;
 
@@ -37,19 +38,16 @@ export class MemberManager extends BaseManager<string, Member> {
    * Tell BaseManager how to handle Revolt's Member IDs
    * @internal
    */
-  protected extractId(data: any): string {
-    return data.user_id ?? data.id ?? (typeof data._id === "string" ? data._id : data._id?.user);
+  protected extractId(data: RawMember): string {
+    return data._id?.user;
   }
 
   /**
    * Tell BaseManager how to build a Member
    * @internal
    */
-  protected construct(data: any): Member {
-    if (!data.server_id && !data.serverId) {
-      data.serverId = this.server.id;
-    }
-    return new Member(this.client, data);
+  protected construct(data: RawMember): Member {
+    return new Member(this.client, data, this.server.id);
   }
 
   /**
@@ -96,7 +94,7 @@ export class MemberManager extends BaseManager<string, Member> {
     }
 
     const id = this.resolveId(member);
-    const data = await this.client.rest.get(`/servers/${this.server.id}/members/${id}`);
+    const data = await this.client.rest.get<RawMember>(`/servers/${this.server.id}/members/${id}`);
 
     return this._add(data);
   }
@@ -123,20 +121,21 @@ export class MemberManager extends BaseManager<string, Member> {
     const queryString = params.toString();
     const endpoint = `/servers/${this.server.id}/members${queryString ? `?${queryString}` : ""}`;
 
-    const data = await this.client.rest.get(endpoint);
+    const data = await this.client.rest.get<AllMemberResponse>(endpoint);
 
-    if (data.users && Array.isArray(data.users)) {
+    if (data.users) {
       for (const userData of data.users) {
         this.client.users._add(userData);
       }
     }
 
     const fetched = new Collection<string, Member>();
-    const rawMembers = data.members || (Array.isArray(data) ? data : []);
 
-    for (const rawMember of rawMembers) {
-      const member = this._add(rawMember);
-      fetched.set(member.id, member);
+    if (data.members) {
+      for (const rawMember of data.members) {
+        const member = this._add(rawMember);
+        fetched.set(member.id, member);
+      }
     }
 
     return fetched;
@@ -157,8 +156,8 @@ export class MemberManager extends BaseManager<string, Member> {
    */
   public async edit(member: MemberResolvable, options: MemberEditOptions): Promise<Member> {
     const id = this.resolveId(member);
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataMemberEdit = {};
+    const remove: FieldsMember[] = [];
 
     if (options.nickname !== undefined) {
       if (options.nickname === null) remove.push("Nickname");
@@ -179,7 +178,7 @@ export class MemberManager extends BaseManager<string, Member> {
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(id);
 
-    const data = await this.client.rest.patch(`/servers/${this.server.id}/members/${id}`, payload);
+    const data = await this.client.rest.patch<RawMember>(`/servers/${this.server.id}/members/${id}`, payload);
     return this._add(data);
   }
 
@@ -206,7 +205,7 @@ export class MemberManager extends BaseManager<string, Member> {
    */
   public async ban(member: MemberResolvable, options?: MemberBanOptions): Promise<void> {
     const id = this.resolveId(member);
-    const payload: any = {};
+    const payload: DataBanCreate = {};
 
     if (options?.reason !== undefined) payload.reason = options.reason;
     if (options?.deleteMessageSeconds !== undefined) payload.delete_message_seconds = options.deleteMessageSeconds;

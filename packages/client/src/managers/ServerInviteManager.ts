@@ -3,6 +3,7 @@ import type { Client } from "../client/Client";
 import { Collection } from "../utils/Collection";
 import { ServerInvite } from "../structures/ServerInvite";
 import { BaseManager } from "./BaseManager";
+import { Invite as RawInvite } from "stoat-api";
 
 export interface Invite {
   code: string;
@@ -19,11 +20,11 @@ export class ServerInviteManager extends BaseManager<string, ServerInvite> {
     super(client, limit);
   }
 
-  protected extractId(data: any): string {
-    return data._id ?? data.code;
+  protected extractId(data: RawInvite): string {
+    return data._id;
   }
 
-  protected construct(data: any): ServerInvite {
+  protected construct(data: RawInvite): ServerInvite {
     return new ServerInvite(data);
   }
 
@@ -31,12 +32,11 @@ export class ServerInviteManager extends BaseManager<string, ServerInvite> {
    * Fetches all active invites for this server.
    */
   public async fetch(): Promise<Collection<string, ServerInvite>> {
-    const data = await this.client.rest.get(`/servers/${this.server.id}/invites`);
+    const data = await this.client.rest.get<RawInvite[]>(`/servers/${this.server.id}/invites`);
 
-    const rawInvites = Array.isArray(data) ? data : [];
     const fetched = new Collection<string, ServerInvite>();
 
-    for (const raw of rawInvites) {
+    for (const raw of data) {
       const invite = this._add(raw);
       fetched.set(invite.code, invite);
     }
