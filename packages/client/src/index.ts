@@ -31,6 +31,7 @@ export * from "./structures/MessageReaction";
 
 // Builders
 export * from "./builders/EmbedBuilder";
+export * from "./builders/AttachmentBuilder";
 
 // Utils
 export * from "./utils/Collection";

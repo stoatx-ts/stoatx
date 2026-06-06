@@ -12,11 +12,12 @@ import { UserResolvable } from "../managers/UserManager";
 import { ReactionCollector, ReactionCollectorOptions } from "../utils/ReactionCollector";
 import { Collection } from "../utils/Collection";
 import { MessageReaction } from "./MessageReaction";
+import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 
 export interface MessageOptions {
   content?: string;
   embeds?: (TextEmbedData | EmbedBuilder)[];
-  attachments?: string[];
+  attachments?: string[] | AttachmentBuilder[];
   interactions?: any[];
   flags?: number;
   masquerade?: Masquerade;

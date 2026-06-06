@@ -5,6 +5,7 @@ import * as util from "node:util";
 import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
 import { Attachment } from "./Attachment";
+import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 
 export class Role extends Base {
   public serverId: string;
@@ -210,8 +211,15 @@ export class Role extends Base {
    * // Set a new icon for the role
    * await role.setIcon("AUTUMN_ID_FOR_ICON");
    * console.log(`Role's new icon: ${role.icon}`);
+   *
+   * // Use AttachmentBuilder to upload a new icon file
+   * import { readFile } from "node:fs/promises";
+   * const iconFile = await readFile("./a.jpg");
+   * const attachment = new AttachmentBuilder(iconFile, "a.jpg");
+   * await role.setIcon(attachment);
+   * console.log(`Role's new icon: ${role.icon}`);
    */
-  public async setIcon(icon: string | null): Promise<Role> {
+  public async setIcon(icon: string | AttachmentBuilder | null): Promise<Role> {
     return await this.edit({ icon });
   }
 

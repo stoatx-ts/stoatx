@@ -5,6 +5,8 @@ import type { Client } from "../client/Client";
 import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
+import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import { resolveAttachment } from "../utils/resolveAttachment";
 
 export type MessageResolvable = Message | string;
 
@@ -107,6 +109,13 @@ export class MessageManager extends BaseManager<string, Message> {
     if (payload.embeds) {
       payload.embeds = payload.embeds.map((embed: any) =>
         typeof embed.toJSON === "function" ? embed.toJSON() : embed,
+      );
+    }
+    if (payload.attachments) {
+      payload.attachments = await Promise.all(
+        payload.attachments.map((attachment: AttachmentBuilder | string) =>
+          resolveAttachment(this.client.rest, attachment, "attachments"),
+        ),
       );
     }
 

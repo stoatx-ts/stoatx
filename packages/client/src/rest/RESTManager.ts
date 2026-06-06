@@ -1,5 +1,6 @@
 import { request } from "undici";
 import { Client } from "../client/Client";
+import { CDNTag } from "../builders/AttachmentBuilder";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -166,10 +167,10 @@ export class RESTManager {
   /**
    * Uploads a file to Stoat's CDN and returns the File ID
    */
-  public async uploadFile(filename: string, fileBuffer: Buffer | Blob): Promise<string> {
+  public async uploadFile(tag: CDNTag, fileBuffer: Buffer | Blob, filename?: string): Promise<string> {
     if (!this.token) throw new Error("REST_NOT_READY: No token available.");
 
-    const url = "https://cdn.stoatusercontent.com/attachments";
+    const url = `https://cdn.stoatusercontent.com/${tag}`;
 
     const formData = new FormData();
     formData.append("file", new Blob([fileBuffer as Uint8Array<ArrayBuffer>]), filename);
