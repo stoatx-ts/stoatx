@@ -320,12 +320,29 @@ export class GatewayManager {
 
       case "ServerMemberLeave": {
         const server = this.client.servers.cache.get(payload.id);
+        let member = null;
+
         if (server) {
-          const member = server.members.cache.get(payload.user);
+          member = server.members.cache.get(payload.user);
           if (member) {
             server.members.cache.delete(payload.user);
-            this.client.emit("serverMemberLeave", member);
           }
+        }
+        const emitData = member || { serverId: payload.id, userId: payload.user };
+        if (payload.reason === "Ban") {
+          if (server) {
+            const dummyBanPayload = {
+              id: payload.user,
+              reason: null,
+            };
+
+            server.bans._add(dummyBanPayload);
+          }
+          this.client.emit("serverBanAdd", emitData);
+        } else if (payload.reason === "Kick") {
+          this.client.emit("serverMemberKick", emitData);
+        } else {
+          this.client.emit("serverMemberLeave", emitData);
         }
         break;
       }
