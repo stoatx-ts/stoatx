@@ -70,7 +70,18 @@ export class RESTManager {
 
   private buckets = new Map<string, AsyncBucket>();
 
-  constructor(private client: Client) {}
+  constructor(private client: Client) {
+    // Sweep dead buckets every 5 minutes to prevent memory leaks
+    setInterval(() => {
+      const now = Date.now();
+      for (const [key, bucket] of this.buckets.entries()) {
+        // If the bucket has its full limits back, drop it from memory
+        if (now > bucket.resetAt && bucket.remaining > 0) {
+          this.buckets.delete(key);
+        }
+      }
+    }, 300000).unref();
+  }
 
   public setToken(token: string) {
     this.token = token;
