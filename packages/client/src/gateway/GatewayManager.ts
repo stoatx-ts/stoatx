@@ -55,6 +55,8 @@ export class GatewayManager {
     const payload = JSON.parse(rawData.toString());
     const eventType = payload.type;
 
+    this.client.emit("raw", payload);
+
     switch (eventType) {
       case "Error":
         this.client.emit("error", new Error(`Gateway Error: ${payload.error || JSON.stringify(payload)}`));
@@ -364,7 +366,8 @@ export class GatewayManager {
       }
 
       default:
-        this.client.emit("raw", payload);
+        this.client.emit("debug", `Unhandled Gateway Event Type: ${eventType}`);
+        break;
     }
   }
 
