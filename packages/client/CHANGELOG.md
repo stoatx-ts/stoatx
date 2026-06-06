@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.3.0...client-v0.4.0) (2026-06-06)
+
+
+### Features
+
+* add role icons and create helper methods ([#61](https://github.com/stoatx-ts/stoatx/issues/61)) ([9400bcf](https://github.com/stoatx-ts/stoatx/commit/9400bcf4ffc4bfa64a1f8e6c13be517a842746b7))
+* create AttachmentBuilder.ts and update methods to use it ([#62](https://github.com/stoatx-ts/stoatx/issues/62)) ([01cd789](https://github.com/stoatx-ts/stoatx/commit/01cd789956b33bcebe605368f0fb1362616c4bfb))
+* rewrite permissions ([#59](https://github.com/stoatx-ts/stoatx/issues/59)) ([67c521b](https://github.com/stoatx-ts/stoatx/commit/67c521b22243ae421bc328a9d95dc45f90c54bc4))
+
 ## [0.3.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.2.2...client-v0.3.0) (2026-05-29)
 
 
