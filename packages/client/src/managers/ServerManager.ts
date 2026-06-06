@@ -97,7 +97,6 @@ export class ServerManager extends BaseManager<string, Server> {
       if (sm.userBanned !== undefined) {
         payload.system_messages.user_banned = sm.userBanned;
       }
-
     } else if (options.systemMessages === null) {
       remove.push("SystemMessages");
     }

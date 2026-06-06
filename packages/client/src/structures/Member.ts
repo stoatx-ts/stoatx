@@ -9,7 +9,7 @@ import { MemberRoleManager } from "../managers/MemberRoleManager";
 import { StoatCDN } from "../utils/Constants";
 import { Attachment } from "./Attachment";
 import { Message, MessageOptions } from "./Message";
-import { Member as RawMember } from "stoat-api"
+import { Member as RawMember } from "stoat-api";
 
 /**
  * Represents a member of a server on Stoat

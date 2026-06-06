@@ -27,7 +27,7 @@ export class ServerChannelManager {
     if (!options.name) throw new Error("A channel name must be provided.");
 
     const payload: DataCreateServerChannel = {
-      name: options.name
+      name: options.name,
     };
 
     if (options.nsfw !== undefined) {

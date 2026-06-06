@@ -9,7 +9,13 @@ import { BaseManager } from "./BaseManager";
 import { MessageResolvable } from "./MessageManager";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
-import { Channel as RawChannel, DataEditChannel, FieldsChannel, DataSetRolePermissions, DataDefaultChannelPermissions } from "stoat-api";
+import {
+  Channel as RawChannel,
+  DataEditChannel,
+  FieldsChannel,
+  DataSetRolePermissions,
+  DataDefaultChannelPermissions,
+} from "stoat-api";
 
 export type ChannelResolvable = BaseChannel | string;
 

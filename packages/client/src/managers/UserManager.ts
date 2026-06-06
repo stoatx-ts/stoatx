@@ -2,7 +2,7 @@ import { User, UserProfile, UserStatus } from "../structures/User";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
-import { User as RawUser, DataEditUser, FieldsUser, Channel as RawChannel } from "stoat-api"
+import { User as RawUser, DataEditUser, FieldsUser, Channel as RawChannel } from "stoat-api";
 
 export type UserResolvable = User | string;
 
