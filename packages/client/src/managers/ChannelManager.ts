@@ -7,6 +7,8 @@ import { GroupChannel } from "../structures/GroupChannel";
 import { Permissions, type PermissionResolvable } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
 import { MessageResolvable } from "./MessageManager";
+import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import { resolveAttachment } from "../utils/resolveAttachment";
 
 export type ChannelResolvable = BaseChannel | string;
 
@@ -14,7 +16,7 @@ export interface ChannelEditOptions {
   name?: string;
   description?: string | null;
   owner?: string;
-  icon?: string | null;
+  icon?: string | AttachmentBuilder | null;
   nsfw?: boolean;
   archived?: boolean;
   voice?: { max_users: number };
@@ -149,7 +151,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
 
     if (options.icon !== undefined) {
       if (options.icon === null) remove.push("Icon");
-      else payload.icon = options.icon;
+      else payload.icon = await resolveAttachment(this.client.rest, options.icon, "icons");
     }
 
     if (remove.length > 0) payload.remove = remove;

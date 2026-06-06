@@ -4,6 +4,8 @@ import type { Client } from "../client/Client";
 import * as util from "node:util";
 import { PermissionResolvable, Permissions } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
+import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import { resolveAttachment } from "../utils/resolveAttachment";
 
 export interface RoleCreateOptions {
   name: string;
@@ -17,7 +19,7 @@ export interface RoleEditOptions {
   // Whether this role should be displayed separately
   hoist?: boolean;
   // Provide an Autumn attachment ID
-  icon?: string | null;
+  icon?: string | AttachmentBuilder | null;
 }
 
 export interface RolePermissionOptions {
@@ -212,7 +214,7 @@ export class RoleManager extends BaseManager<string, Role> {
       if (options.icon === null) {
         remove.push("Icon");
       } else {
-        payload.icon = options.icon;
+        payload.icon = await resolveAttachment(this.client.rest, options.icon, "icons");
       }
     }
 
