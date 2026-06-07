@@ -1,6 +1,7 @@
 import { request } from "undici";
 import { Client } from "../client/Client";
 import { CDNTag } from "../builders/AttachmentBuilder";
+import type { APIRoutes } from "stoat-api";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -63,6 +64,13 @@ export class StoatAPIError extends Error {
   }
 }
 
+type ValidPath<M extends APIRoutes["method"]> = Extract<APIRoutes, { method: M }>["path"];
+
+type RouteResponse<M extends APIRoutes["method"], P extends string> = Extract<
+  APIRoutes,
+  { method: M; path: P }
+>["response"];
+
 export class RESTManager {
   private baseURL = "https://stoat.chat/api";
 
@@ -94,7 +102,11 @@ export class RESTManager {
     return `${method}:${endpoint}`;
   }
 
-  public makeRequest<T = unknown>(method: string, endpoint: string, body?: any): Promise<T> {
+  public makeRequest<M extends APIRoutes["method"], P extends ValidPath<M>>(
+    method: M,
+    endpoint: P,
+    body?: any,
+  ): Promise<RouteResponse<M, P>> {
     const routeKey = this.getRouteKey(method, endpoint);
 
     let bucket = this.buckets.get(routeKey);
@@ -210,20 +222,23 @@ export class RESTManager {
     return data.id;
   }
 
-  public get<T = unknown>(endpoint: string): Promise<T> {
-    return this.makeRequest("GET", endpoint);
-  }
-  public post<T = unknown>(endpoint: string, body?: any): Promise<T> {
-    return this.makeRequest("POST", endpoint, body);
-  }
-  public patch<T = unknown>(endpoint: string, body?: any): Promise<T> {
-    return this.makeRequest("PATCH", endpoint, body);
-  }
-  public delete<T = unknown>(endpoint: string, body?: any): Promise<T> {
-    return this.makeRequest("DELETE", endpoint, body);
+  public get<P extends ValidPath<"get">>(endpoint: P): Promise<RouteResponse<"get", P>> {
+    return this.makeRequest("get", endpoint);
   }
 
-  async put<T = unknown>(endpoint: string, body?: any): Promise<T> {
-    return this.makeRequest("PUT", endpoint, body);
+  public post<P extends ValidPath<"post">>(endpoint: P, body?: any): Promise<RouteResponse<"post", P>> {
+    return this.makeRequest("post", endpoint, body);
+  }
+
+  public patch<P extends ValidPath<"patch">>(endpoint: P, body?: any): Promise<RouteResponse<"patch", P>> {
+    return this.makeRequest("patch", endpoint, body);
+  }
+
+  public delete<P extends ValidPath<"delete">>(endpoint: P, body?: any): Promise<RouteResponse<"delete", P>> {
+    return this.makeRequest("delete", endpoint, body);
+  }
+
+  public put<P extends ValidPath<"put">>(endpoint: P, body?: any): Promise<RouteResponse<"put", P>> {
+    return this.makeRequest("put", endpoint, body);
   }
 }
