@@ -1,6 +1,6 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
-import {File} from "stoat-api";
+import { File } from "stoat-api";
 
 export type AttachmentMetadata =
   | { type: "File" }

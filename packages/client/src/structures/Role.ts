@@ -6,7 +6,7 @@ import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
 import { Attachment } from "./Attachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
-import {Role as RawRole} from "stoat-api";
+import { Role as RawRole } from "stoat-api";
 
 export class Role extends Base {
   public serverId: string;
@@ -32,7 +32,7 @@ export class Role extends Base {
     if (data.colour !== undefined) this.color = data.colour;
     if (data.hoist !== undefined) this.hoist = data.hoist;
     if (data.rank !== undefined) this.rank = data.rank;
-    if (data.icon !== undefined) this.icon = data.icon !== null ? new Attachment(this.client, data.icon): null;
+    if (data.icon !== undefined) this.icon = data.icon !== null ? new Attachment(this.client, data.icon) : null;
     if (data.permissions !== undefined) {
       try {
         if (typeof data.permissions === "object" && data.permissions !== null) {

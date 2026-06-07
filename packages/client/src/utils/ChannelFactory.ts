@@ -4,7 +4,7 @@ import type { Client } from "../client/Client";
 import { UnknownChannel } from "../structures/UnknownChannel";
 import { DMChannel } from "../structures/DMChannel";
 import { GroupChannel } from "../structures/GroupChannel";
-import {Channel as RawChannel} from "stoat-api";
+import { Channel as RawChannel } from "stoat-api";
 
 export function createChannel(client: Client, data: RawChannel): BaseChannel {
   switch (data.channel_type) {

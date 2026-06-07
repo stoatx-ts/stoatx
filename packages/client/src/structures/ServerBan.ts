@@ -5,7 +5,7 @@ export class ServerBan {
   public reason: string | null;
 
   constructor(data: RawServerBan) {
-    this.userId = data._id?.user
+    this.userId = data._id?.user;
     this.reason = data.reason ?? null;
   }
 

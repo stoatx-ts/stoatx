@@ -162,7 +162,7 @@ export abstract class BaseChannel extends Base {
   }
 
   public isDM(): this is DMChannel {
-    return this.type === "DirectMessage"
+    return this.type === "DirectMessage";
   }
 
   public isGroup(): this is GroupChannel {

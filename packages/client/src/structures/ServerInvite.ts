@@ -6,7 +6,7 @@ export class ServerInvite {
   public channelId: string;
 
   constructor(data: RawInvite) {
-    this.code = data._id
+    this.code = data._id;
     this.creatorId = data.creator;
     this.channelId = data.channel;
   }

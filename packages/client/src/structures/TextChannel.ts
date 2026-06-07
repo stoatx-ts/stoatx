@@ -101,7 +101,7 @@ export class TextChannel extends BaseChannel {
     const serverId = this.serverId as string;
     const server = await this.client.servers.fetch(serverId);
 
-    if(!server.categories || server.categories.length === 0) {
+    if (!server.categories || server.categories.length === 0) {
       throw new Error("This server has no categories to move the channel into.");
     }
 

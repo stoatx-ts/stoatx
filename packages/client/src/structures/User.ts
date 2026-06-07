@@ -5,7 +5,6 @@ import type { User as RawUser } from "stoat-api";
 
 export type UserRelationShip = "None" | "User" | "Friend" | "Outgoing" | "Incoming" | "Blocked" | "BlockedOther";
 
-
 export interface BotInformation {
   owner: string;
 }

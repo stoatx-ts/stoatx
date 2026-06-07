@@ -65,12 +65,12 @@ export class MessageManager extends BaseManager<string, Message> {
 
     const query: RouteParams<"get", typeof endpoint> = {};
 
-    if(options.limit !== undefined) query.limit = options.limit;
-    if(options.before !== undefined) query.before = options.before;
-    if(options.after !== undefined) query.after = options.after;
-    if(options.sort !== undefined) query.sort = options.sort;
-    if(options.nearby !== undefined) query.nearby = options.nearby;
-    if(options.includeUsers !== undefined) query.include_users = options.includeUsers;
+    if (options.limit !== undefined) query.limit = options.limit;
+    if (options.before !== undefined) query.before = options.before;
+    if (options.after !== undefined) query.after = options.after;
+    if (options.sort !== undefined) query.sort = options.sort;
+    if (options.nearby !== undefined) query.nearby = options.nearby;
+    if (options.includeUsers !== undefined) query.include_users = options.includeUsers;
 
     const data = await this.client.rest.get(endpoint, query);
 

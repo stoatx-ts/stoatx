@@ -4,7 +4,7 @@ import { BaseChannel } from "./BaseChannel";
 import type { User } from "./User";
 import * as util from "node:util";
 import { PermissionResolvable } from "../utils/permissions";
-import type {Channel as RawChannel} from "stoat-api";
+import type { Channel as RawChannel } from "stoat-api";
 
 export type RawGroupChannel = Extract<RawChannel, { channel_type: "Group" }>;
 
