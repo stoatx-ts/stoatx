@@ -2,7 +2,7 @@ import { User, UserProfile, UserStatus } from "../structures/User";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
-import { User as RawUser, DataEditUser, FieldsUser, Channel as RawChannel } from "stoat-api";
+import { User as RawUser, DataEditUser, FieldsUser } from "stoat-api";
 
 export type UserResolvable = User | string;
 
@@ -92,7 +92,7 @@ export class UserManager extends BaseManager<string, User> {
 
     const id = this.resolveId(user);
 
-    const data = await this.client.rest.get<RawUser>(`/users/${id}`);
+    const data = await this.client.rest.get(`/users/${id}`);
 
     return this._add(data);
   }
@@ -107,7 +107,7 @@ export class UserManager extends BaseManager<string, User> {
    * console.log(`Logged in as ${me.tag}`);
    */
   public async fetchMe() {
-    const data = await this.client.rest.get<RawUser>(`/users/@me`);
+    const data = await this.client.rest.get(`/users/@me`);
 
     return this._add(data);
   }
@@ -179,7 +179,7 @@ export class UserManager extends BaseManager<string, User> {
       return this.fetch("@me");
     }
 
-    const data = await this.client.rest.patch<RawUser>(`/users/@me`, payload);
+    const data = await this.client.rest.patch(`/users/${this.client.user?.id}`, payload);
 
     return this._add(data);
   }
@@ -217,7 +217,7 @@ export class UserManager extends BaseManager<string, User> {
       if (dmChannel) return dmChannel;
     }
 
-    const data = await this.client.rest.get<RawChannel>(`/users/${id}/dm`);
+    const data = await this.client.rest.get(`/users/${id}/dm`);
     return this.client.channels._add(data) as DMChannel;
   }
 }

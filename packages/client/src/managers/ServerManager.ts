@@ -54,7 +54,7 @@ export class ServerManager extends BaseManager<string, Server> {
       if (cached) return cached;
     }
 
-    const data = await this.client.rest.get<RawServer>(`/servers/${id}`);
+    const data = await this.client.rest.get(`/servers/${id}`);
     return this._add(data);
   }
 
@@ -107,7 +107,7 @@ export class ServerManager extends BaseManager<string, Server> {
 
     if (remove.length > 0) payload.remove = remove;
 
-    const data = await this.client.rest.patch<RawServer>(`/servers/${serverId}`, payload);
+    const data = await this.client.rest.patch(`/servers/${serverId}`, payload);
 
     return this._add(data);
   }

@@ -149,7 +149,7 @@ export class GatewayManager {
 
         if (message && payload.append.embeds) {
           const oldMessage = message._clone();
-          message.embeds.push(...payload.append.embeds);
+          message.embeds = [...(message.embeds || []), ...payload.append.embeds];
           this.client.emit("messageUpdate", oldMessage, message);
         }
         break;

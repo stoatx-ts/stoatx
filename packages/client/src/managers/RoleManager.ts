@@ -9,11 +9,9 @@ import { resolveAttachment } from "../utils/resolveAttachment";
 import {
   Role as RawRole,
   DataCreateRole,
-  NewRoleResponse,
   DataEditRole,
   FieldsRole,
   DataSetServerRolePermission,
-  Server as RawServer,
   DataEditRoleRanks,
 } from "stoat-api";
 
@@ -148,7 +146,7 @@ export class RoleManager extends BaseManager<string, Role> {
       name: options.name,
     };
 
-    const data = await this.client.rest.post<NewRoleResponse>(`/servers/${this.server.id}/roles`, payload);
+    const data = await this.client.rest.post(`/servers/${this.server.id}/roles`, payload);
 
     return this._add(data.role);
   }
@@ -181,7 +179,7 @@ export class RoleManager extends BaseManager<string, Role> {
 
     const id = this.resolveId(role);
 
-    const data = await this.client.rest.get<RawRole>(`/servers/${this.server.id}/roles/${id}`);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/roles/${id}`);
 
     return this._add(data);
   }
@@ -212,7 +210,6 @@ export class RoleManager extends BaseManager<string, Role> {
     if (options.name !== undefined) payload.name = options.name;
     if (options.hoist !== undefined) payload.hoist = options.hoist;
 
-    // 3. Handle the "Remove" magic for colors
     if (options.color !== undefined) {
       if (options.color === null) {
         remove.push("Colour");
@@ -238,10 +235,12 @@ export class RoleManager extends BaseManager<string, Role> {
     if (Object.keys(payload).length === 0) {
       return this.fetch(id);
     }
+    const endpoint = `/servers/${this.server.id}/roles/${id}` as const;
 
-    const data = await this.client.rest.patch<RawRole>(`/servers/${this.server.id}/roles/${id}`, payload);
+    const data = await this.client.rest.patch(endpoint, payload);
 
-    return this._add(data, id);
+    // TypeScript can't differ /roles/ranks and /roles/:id so we have to cast it
+    return this._add(data as RawRole, id);
   }
 
   /**
@@ -302,7 +301,7 @@ export class RoleManager extends BaseManager<string, Role> {
       },
     };
 
-    const data = await this.client.rest.put<RawServer>(`/servers/${this.server.id}/permissions/${id}`, payload);
+    const data = await this.client.rest.put(`/servers/${this.server.id}/permissions/${id}`, payload);
 
     // The fucking API returns a Server object
     this.server._patch(data);
@@ -332,7 +331,7 @@ export class RoleManager extends BaseManager<string, Role> {
       ranks: mappedIds,
     };
 
-    const data = await this.client.rest.put<RawServer>(`/servers/${this.server.id}/roles`, payload);
+    const data = await this.client.rest.patch(`/servers/${this.server.id}/roles/ranks`, payload);
 
     this.server._patch(data);
 

@@ -120,7 +120,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     }
 
     const id = this.resolveId(channel);
-    const data = await this.client.rest.get<RawChannel>(`/channels/${id}`);
+    const data = await this.client.rest.get(`/channels/${id}`);
 
     return this._add(data);
   }
@@ -171,7 +171,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(channel);
 
-    const data = await this.client.rest.patch<RawChannel>(`/channels/${this.resolveId(channel)}`, payload);
+    const data = await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload);
     return this._add(data);
   }
 
@@ -212,7 +212,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
       },
     };
 
-    const data = await this.client.rest.put<RawChannel>(`/channels/${id}/permissions/${roleId}`, payload);
+    const data = await this.client.rest.put(`/channels/${id}/permissions/${roleId}`, payload);
     return this._add(data);
   }
 
@@ -243,7 +243,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
       permissions: Number(permBigInt),
     };
 
-    const data = await this.client.rest.put<RawChannel>(`/channels/${id}/permissions/default`, payload);
+    const data = await this.client.rest.put(`/channels/${id}/permissions/default`, payload);
     return this._add(data);
   }
 
@@ -270,7 +270,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
    * await client.channels.pin("CHANNEL_ID", "MESSAGE_ID");
    */
   public async pin(id: string, messageId: string): Promise<void> {
-    await this.client.rest.post(`/channels/${id}/pins/${messageId}`);
+    await this.client.rest.post(`/channels/${id}/messages/${messageId}/pin`);
   }
 
   /**
@@ -304,6 +304,6 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
       throw new TypeError("Invalid MessageResolvable provided. Expected a Message object or a string ID/Mention.");
     });
 
-    await this.client.rest.delete(`/channels/${id}/messages/bulk`, { messages: messageIds });
+    await this.client.rest.delete(`/channels/${id}/messages/bulk`, { ids: messageIds });
   }
 }

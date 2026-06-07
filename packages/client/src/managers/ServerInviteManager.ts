@@ -32,7 +32,7 @@ export class ServerInviteManager extends BaseManager<string, ServerInvite> {
    * Fetches all active invites for this server.
    */
   public async fetch(): Promise<Collection<string, ServerInvite>> {
-    const data = await this.client.rest.get<RawInvite[]>(`/servers/${this.server.id}/invites`);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/invites`);
 
     const fetched = new Collection<string, ServerInvite>();
 

@@ -3,7 +3,7 @@ import type { BaseChannel, ChannelCreateOptions } from "../structures/BaseChanne
 import type { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
 import * as util from "node:util";
-import { DataCreateServerChannel, Channel as RawChannel } from "stoat-api";
+import { DataCreateServerChannel } from "stoat-api";
 
 export class ServerChannelManager {
   public client: Client;
@@ -46,7 +46,7 @@ export class ServerChannelManager {
       payload.voice = { max_users: options.voice.max_users };
     }
 
-    const data = await this.client.rest.post<RawChannel>(`/servers/${this.server.id}/channels`, payload);
+    const data = await this.client.rest.post(`/servers/${this.server.id}/channels`, payload);
 
     return this.client.channels._add(data);
   }

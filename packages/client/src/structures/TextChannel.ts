@@ -3,24 +3,29 @@ import { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import { PermissionResolvable } from "../utils/permissions";
 import { ChannelRolePermissionOptions } from "../managers/ChannelManager";
+import type { Channel as RawChannel } from "stoat-api";
+
+export type RawTextChannel = Extract<RawChannel, { channel_type: "TextChannel" }>;
 
 export class TextChannel extends BaseChannel {
   public name!: string;
   public serverId!: string;
-  public defaultPermissions?: { a: number; d: number };
-  public description?: string | null;
+  public defaultPermissions?: { a: number; d: number } | null | undefined;
+  public description?: string | null | undefined;
   public icon?: Attachment | null;
-  public lastMessageId?: string | null;
+  public lastMessageId?: string | null | undefined;
   public nsfw?: boolean;
   public slowmode?: number;
   public voice?: any;
 
-  constructor(client: Client, data: any) {
+  constructor(client: Client, data: RawTextChannel) {
     super(client, data);
     this.serverId = data.server;
     this.defaultPermissions = data.default_permissions;
     this.description = data.description;
-    this.icon = data.icon;
+    if (data.icon !== undefined) {
+      this.icon = data.icon ? new Attachment(this.client, data.icon) : null;
+    }
     this.lastMessageId = data.last_message_id;
     this.nsfw = data.nsfw ?? false;
     this.slowmode = data.slowmode ?? 0;
@@ -28,7 +33,7 @@ export class TextChannel extends BaseChannel {
     this._patch(data);
   }
 
-  public _patch(data: any, clear?: string[]) {
+  public _patch(data: RawTextChannel, clear?: string[]) {
     if (data.name !== undefined) this.name = data.name;
     if (data.description !== undefined) this.description = data.description;
 
@@ -96,6 +101,10 @@ export class TextChannel extends BaseChannel {
     const serverId = this.serverId as string;
     const server = await this.client.servers.fetch(serverId);
 
+    if(!server.categories || server.categories.length === 0) {
+      throw new Error("This server has no categories to move the channel into.");
+    }
+
     const categories = server.categories.map((c) => ({
       id: c.id,
       title: c.title,
@@ -131,6 +140,10 @@ export class TextChannel extends BaseChannel {
   public async setPosition(position: number): Promise<TextChannel> {
     const serverId = this.serverId as string;
     const server = await this.client.servers.fetch(serverId);
+
+    if (!server.categories || server.categories.length === 0) {
+      throw new Error("This server has no categories to move the channel into.");
+    }
 
     const categories = server.categories.map((c) => ({
       id: c.id,

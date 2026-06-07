@@ -5,7 +5,8 @@ import type { Server } from "../structures/Server";
 import * as util from "node:util";
 import { User } from "../structures/User";
 import { BaseManager } from "./BaseManager";
-import { AllMemberResponse, DataMemberEdit, FieldsMember, Member as RawMember, DataBanCreate } from "stoat-api";
+import { DataMemberEdit, FieldsMember, Member as RawMember, DataBanCreate } from "stoat-api";
+import { RouteParams } from "../utils/schema";
 
 export type MemberResolvable = Member | User | string;
 
@@ -22,7 +23,8 @@ export interface MemberBanOptions {
 }
 
 export interface FetchMembersOptions {
-  exclude_offline?: boolean;
+  /** Whether to exclude offline users from the fetch */
+  excludeOffline?: boolean;
 }
 
 export class MemberManager extends BaseManager<string, Member> {
@@ -94,7 +96,7 @@ export class MemberManager extends BaseManager<string, Member> {
     }
 
     const id = this.resolveId(member);
-    const data = await this.client.rest.get<RawMember>(`/servers/${this.server.id}/members/${id}`);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/members/${id}`);
 
     return this._add(data);
   }
@@ -112,16 +114,13 @@ export class MemberManager extends BaseManager<string, Member> {
    * const onlineMembers = await server.members.fetchMany({ exclude_offline: true });
    */
   public async fetchMany(options: FetchMembersOptions = {}): Promise<Collection<string, Member>> {
-    const params = new URLSearchParams();
+    const query: RouteParams<"get", `/servers/${string}/members`> = {};
 
-    if (options.exclude_offline !== undefined) {
-      params.append("exclude_offline", options.exclude_offline.toString());
+    if (options.excludeOffline !== undefined) {
+      query.exclude_offline = options.excludeOffline;
     }
 
-    const queryString = params.toString();
-    const endpoint = `/servers/${this.server.id}/members${queryString ? `?${queryString}` : ""}`;
-
-    const data = await this.client.rest.get<AllMemberResponse>(endpoint);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/members`, query);
 
     if (data.users) {
       for (const userData of data.users) {
@@ -178,7 +177,7 @@ export class MemberManager extends BaseManager<string, Member> {
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(id);
 
-    const data = await this.client.rest.patch<RawMember>(`/servers/${this.server.id}/members/${id}`, payload);
+    const data = await this.client.rest.patch(`/servers/${this.server.id}/members/${id}`, payload);
     return this._add(data);
   }
 

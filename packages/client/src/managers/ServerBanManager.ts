@@ -3,7 +3,7 @@ import type { Client } from "../client/Client";
 import { Collection } from "../utils/Collection";
 import { BaseManager } from "./BaseManager";
 import { ServerBan } from "../structures/ServerBan";
-import { BanListResult } from "stoat-api";
+
 export interface Ban {
   userId: string;
   reason: string | null;
@@ -32,7 +32,7 @@ export class ServerBanManager extends BaseManager<string, ServerBan> {
    * @returns A promise that resolves to a Collection of Bans.
    */
   public async fetch(): Promise<Collection<string, ServerBan>> {
-    const data = await this.client.rest.get<BanListResult>(`/servers/${this.server.id}/bans`);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/bans`);
 
     // Cache associated users globally
     if (data.users && Array.isArray(data.users)) {

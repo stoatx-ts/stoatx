@@ -6,7 +6,8 @@ import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
 import { resolveAttachment } from "../utils/resolveAttachment";
-import { Message as RawMessage, BulkMessageResponse, DataMessageSend, DataEditMessage } from "stoat-api";
+import { Message as RawMessage, DataMessageSend, DataEditMessage } from "stoat-api";
+import { RouteParams } from "../utils/schema";
 
 export type MessageResolvable = Message | string;
 
@@ -43,7 +44,7 @@ export class MessageManager extends BaseManager<string, Message> {
   }
 
   public async fetch(id: string): Promise<Message> {
-    const data = await this.client.rest.get<RawMessage>(`/channels/${this.channel.id}/messages/${id}`);
+    const data = await this.client.rest.get(`/channels/${this.channel.id}/messages/${id}`);
     return this._add(data);
   }
 
@@ -60,19 +61,18 @@ export class MessageManager extends BaseManager<string, Message> {
    * const history = await channel.messages.fetchMany({ limit: 20, before: "01H..." });
    */
   public async fetchMany(options: MessageFetchOptions = {}): Promise<Collection<string, Message>> {
-    const params = new URLSearchParams();
+    const endpoint = `/channels/${this.channel.id}/messages` as const;
 
-    if (options.limit !== undefined) params.append("limit", options.limit.toString());
-    if (options.before !== undefined) params.append("before", options.before);
-    if (options.after !== undefined) params.append("after", options.after);
-    if (options.sort !== undefined) params.append("sort", options.sort);
-    if (options.nearby !== undefined) params.append("nearby", options.nearby);
-    if (options.includeUsers !== undefined) params.append("include_users", options.includeUsers.toString());
+    const query: RouteParams<"get", typeof endpoint> = {};
 
-    const queryString = params.toString();
-    const endpoint = `/channels/${this.channel.id}/messages${queryString ? `?${queryString}` : ""}`;
+    if(options.limit !== undefined) query.limit = options.limit;
+    if(options.before !== undefined) query.before = options.before;
+    if(options.after !== undefined) query.after = options.after;
+    if(options.sort !== undefined) query.sort = options.sort;
+    if(options.nearby !== undefined) query.nearby = options.nearby;
+    if(options.includeUsers !== undefined) query.include_users = options.includeUsers;
 
-    const data = await this.client.rest.get<BulkMessageResponse>(endpoint);
+    const data = await this.client.rest.get(endpoint, query);
 
     let rawMessages: RawMessage[];
 
@@ -136,7 +136,7 @@ export class MessageManager extends BaseManager<string, Message> {
       }
     }
 
-    const data = await this.client.rest.post<RawMessage>(`/channels/${this.channel.id}/messages`, payload);
+    const data = await this.client.rest.post(`/channels/${this.channel.id}/messages`, payload);
 
     return new Message(this.client, data);
   }
@@ -166,7 +166,7 @@ export class MessageManager extends BaseManager<string, Message> {
       }
     }
 
-    const data = await this.client.rest.patch<RawMessage>(`/channels/${this.channel.id}/messages/${id}`, payload);
+    const data = await this.client.rest.patch(`/channels/${this.channel.id}/messages/${id}`, payload);
 
     return this._add(data);
   }
@@ -187,7 +187,7 @@ export class MessageManager extends BaseManager<string, Message> {
    */
   public async pin(message: MessageResolvable): Promise<void> {
     const id = this.resolveId(message);
-    await this.client.rest.post(`/channels/${this.channel.id}/messages/${id}/pin`, {});
+    await this.client.rest.post(`/channels/${this.channel.id}/messages/${id}/pin`);
 
     const existing = this.cache.get(id);
     if (existing) existing.pinned = true;
@@ -244,14 +244,17 @@ export class MessageManager extends BaseManager<string, Message> {
     const id = this.resolveId(message);
     const targetUser = userId ? this.client.users.resolveId(userId) : undefined;
 
-    const params = new URLSearchParams();
-    if (targetUser) params.append("user_id", targetUser);
-    if (removeAll) params.append("remove_all", "true");
+    const endpoint = `/channels/${this.channel.id}/messages/${id}/reactions/${reaction}` as const;
 
-    const queryString = params.toString();
-    const endpoint = `/channels/${this.channel.id}/messages/${id}/reactions/${encodeURIComponent(reaction)}${queryString ? `?${queryString}` : ""}`;
+    const query: RouteParams<"delete", typeof endpoint> = {};
 
-    await this.client.rest.delete(endpoint);
+    if (targetUser) {
+      query.user_id = targetUser;
+    } else if (removeAll) {
+      query.remove_all = true;
+    }
+
+    await this.client.rest.delete(endpoint, query);
   }
 
   /**

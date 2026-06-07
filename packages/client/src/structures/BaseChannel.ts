@@ -8,12 +8,9 @@ import { GroupChannel } from "./GroupChannel";
 import { ChannelEditOptions } from "../managers/ChannelManager";
 import { Collection } from "../utils/Collection";
 import { MessageCollector, MessageCollectorOptions } from "../utils/MessageCollector";
+import { Channel as RawChannel } from "stoat-api";
 
-export enum ChannelType {
-  TEXT = "TextChannel",
-  DM = "DirectMessage",
-  GROUP = "Group",
-}
+export type ChannelType = "SavedMessages" | "DirectMessage" | "Group" | "TextChannel";
 
 export interface ChannelCreateOptions {
   name: string;
@@ -29,7 +26,7 @@ export abstract class BaseChannel extends Base {
   public type: ChannelType;
   public messages: MessageManager;
 
-  protected constructor(client: Client, data: any) {
+  protected constructor(client: Client, data: RawChannel) {
     super(client, data);
     this.type = data.channel_type;
 
@@ -161,14 +158,14 @@ export abstract class BaseChannel extends Base {
   }
 
   public isText(): this is TextChannel {
-    return this.type === ChannelType.TEXT;
+    return this.type === "TextChannel";
   }
 
   public isDM(): this is DMChannel {
-    return this.type === ChannelType.DM;
+    return this.type === "DirectMessage"
   }
 
   public isGroup(): this is GroupChannel {
-    return this.type === ChannelType.GROUP;
+    return this.type === "Group";
   }
 }

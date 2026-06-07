@@ -6,17 +6,18 @@ import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
 import { Attachment } from "./Attachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import {Role as RawRole} from "stoat-api";
 
 export class Role extends Base {
   public serverId: string;
   public name!: string;
-  public color: string | null = null;
+  public color: string | null | undefined = null;
   public hoist: boolean = false;
   public rank: number = 0;
   public icon: Attachment | null = null;
   private _permissions: bigint = 0n;
 
-  constructor(client: Client, data: any, serverId: string) {
+  constructor(client: Client, data: RawRole, serverId: string) {
     super(client, data);
     this.serverId = serverId;
     this._patch(data);
@@ -26,16 +27,16 @@ export class Role extends Base {
    * Updates the role instance with new data without losing the object reference.
    * @internal
    */
-  public _patch(data: any) {
+  public _patch(data: RawRole) {
     if (data.name !== undefined) this.name = data.name;
-    if (data.color !== undefined) this.color = data.color;
+    if (data.colour !== undefined) this.color = data.colour;
     if (data.hoist !== undefined) this.hoist = data.hoist;
     if (data.rank !== undefined) this.rank = data.rank;
-    if (data.icon !== undefined) this.icon = new Attachment(this.client, data.icon);
+    if (data.icon !== undefined) this.icon = data.icon !== null ? new Attachment(this.client, data.icon): null;
     if (data.permissions !== undefined) {
       try {
         if (typeof data.permissions === "object" && data.permissions !== null) {
-          const allowPerms = data.permissions.a ?? data.permissions[0] ?? 0;
+          const allowPerms = data.permissions.a ?? 0;
           this._permissions = BigInt(allowPerms);
         } else {
           this._permissions = BigInt(data.permissions);

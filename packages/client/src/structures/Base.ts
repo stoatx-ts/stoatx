@@ -8,7 +8,7 @@ export abstract class Base {
   public cachedAt: number = Date.now();
   protected readonly client: Client;
 
-  constructor(client: Client, data: { _id: string }) {
+  protected constructor(client: Client, data: { _id: string }) {
     this.id = data._id;
     this.client = client;
 

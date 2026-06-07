@@ -2,6 +2,7 @@ import { request } from "undici";
 import { Client } from "../client/Client";
 import { CDNTag } from "../builders/AttachmentBuilder";
 import type { APIRoutes } from "stoat-api";
+import { queryParams, RouteParams, RouteResponse, ValidPath } from "../utils/schema";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -63,13 +64,14 @@ export class StoatAPIError extends Error {
     Object.setPrototypeOf(this, StoatAPIError.prototype);
   }
 }
-
-type ValidPath<M extends APIRoutes["method"]> = Extract<APIRoutes, { method: M }>["path"];
-
-type RouteResponse<M extends APIRoutes["method"], P extends string> = Extract<
-  APIRoutes,
-  { method: M; path: P }
->["response"];
+const ALL_QUERY_KEYS = new Set<string>();
+for (const routes of Object.values(queryParams)) {
+  for (const keys of Object.values(routes)) {
+    for (const key of keys) {
+      ALL_QUERY_KEYS.add(key);
+    }
+  }
+}
 
 export class RESTManager {
   private baseURL = "https://stoat.chat/api";
@@ -105,31 +107,43 @@ export class RESTManager {
   public makeRequest<M extends APIRoutes["method"], P extends ValidPath<M>>(
     method: M,
     endpoint: P,
-    body?: any,
-    query?: Record<string, string | number | boolean | undefined>,
+    params?: RouteParams<M, P>,
   ): Promise<RouteResponse<M, P>> {
     let finalEndpoint = endpoint as string;
+    let finalBody: Record<string, any> | undefined = undefined;
 
-    if (query) {
-      const params = new URLSearchParams();
-      for (const [key, value] of Object.entries(query)) {
-        if (value !== undefined) params.append(key, String(value));
+    if (params && typeof params === "object") {
+      const query = new URLSearchParams();
+      finalBody = {};
+
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined) {
+          if (ALL_QUERY_KEYS.has(key)) {
+            query.append(key, String(value));
+          } else {
+            finalBody[key] = value;
+          }
+        }
       }
-      const qs = params.toString();
+
+      const qs = query.toString();
       if (qs) finalEndpoint += `?${qs}`;
+
+      if (Object.keys(finalBody).length === 0) finalBody = undefined;
     }
     const routeKey = this.getRouteKey(method, finalEndpoint);
 
-    let bucket = this.buckets.get(routeKey);
-    if (!bucket) {
-      bucket = new AsyncBucket();
-      this.buckets.set(routeKey, bucket);
-    }
-
     return new Promise((resolve, reject) => {
-      bucket!.queue = bucket!.queue.then(async () => {
+      let bucket = this.buckets.get(routeKey);
+      if (!bucket) {
+        bucket = new AsyncBucket();
+        this.buckets.set(routeKey, bucket);
+      }
+
+      bucket.queue = bucket.queue.then(async () => {
         try {
-          const result = await this.execute(method, endpoint, body, bucket!);
+          // Pass the split finalEndpoint and finalBody down to your request executor
+          const result = await this.execute(method, finalEndpoint, finalBody, bucket!);
           resolve(result);
         } catch (error) {
           reject(error);
@@ -235,24 +249,36 @@ export class RESTManager {
 
   public get<P extends ValidPath<"get">>(
     endpoint: P,
-    query?: Record<string, string | number | boolean | undefined>,
+    params?: RouteParams<"get", P>,
   ): Promise<RouteResponse<"get", P>> {
-    return this.makeRequest("get", endpoint, undefined, query);
+    return this.makeRequest("get", endpoint, params);
   }
 
-  public post<P extends ValidPath<"post">>(endpoint: P, body?: any): Promise<RouteResponse<"post", P>> {
-    return this.makeRequest("post", endpoint, body);
+  public post<P extends ValidPath<"post">>(
+    endpoint: P,
+    params?: RouteParams<"post", P>,
+  ): Promise<RouteResponse<"post", P>> {
+    return this.makeRequest("post", endpoint, params);
   }
 
-  public patch<P extends ValidPath<"patch">>(endpoint: P, body?: any): Promise<RouteResponse<"patch", P>> {
-    return this.makeRequest("patch", endpoint, body);
+  public patch<P extends ValidPath<"patch">>(
+    endpoint: P,
+    params?: RouteParams<"patch", P>,
+  ): Promise<RouteResponse<"patch", P>> {
+    return this.makeRequest("patch", endpoint, params);
   }
 
-  public delete<P extends ValidPath<"delete">>(endpoint: P, body?: any): Promise<RouteResponse<"delete", P>> {
-    return this.makeRequest("delete", endpoint, body);
+  public delete<P extends ValidPath<"delete">>(
+    endpoint: P,
+    params?: RouteParams<"delete", P>,
+  ): Promise<RouteResponse<"delete", P>> {
+    return this.makeRequest("delete", endpoint, params);
   }
 
-  public put<P extends ValidPath<"put">>(endpoint: P, body?: any): Promise<RouteResponse<"put", P>> {
-    return this.makeRequest("put", endpoint, body);
+  public put<P extends ValidPath<"put">>(
+    endpoint: P,
+    params?: RouteParams<"put", P>,
+  ): Promise<RouteResponse<"put", P>> {
+    return this.makeRequest("put", endpoint, params);
   }
 }
