@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Run test coverage"
+set -e
+
+pnpm coverage
