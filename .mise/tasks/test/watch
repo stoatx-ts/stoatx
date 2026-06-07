@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Run tests in watch mode"
+set -e
+
+pnpm test:watch
