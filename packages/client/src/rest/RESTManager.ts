@@ -106,8 +106,19 @@ export class RESTManager {
     method: M,
     endpoint: P,
     body?: any,
+    query?: Record<string, string | number | boolean | undefined>,
   ): Promise<RouteResponse<M, P>> {
-    const routeKey = this.getRouteKey(method, endpoint);
+    let finalEndpoint = endpoint as string;
+
+    if (query) {
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(query)) {
+        if (value !== undefined) params.append(key, String(value));
+      }
+      const qs = params.toString();
+      if (qs) finalEndpoint += `?${qs}`;
+    }
+    const routeKey = this.getRouteKey(method, finalEndpoint);
 
     let bucket = this.buckets.get(routeKey);
     if (!bucket) {
@@ -222,8 +233,11 @@ export class RESTManager {
     return data.id;
   }
 
-  public get<P extends ValidPath<"get">>(endpoint: P): Promise<RouteResponse<"get", P>> {
-    return this.makeRequest("get", endpoint);
+  public get<P extends ValidPath<"get">>(
+    endpoint: P,
+    query?: Record<string, string | number | boolean | undefined>,
+  ): Promise<RouteResponse<"get", P>> {
+    return this.makeRequest("get", endpoint, undefined, query);
   }
 
   public post<P extends ValidPath<"post">>(endpoint: P, body?: any): Promise<RouteResponse<"post", P>> {
