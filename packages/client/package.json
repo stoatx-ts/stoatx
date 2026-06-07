@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "events": "^3.3.0",
+    "stoat-api": "^0.13.7",
     "ulid": "^3.0.2",
     "undici": "^8.3.0",
-    "ws": "^8.16.0",
-    "stoat-api": "^0.13.7"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/ws": "^8.5.0"

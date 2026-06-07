@@ -4,7 +4,8 @@
   "description": "Moderation bot for Stoat and documentation fot the bot",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "version": "changeset version",
     "release": "pnpm -r build && changeset publish",
     "format": "prettier --write .",
@@ -27,7 +28,8 @@
     "@types/node": "^25.6.0",
     "prettier": "^3.8.1",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=26.0.0",
