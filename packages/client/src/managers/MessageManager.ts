@@ -5,8 +5,9 @@ import type { Client } from "../client/Client";
 import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
-import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import { Message as RawMessage, DataMessageSend, DataEditMessage } from "stoat-api";
+import { RouteParams } from "../utils/schema";
 
 export type MessageResolvable = Message | string;
 
@@ -31,14 +32,14 @@ export class MessageManager extends BaseManager<string, Message> {
   /**
    * Tell BaseManager how to find the ID for Messages
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawMessage): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a Message
    */
-  protected construct(data: any): Message {
+  protected construct(data: RawMessage): Message {
     return new Message(this.client, data);
   }
 
@@ -60,25 +61,37 @@ export class MessageManager extends BaseManager<string, Message> {
    * const history = await channel.messages.fetchMany({ limit: 20, before: "01H..." });
    */
   public async fetchMany(options: MessageFetchOptions = {}): Promise<Collection<string, Message>> {
-    const params = new URLSearchParams();
+    const endpoint = `/channels/${this.channel.id}/messages` as const;
 
-    if (options.limit !== undefined) params.append("limit", options.limit.toString());
-    if (options.before !== undefined) params.append("before", options.before);
-    if (options.after !== undefined) params.append("after", options.after);
-    if (options.sort !== undefined) params.append("sort", options.sort);
-    if (options.nearby !== undefined) params.append("nearby", options.nearby);
-    if (options.includeUsers !== undefined) params.append("include_users", options.includeUsers.toString());
+    const query: RouteParams<"get", typeof endpoint> = {};
 
-    const queryString = params.toString();
-    const endpoint = `/channels/${this.channel.id}/messages${queryString ? `?${queryString}` : ""}`;
+    if (options.limit !== undefined) query.limit = options.limit;
+    if (options.before !== undefined) query.before = options.before;
+    if (options.after !== undefined) query.after = options.after;
+    if (options.sort !== undefined) query.sort = options.sort;
+    if (options.nearby !== undefined) query.nearby = options.nearby;
+    if (options.includeUsers !== undefined) query.include_users = options.includeUsers;
 
-    const data = await this.client.rest.get(endpoint);
+    const data = await this.client.rest.get(endpoint, query);
 
-    const rawMessages = Array.isArray(data) ? data : data.messages || [];
+    let rawMessages: RawMessage[];
 
-    if (!Array.isArray(data) && data.users) {
-      for (const userData of data.users) {
-        this.client.users._add(userData);
+    if (Array.isArray(data)) {
+      rawMessages = data;
+    } else {
+      rawMessages = data.messages;
+
+      if (data.users) {
+        for (const userData of data.users) {
+          this.client.users._add(userData);
+        }
+      }
+      if (data.members && this.channel.isText()) {
+        const serverId = this.channel.serverId;
+        const server = await this.client.servers.fetch(serverId);
+        for (const memberData of data.members) {
+          server.members._add(memberData);
+        }
       }
     }
 
@@ -104,19 +117,23 @@ export class MessageManager extends BaseManager<string, Message> {
    * @returns A promise that resolves to the sent Message.
    */
   public async send(contentOrOptions: MessageOptions | string): Promise<Message> {
-    const payload: any = typeof contentOrOptions === "string" ? { content: contentOrOptions } : { ...contentOrOptions }; // Spread to avoid mutating the user's original object
+    const opts = typeof contentOrOptions === "string" ? { content: contentOrOptions } : contentOrOptions;
 
-    if (payload.embeds) {
-      payload.embeds = payload.embeds.map((embed: any) =>
-        typeof embed.toJSON === "function" ? embed.toJSON() : embed,
-      );
+    const payload: DataMessageSend = {};
+
+    if (opts.embeds && opts.embeds.length) {
+      payload.embeds = opts.embeds.map((embed: any) => (typeof embed.toJSON === "function" ? embed.toJSON() : embed));
     }
-    if (payload.attachments) {
-      payload.attachments = await Promise.all(
-        payload.attachments.map((attachment: AttachmentBuilder | string) =>
-          resolveAttachment(this.client.rest, attachment, "attachments"),
-        ),
+    if (opts.attachments && opts.attachments.length > 0) {
+      const resolved = await Promise.all(
+        opts.attachments.map((attachment) => resolveAttachment(this.client.rest, attachment, "attachments")),
       );
+
+      const validAttachments = resolved.filter((id): id is string => id !== undefined);
+
+      if (validAttachments.length > 0) {
+        payload.attachments = validAttachments;
+      }
     }
 
     const data = await this.client.rest.post(`/channels/${this.channel.id}/messages`, payload);
@@ -132,23 +149,26 @@ export class MessageManager extends BaseManager<string, Message> {
    */
   public async edit(message: MessageResolvable, contentOrOptions: string | MessageOptions): Promise<Message> {
     const id = this.resolveId(message);
-    const payload: MessageOptions =
-      typeof contentOrOptions === "string" ? { content: contentOrOptions } : { ...contentOrOptions };
 
-    if (payload.embeds) {
-      payload.embeds = payload.embeds.map((embed: any) =>
-        typeof embed.toJSON === "function" ? embed.toJSON() : embed,
-      );
+    const opts = typeof contentOrOptions === "string" ? { content: contentOrOptions } : contentOrOptions;
+
+    const payload: DataEditMessage = {};
+
+    if (opts.content !== undefined) {
+      payload.content = opts.content;
+    }
+
+    if (opts.embeds !== undefined) {
+      if (opts.embeds === null) {
+        payload.embeds = [];
+      } else {
+        payload.embeds = opts.embeds.map((embed) => ("toJSON" in embed ? embed.toJSON() : embed));
+      }
     }
 
     const data = await this.client.rest.patch(`/channels/${this.channel.id}/messages/${id}`, payload);
-    const existing = this.cache.get(id);
-    if (existing) {
-      existing._patch(data);
-      return existing;
-    }
 
-    return new Message(this.client, data);
+    return this._add(data);
   }
 
   /**
@@ -167,7 +187,7 @@ export class MessageManager extends BaseManager<string, Message> {
    */
   public async pin(message: MessageResolvable): Promise<void> {
     const id = this.resolveId(message);
-    await this.client.rest.post(`/channels/${this.channel.id}/messages/${id}/pin`, {});
+    await this.client.rest.post(`/channels/${this.channel.id}/messages/${id}/pin`);
 
     const existing = this.cache.get(id);
     if (existing) existing.pinned = true;
@@ -224,14 +244,17 @@ export class MessageManager extends BaseManager<string, Message> {
     const id = this.resolveId(message);
     const targetUser = userId ? this.client.users.resolveId(userId) : undefined;
 
-    const params = new URLSearchParams();
-    if (targetUser) params.append("user_id", targetUser);
-    if (removeAll) params.append("remove_all", "true");
+    const endpoint = `/channels/${this.channel.id}/messages/${id}/reactions/${reaction}` as const;
 
-    const queryString = params.toString();
-    const endpoint = `/channels/${this.channel.id}/messages/${id}/reactions/${encodeURIComponent(reaction)}${queryString ? `?${queryString}` : ""}`;
+    const query: RouteParams<"delete", typeof endpoint> = {};
 
-    await this.client.rest.delete(endpoint);
+    if (targetUser) {
+      query.user_id = targetUser;
+    } else if (removeAll) {
+      query.remove_all = true;
+    }
+
+    await this.client.rest.delete(endpoint, query);
   }
 
   /**

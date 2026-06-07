@@ -4,6 +4,9 @@ import { BaseChannel } from "./BaseChannel";
 import type { User } from "./User";
 import * as util from "node:util";
 import { PermissionResolvable } from "../utils/permissions";
+import type { Channel as RawChannel } from "stoat-api";
+
+export type RawGroupChannel = Extract<RawChannel, { channel_type: "Group" }>;
 
 export class GroupChannel extends BaseChannel {
   public name!: string;
@@ -14,12 +17,12 @@ export class GroupChannel extends BaseChannel {
   public lastMessageId?: string | null = null;
   public nsfw: boolean = false;
 
-  constructor(client: Client, data: any) {
+  constructor(client: Client, data: RawGroupChannel) {
     super(client, data);
     this._patch(data);
   }
 
-  public _patch(data: any, clear?: string[]) {
+  public _patch(data: RawGroupChannel, clear?: string[]) {
     if (data.name !== undefined) this.name = data.name;
     if (data.owner !== undefined) this.ownerId = data.owner;
     if (data.recipients !== undefined) this.recipients = data.recipients;

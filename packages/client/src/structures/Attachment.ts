@@ -1,11 +1,12 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
+import { File } from "stoat-api";
 
 export type AttachmentMetadata =
   | { type: "File" }
   | { type: "Text" }
   | { type: "Audio" }
-  | { type: "Image"; width: number; height: number; thumbhash?: number[]; animated?: boolean }
+  | { type: "Image"; width: number; height: number; thumbhash?: number[] | null; animated?: boolean | null }
   | { type: "Video"; width: number; height: number };
 
 export class Attachment extends Base {
@@ -18,13 +19,13 @@ export class Attachment extends Base {
 
   public deleted?: boolean;
   public reported?: boolean;
-  public messageId?: string;
-  public userId?: string;
-  public serverId?: string;
-  public objectId?: string;
+  public messageId?: string | null | undefined;
+  public userId?: string | null | undefined;
+  public serverId?: string | null | undefined;
+  public objectId?: string | null | undefined;
 
-  constructor(client: Client, data: any) {
-    super(client, { ...data, id: data._id });
+  constructor(client: Client, data: File) {
+    super(client, { ...data, _id: data._id });
 
     this.id = data._id;
     this.tag = data.tag;

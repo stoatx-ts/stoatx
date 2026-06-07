@@ -1,33 +1,16 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
+import type { User as RawUser } from "stoat-api";
 
-export enum UserRelationship {
-  None = "None",
-  User = "User",
-  Friend = "Friend",
-  Outgoing = "Outgoing",
-  Incoming = "Incoming",
-  Blocked = "Blocked",
-  BlockedOther = "BlockedOther",
-}
-
-export enum UserPresence {
-  Online = "Online",
-  Idle = "Idle",
-  Focus = "Focus",
-  Busy = "Busy",
-  Invisible = "Invisible",
-}
+export type UserRelationShip = "None" | "User" | "Friend" | "Outgoing" | "Incoming" | "Blocked" | "BlockedOther";
 
 export interface BotInformation {
   owner: string;
 }
 
-export interface UserStatus {
-  presence: UserPresence;
-  text?: string | null;
-}
+export type UserStatus = NonNullable<RawUser["status"]>;
+export type UserPresence = NonNullable<UserStatus["presence"]>;
 
 export interface UserProfile {
   background?: string | null;
@@ -37,7 +20,7 @@ export interface UserProfile {
 export class User extends Base {
   public discriminator!: string;
   public online!: boolean;
-  public relationship!: UserRelationship;
+  public relationship!: UserRelationShip;
   public username!: string;
   public avatar?: Attachment | null;
   public badges?: number;
@@ -47,7 +30,7 @@ export class User extends Base {
   public privileged?: boolean;
   public status?: UserStatus | null;
 
-  constructor(client: Client, data: any) {
+  constructor(client: Client, data: RawUser) {
     super(client, data);
     this.bot = false;
     this.privileged = false;
@@ -55,7 +38,7 @@ export class User extends Base {
     this._patch(data);
   }
 
-  public _patch(data: any, clear?: string[]) {
+  public _patch(data: RawUser, clear?: string[]) {
     if (data.username !== undefined) this.username = data.username;
     if (data.discriminator !== undefined) this.discriminator = data.discriminator;
     if (data.online !== undefined) this.online = data.online;
@@ -73,7 +56,7 @@ export class User extends Base {
     }
 
     if (data.avatar !== undefined) {
-      this.avatar = new Attachment(this.client, data.avatar);
+      this.avatar = data.avatar ? new Attachment(this.client, data.avatar) : null;
     }
 
     // Handle deletions gracefully

@@ -13,6 +13,7 @@ import { ReactionCollector, ReactionCollectorOptions } from "../utils/ReactionCo
 import { Collection } from "../utils/Collection";
 import { MessageReaction } from "./MessageReaction";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import { Message as RawMessage, Embed as RawEmbed } from "stoat-api";
 
 export interface MessageOptions {
   content?: string;
@@ -24,9 +25,9 @@ export interface MessageOptions {
   replies?: ReplyIntent[];
 }
 export interface Masquerade {
-  avatar?: string;
-  name?: string;
-  colour?: string;
+  avatar?: string | null;
+  name?: string | null;
+  colour?: string | null;
 }
 export interface ReplyIntent {
   id: string;
@@ -43,20 +44,20 @@ export class Message extends Base {
   public content: string | null = null;
   public authorId: string;
   public channelId: string;
-  public embeds: any[] = [];
+  public embeds: RawEmbed[] | null = [];
   public attachments: Attachment[] = [];
   public editedAt: Date | null = null;
   public createdAt: Date | null = null;
   public flags: number = 0;
   public interactions: Interaction | null = null;
   public masquerade: Masquerade | null = null;
-  public mentions: string[] = [];
-  public pinned: boolean = false;
+  public mentions: string[] | null = null;
+  public pinned: null | boolean = false;
   public reactions: Record<string, string[]> = {};
-  public replies: string[] = [];
-  public role_mentions: string[] = [];
+  public replies: string[] | null = [];
+  public role_mentions: string[] | null = [];
 
-  constructor(client: Client, data: any) {
+  constructor(client: Client, data: RawMessage) {
     super(client, data);
 
     this.authorId = data.author;
@@ -258,9 +259,9 @@ export class Message extends Base {
     return this.client.servers.cache.get(serverId);
   }
 
-  public _patch(data: any) {
+  public _patch(data: RawMessage) {
     if (data.content !== undefined) this.content = data.content;
-    if (data.edited !== undefined) this.editedAt = new Date(data.edited);
+    if (data.edited !== undefined) this.editedAt = new Date(data.edited ?? 0);
     if (data.pinned !== undefined) this.pinned = data.pinned;
     if (data.embeds !== undefined) this.embeds = data.embeds;
     if (data.flags !== undefined) this.flags = data.flags;

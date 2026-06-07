@@ -40,3 +40,5 @@ export * from "./utils/Collector";
 export * from "./utils/MessageCollector";
 export * from "./utils/ReactionCollector";
 export * from "./utils/BitField";
+
+export * as API from "stoat-api";

@@ -3,6 +3,7 @@ import type { BaseChannel, ChannelCreateOptions } from "../structures/BaseChanne
 import type { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
 import * as util from "node:util";
+import { DataCreateServerChannel } from "stoat-api";
 
 export class ServerChannelManager {
   public client: Client;
@@ -25,12 +26,21 @@ export class ServerChannelManager {
   public async create(options: ChannelCreateOptions): Promise<BaseChannel> {
     if (!options.name) throw new Error("A channel name must be provided.");
 
-    const payload: any = {
+    const payload: DataCreateServerChannel = {
       name: options.name,
-      type: options.type ?? "Text",
-      description: options.description,
-      nsfw: options.nsfw ?? false,
     };
+
+    if (options.nsfw !== undefined) {
+      payload.nsfw = options.nsfw;
+    }
+
+    if (options.type !== undefined) {
+      payload.type = options.type;
+    }
+
+    if (options.description !== undefined) {
+      payload.description = options.description;
+    }
 
     if (options.type === "Voice" && options.voice?.max_users) {
       payload.voice = { max_users: options.voice.max_users };

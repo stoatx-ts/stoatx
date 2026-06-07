@@ -2,6 +2,7 @@ import { BaseManager } from "./BaseManager";
 import { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
 import * as util from "node:util";
+import { Server as RawServer, DataEditServer, FieldsServer } from "stoat-api";
 
 export interface ServerEditOptions {
   name?: string;
@@ -31,14 +32,14 @@ export class ServerManager extends BaseManager<string, Server> {
   /**
    * Tell BaseManager how to find the ID for Servers
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawServer): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a Server
    */
-  protected construct(data: any): Server {
+  protected construct(data: RawServer): Server {
     return new Server(this.client, data);
   }
 
@@ -58,8 +59,8 @@ export class ServerManager extends BaseManager<string, Server> {
   }
 
   public async edit(serverId: string, options: ServerEditOptions): Promise<Server> {
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataEditServer = {};
+    const remove: FieldsServer[] = [];
 
     if (options.name !== undefined) payload.name = options.name;
     if (options.description !== undefined) {
@@ -80,22 +81,24 @@ export class ServerManager extends BaseManager<string, Server> {
     if (options.systemMessages) {
       payload.system_messages = {};
       const sm = options.systemMessages;
+
       if (sm.userJoined !== undefined) {
-        if (sm.userJoined === null) remove.push("SystemMessageUserJoined");
-        else payload.system_messages.user_joined = sm.userJoined;
+        payload.system_messages.user_joined = sm.userJoined;
       }
+
       if (sm.userLeft !== undefined) {
-        if (sm.userLeft === null) remove.push("SystemMessageUserLeft");
-        else payload.system_messages.user_left = sm.userLeft;
+        payload.system_messages.user_left = sm.userLeft;
       }
+
       if (sm.userKicked !== undefined) {
-        if (sm.userKicked === null) remove.push("SystemMessageUserKicked");
-        else payload.system_messages.user_kicked = sm.userKicked;
+        payload.system_messages.user_kicked = sm.userKicked;
       }
+
       if (sm.userBanned !== undefined) {
-        if (sm.userBanned === null) remove.push("SystemMessageUserBanned");
-        else payload.system_messages.user_banned = sm.userBanned;
+        payload.system_messages.user_banned = sm.userBanned;
       }
+    } else if (options.systemMessages === null) {
+      remove.push("SystemMessages");
     }
 
     if (options.categories !== undefined) payload.categories = options.categories;
@@ -106,7 +109,6 @@ export class ServerManager extends BaseManager<string, Server> {
 
     const data = await this.client.rest.patch(`/servers/${serverId}`, payload);
 
-    // Using _add ensures the existing Server object is patched!
     return this._add(data);
   }
 

@@ -2,6 +2,8 @@ import { User, UserProfile, UserStatus } from "../structures/User";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
+import { User as RawUser, DataEditUser, FieldsUser } from "stoat-api";
+
 export type UserResolvable = User | string;
 
 export interface UserEditOptions {
@@ -19,14 +21,14 @@ export class UserManager extends BaseManager<string, User> {
   /**
    * Tell BaseManager how to find the ID for Users
    */
-  protected extractId(data: any): string {
-    return data._id ?? data.id;
+  protected extractId(data: RawUser): string {
+    return data._id;
   }
 
   /**
    * Tell BaseManager how to build a User
    */
-  protected construct(data: any): User {
+  protected construct(data: RawUser): User {
     return new User(this.client, data);
   }
 
@@ -130,8 +132,8 @@ export class UserManager extends BaseManager<string, User> {
       throw new TypeError("UserEditOptions must be a valid object.");
     }
 
-    const payload: any = {};
-    const remove: string[] = [];
+    const payload: DataEditUser = {};
+    const remove: FieldsUser[] = [];
 
     if (options.displayName !== undefined) {
       if (options.displayName === null) remove.push("DisplayName");
@@ -177,7 +179,7 @@ export class UserManager extends BaseManager<string, User> {
       return this.fetch("@me");
     }
 
-    const data = await this.client.rest.patch(`/users/@me`, payload);
+    const data = await this.client.rest.patch(`/users/${this.client.user?.id}`, payload);
 
     return this._add(data);
   }

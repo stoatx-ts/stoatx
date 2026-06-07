@@ -8,12 +8,7 @@ import { ServerInviteManager } from "../managers/ServerInviteManager";
 import { ServerBanManager } from "../managers/ServerBanManager";
 import { ServerEditOptions } from "../managers/ServerManager";
 import { EmojiManager } from "../managers/EmojiManager";
-
-export interface Categories {
-  channels: string[];
-  id: string;
-  title: string;
-}
+import type { Server as RawServer, Category as RawCategory } from "stoat-api";
 
 export class Server extends Base {
   public channelIds: string[] = [];
@@ -22,7 +17,7 @@ export class Server extends Base {
   public ownerId!: string;
   public analytics: boolean = false;
   public banner: Attachment | null = null;
-  public categories: Categories[] = [];
+  public categories: RawCategory[] | null = null;
   public description: string | null = null;
   public discoverable: boolean = false;
   public flags: number = 0;
@@ -35,7 +30,7 @@ export class Server extends Base {
   public invites: ServerInviteManager;
   public emojis: EmojiManager;
 
-  constructor(client: Client, data: any) {
+  constructor(client: Client, data: RawServer) {
     super(client, data);
     this.channels = new ServerChannelManager(client, this);
     this.members = new MemberManager(client, this);
@@ -49,7 +44,7 @@ export class Server extends Base {
   /**
    * Updates the server instance with new data without losing the object reference.
    */
-  public _patch(data: any, clear?: string[]) {
+  public _patch(data: RawServer, clear?: string[]) {
     if (data.channels !== undefined) this.channelIds = data.channels;
     if (data.default_permissions !== undefined) {
       try {
@@ -75,13 +70,6 @@ export class Server extends Base {
     if (data.roles !== undefined) {
       for (const [id, roleData] of Object.entries(data.roles)) {
         this.roles._add({ id, ...(roleData as any) });
-      }
-    }
-    if (data.emojis !== undefined) {
-      if (Array.isArray(data.emojis)) {
-        for (const emoji of data.emojis) {
-          this.emojis._add(emoji);
-        }
       }
     }
 

@@ -9,6 +9,7 @@ import { MemberRoleManager } from "../managers/MemberRoleManager";
 import { StoatCDN } from "../utils/Constants";
 import { Attachment } from "./Attachment";
 import { Message, MessageOptions } from "./Message";
+import { Member as RawMember } from "stoat-api";
 
 /**
  * Represents a member of a server on Stoat
@@ -35,23 +36,26 @@ export class Member extends Base {
   // Member roles manager
   public roles: MemberRoleManager;
 
-  constructor(client: Client, data: any) {
-    super(client, { _id: data.user._id });
+  constructor(client: Client, data: RawMember, serverId?: string) {
+    super(client, { _id: data._id?.user });
 
-    this.serverId = data.serverId || data.server_id;
-    this.joinedAt = new Date(data.joinedAt || data.joined_at);
+    // 1. Try to get it from the API payload's _id object
+    // 2. Fallback to the ID passed from the Manager
+    this.serverId = data._id?.server ?? serverId;
+
+    this.joinedAt = new Date(data.joined_at);
     this.roles = new MemberRoleManager(this);
 
     this._patch(data);
   }
 
-  _patch(data: any) {
+  _patch(data: RawMember) {
     if (data.nickname !== undefined) this.nickname = data.nickname;
-    if (data.avatar !== undefined) this.avatar = data.avatar;
+    if (data.avatar !== undefined) this.avatar = data.avatar ? new Attachment(this.client, data.avatar) : null;
     if (data.roles !== undefined) this._roles = data.roles;
     if (data.timeout !== undefined) this.timeout = data.timeout ? new Date(data.timeout) : null;
-    if (data.can_publish !== undefined) this.canPublish = data.canPublish;
-    if (data.can_recieve !== undefined) this.canRecieve = data.canRecieve;
+    if (data.can_publish !== undefined) this.canPublish = data.can_publish;
+    if (data.can_receive !== undefined) this.canRecieve = data.can_receive;
   }
 
   /**
