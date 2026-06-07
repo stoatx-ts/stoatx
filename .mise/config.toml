@@ -11,5 +11,6 @@ description = "Task group for CI checks"
 run = [
     { task = "install:frozen" },
     { task = "build" },
-    { tasks = ["build:check", "format"] }
+    { tasks = ["build:check", "format"] },
+    { task = "test" }
 ]
