@@ -41,9 +41,10 @@ jobs:
 
       - name: Generate Test Coverage
         run: pnpm run coverage
+
       - name: Inject Coverage into Docs
         run: mv coverage ./apps/docs/dist/coverage
-        
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

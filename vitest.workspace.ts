@@ -8,6 +8,6 @@ export default defineConfig({
       reporter: ["text", "html"],
       include: ["packages/*/src/**/*.ts"],
       exclude: ["packages/*/src/**/index.ts"],
-    }
+    },
   },
 });
