@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EventEmitter } from "events"
+import { EventEmitter } from "events";
 import { type Message, ReactionCollector } from "../src";
 
 vi.mock("../src/structures/MessageReaction", () => {
