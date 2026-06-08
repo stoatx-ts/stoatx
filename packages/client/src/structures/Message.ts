@@ -14,6 +14,7 @@ import { Collection } from "../utils/Collection";
 import { MessageReaction } from "./MessageReaction";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { Message as RawMessage, Embed as RawEmbed } from "stoat-api";
+import { MessageMentions } from "./MessageMentions";
 
 export interface MessageOptions {
   content?: string;
@@ -51,11 +52,10 @@ export class Message extends Base {
   public flags: number = 0;
   public interactions: Interaction | null = null;
   public masquerade: Masquerade | null = null;
-  public mentions: string[] | null = null;
+  public mentions: MessageMentions;
   public pinned: null | boolean = false;
   public reactions: Record<string, string[]> = {};
   public replies: string[] | null = [];
-  public role_mentions: string[] | null = [];
 
   constructor(client: Client, data: RawMessage) {
     super(client, data);
@@ -73,11 +73,11 @@ export class Message extends Base {
     }
 
     if (data.masquerade !== undefined) this.masquerade = data.masquerade;
-    if (data.mentions !== undefined) this.mentions = data.mentions;
     if (data.replies !== undefined) this.replies = data.replies;
-    if (data.role_mentions !== undefined) this.role_mentions = data.role_mentions;
 
     this._patch(data);
+
+    this.mentions = new MessageMentions(client, this, data.mentions ?? null, data.role_mentions ?? null);
   }
 
   public async reply(contentOrOptions: string | MessageOptions): Promise<Message> {
