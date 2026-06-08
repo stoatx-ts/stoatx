@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.5.0...client-v0.6.0) (2026-06-08)
+
+
+### Features
+
+* extend message.mentions to include collections of users, members, roles and channels ([#73](https://github.com/stoatx-ts/stoatx/issues/73)) ([3fb6da2](https://github.com/stoatx-ts/stoatx/commit/3fb6da2f674fa124541b239333a0b4a79b36d83a))
+
+
+### Bug Fixes
+
+* handleCollect wouldn't handle manual ending properly ([#68](https://github.com/stoatx-ts/stoatx/issues/68)) ([777c2fa](https://github.com/stoatx-ts/stoatx/commit/777c2fa933cec1a96dd8eae86ae850651ee5c17e))
+* members not populating on startup ([#74](https://github.com/stoatx-ts/stoatx/issues/74)) ([1a3763d](https://github.com/stoatx-ts/stoatx/commit/1a3763dc21eecf81226cfd3473f7b73773eb239d))
+
 ## [0.5.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.4.0...client-v0.5.0) (2026-06-07)
 
 
