@@ -7,7 +7,14 @@
     },
     "packages/client": {
       "release-type": "node",
-      "package-name": "@stoatx/client"
+      "package-name": "@stoatx/client",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/stoatx/package.json",
+          "jsonpath": "$.peerDependencies['@stoatx/client']"
+        }
+      ]
     },
     "apps/bot": {
       "release-type": "node",
