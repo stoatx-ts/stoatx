@@ -51,10 +51,15 @@ export class MessageCollector extends Collector<string, Message> {
 
   public override handleCollect(message: Message) {
     if (message.channelId !== this.channelId) return;
+
     this.processed++;
     super.handleCollect(message);
+
     if (!this.ended && this.collected.has(message.id)) {
       this.total++;
+    }
+
+    if (!this.ended) {
       this.checkEnd();
     }
   }
