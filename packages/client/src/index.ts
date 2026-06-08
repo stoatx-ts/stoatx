@@ -28,6 +28,7 @@ export * from "./structures/User";
 export * from "./structures/ClientUser";
 export * from "./structures/Emoji";
 export * from "./structures/MessageReaction";
+export * from "./structures/GroupChannel";
 
 // Builders
 export * from "./builders/EmbedBuilder";

@@ -27,6 +27,15 @@ describe("Permissions Utility", () => {
     perms.remove("KickMembers");
     expect(perms.has("KickMembers")).toBe(false);
   });
+
+  it("should correctly return true if any permissions are present", () => {
+    const perms = new Permissions(0n);
+    expect(perms.any(["ManageServer", "KickMembers"])).toBe(false);
+
+    perms.add("ManageServer");
+    expect(perms.any(["ManageServer", "KickMembers"])).toBe(true);
+  });
+
   describe("missing() method", () => {
     it("should return all specified permissions if the instance is empty", () => {
       const perms = new Permissions(0n);
