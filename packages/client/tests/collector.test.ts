@@ -180,6 +180,17 @@ describe("Collector", () => {
 
       expect(collector.endReason()).toBeNull();
     });
+
+    it("should stop automatically after initial idle time if absolutely no items are collected", () => {
+      const collector = new TestCollector(dummyClient, { idle: 2000 });
+      const onEnd = vi.fn();
+      collector.on("end", onEnd);
+
+      vi.advanceTimersByTime(2000);
+
+      expect(collector.ended).toBe(true);
+      expect(onEnd).toHaveBeenCalledWith(collector.collected, "idle");
+    });
   });
 
   describe("Async Iterator", () => {
