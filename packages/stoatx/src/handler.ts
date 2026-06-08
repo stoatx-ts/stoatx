@@ -233,7 +233,7 @@ export class StoatxHandler {
    * ```
    */
   async handle(message: Message): Promise<boolean> {
-    if (!message.channel || !message.author) {
+    if (!message.channel || !message.author || !message.content) {
       return false;
     }
 
@@ -250,8 +250,7 @@ export class StoatxHandler {
       return await message.channel!.send(content);
     };
 
-    // rawContent won't be null since a command will be invoked with a prefix
-    await this.handleMessage(rawContent!, message, {
+    await this.handleMessage(rawContent, message, {
       authorId,
       channelId,
       serverId,
