@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.2](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.1...stoatx-v0.7.2) (2026-06-08)
+
+
+### Bug Fixes
+
+* attachment only messages breaking handler ([#72](https://github.com/stoatx-ts/stoatx/issues/72)) ([0a7101b](https://github.com/stoatx-ts/stoatx/commit/0a7101b5f3a8835083ca62a86528d782e5c3e65a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 0.6.0
+
 ## [0.7.1](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.0...stoatx-v0.7.1) (2026-06-07)
 
 
