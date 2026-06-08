@@ -88,6 +88,16 @@ export class GatewayManager {
           }
         }
 
+        if (payload.members) {
+          for (const rawMember of payload.members) {
+            const server = this.client.servers.cache.get(rawMember._id.server);
+            const user = this.client.users.cache.get(rawMember._id.user);
+            if (server && user) {
+              server.members._add({ ...rawMember, user });
+            }
+          }
+        }
+
         if (payload.emojis) {
           for (const rawEmoji of payload.emojis) {
             const emoji = this.client.emojis._add(rawEmoji);
