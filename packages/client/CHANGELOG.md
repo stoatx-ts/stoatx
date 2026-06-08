@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.4.0...client-v0.5.0) (2026-06-07)
+
+
+### Features
+
+* add serverBanAdd and serverMemberKick events ([#65](https://github.com/stoatx-ts/stoatx/issues/65)) ([e61c556](https://github.com/stoatx-ts/stoatx/commit/e61c556e25970e9ce8e4b35168f8da1c9a5b16d8))
+* add unit tests ([#67](https://github.com/stoatx-ts/stoatx/issues/67)) ([f092c0f](https://github.com/stoatx-ts/stoatx/commit/f092c0febed72d043bbd8cabbd26fcd15a1bbaca))
+
+
+### Bug Fixes
+
+* firehose raw events so they always show up ([#63](https://github.com/stoatx-ts/stoatx/issues/63)) ([9c8fdd2](https://github.com/stoatx-ts/stoatx/commit/9c8fdd289e661c1476409763d1d5f4c02997f0dc))
+
 ## [0.4.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.3.0...client-v0.4.0) (2026-06-06)
 
 
