@@ -36,6 +36,15 @@ describe("Collection Utility", () => {
       expect(cache.size).toBe(0);
       expect(cache.has("a")).toBe(false);
     });
+
+    it("should safely handle negative limits without throwing (hitting undefined oldestKey)", () => {
+      const cache = new Collection<string, number>(-1);
+
+      cache.set("a", 1);
+
+      expect(cache.size).toBe(1);
+      expect(cache.get("a")).toBe(1);
+    });
   });
 
   describe("Array-like Utility Methods", () => {
