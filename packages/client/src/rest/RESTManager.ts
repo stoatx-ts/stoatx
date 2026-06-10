@@ -163,14 +163,6 @@ export class RESTManager {
       await sleep(waitTime);
     }
 
-    const headers: Record<string, string> = {
-      "X-Bot-Token": this.token,
-    };
-
-    if (body) {
-      headers["Content-Type"] = "application/json";
-    }
-    console.log("FETCH", method.toUpperCase(), url, JSON.stringify(body));
     const response = await fetch(url, {
       method: method.toUpperCase(),
       headers: {
