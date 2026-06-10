@@ -38,7 +38,7 @@
   },
   "peerDependencies": {
     "reflect-metadata": "^0.2.0",
-    "@stoatx/client": "^0.6.3"
+    "@stoatx/client": "^0.6.4"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*"
