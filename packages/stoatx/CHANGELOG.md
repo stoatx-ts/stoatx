@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.7](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.6...stoatx-v0.7.7) (2026-06-10)
+
+
+### Bug Fixes
+
+* type errors ([#87](https://github.com/stoatx-ts/stoatx/issues/87)) ([0a3ebbd](https://github.com/stoatx-ts/stoatx/commit/0a3ebbdc871ebaa54205f67a1d6b370c679ed9cd))
+
 ## [0.7.6](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.5...stoatx-v0.7.6) (2026-06-10)
 
 
