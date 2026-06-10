@@ -6,7 +6,7 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "pretty": false,
     "skipDefaultLibCheck": true,
-    "types": ["node", "undici"]
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

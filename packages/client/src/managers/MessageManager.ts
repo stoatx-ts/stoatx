@@ -121,8 +121,8 @@ export class MessageManager extends BaseManager<string, Message> {
 
     const payload: DataMessageSend = {};
 
-    if(opts.content) {
-     payload.content = opts.content;
+    if (opts.content) {
+      payload.content = opts.content;
     }
 
     if (opts.attachments && opts.attachments.length > 0) {
@@ -136,7 +136,7 @@ export class MessageManager extends BaseManager<string, Message> {
         payload.attachments = validAttachments;
       }
     }
-    if(opts.replies) {
+    if (opts.replies) {
       payload.replies = opts.replies;
     }
 
@@ -144,18 +144,17 @@ export class MessageManager extends BaseManager<string, Message> {
       payload.embeds = opts.embeds.map((embed: any) => (typeof embed.toJSON === "function" ? embed.toJSON() : embed));
     }
 
-    if(opts.masquerade) {
+    if (opts.masquerade) {
       payload.masquerade = opts.masquerade;
     }
 
-    if(opts.interactions) {
-      payload.interactions = opts.interactions
+    if (opts.interactions) {
+      payload.interactions = opts.interactions;
     }
 
-    if(opts.flags) {
+    if (opts.flags) {
       payload.flags = opts.flags;
     }
-
 
     const data = await this.client.rest.post(`/channels/${this.channel.id}/messages`, payload);
 
