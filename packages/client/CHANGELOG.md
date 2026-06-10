@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.2...client-v0.6.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* some shit I am tired ([#83](https://github.com/stoatx-ts/stoatx/issues/83)) ([dd0a66f](https://github.com/stoatx-ts/stoatx/commit/dd0a66f592cf912a2e14b1853bbde0b47f216db1))
+
 ## [0.6.2](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.1...client-v0.6.2) (2026-06-10)
 
 
