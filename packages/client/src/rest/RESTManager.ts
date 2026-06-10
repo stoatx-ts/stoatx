@@ -165,7 +165,7 @@ export class RESTManager {
     }
 
     const options = {
-      method: method as any,
+      method: method.toUpperCase() as any,
       headers: {
         "X-Bot-Token": this.token,
         "Content-Type": "application/json",
