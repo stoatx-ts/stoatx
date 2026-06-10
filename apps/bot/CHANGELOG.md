@@ -1,5 +1,14 @@
 # @stoatx/bot
 
+## [0.4.4](https://github.com/stoatx-ts/stoatx/compare/bot-v0.4.3...bot-v0.4.4) (2026-06-10)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * stoatx bumped to 0.7.3
+
 ## [0.4.3](https://github.com/stoatx-ts/stoatx/compare/bot-v0.4.2...bot-v0.4.3) (2026-06-08)
 
 
