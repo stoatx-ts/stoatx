@@ -7,7 +7,8 @@ import type {
   StoatxHandlerOptions,
   CooldownManager,
 } from "./types";
-import { Client as StoatClient, ClientEvents, Message } from "@stoatx/client";
+import { ClientEvents, Message } from "@stoatx/client";
+import { Client } from "./client";
 
 /**
  * Default in-memory cooldown manager
@@ -57,42 +58,6 @@ export class DefaultCooldownManager implements CooldownManager {
 }
 
 /**
- * Client - An extended Client that integrates StoatxHandler directly
- *
- * @example
- * ```ts
- * import { Client } from 'stoatx';
- *
- * const client = new Client({
- *   prefix: '!',
- *   owners: ['owner-user-id'],
- * });
- *
- * await client.initCommands();
- * ```
- */
-export class Client extends StoatClient {
-  public readonly handler: StoatxHandler;
-
-  constructor(options: Omit<StoatxHandlerOptions, "client">) {
-    super();
-    this.handler = new StoatxHandler({ ...options, client: this });
-
-    // Automatically hook up the message handler
-    this.on("messageCreate", async (message) => {
-      await this.handler.handle(message);
-    });
-  }
-
-  /**
-   * Initialize the StoatxHandler commands
-   */
-  async initCommands(): Promise<void> {
-    await this.handler.init();
-  }
-}
-
-/**
  * StoatxHandler - The execution engine for commands
  *
  * Handles message parsing, middleware execution, and command dispatching
@@ -107,7 +72,7 @@ export class StoatxHandler {
   private readonly registry: CommandRegistry;
   private readonly cooldownManager: CooldownManager;
   private readonly disableMentionPrefix: boolean;
-  private readonly client: StoatClient;
+  private readonly client: Client;
   constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
     this.commandsDir = options.commandsDir;
@@ -171,7 +136,7 @@ export class StoatxHandler {
       serverId?: string | undefined;
       reply: (content: string) => Promise<Message>;
     },
-  ): Promise<CommandContext | null> {
+  ): Promise<CommandContext<Client> | null> {
     const prefix = await this.resolvePrefix(meta.serverId);
     let usedPrefix = prefix;
     let withoutPrefix = "";
@@ -298,7 +263,7 @@ export class StoatxHandler {
   /**
    * Execute a command with the given context
    */
-  async execute(ctx: CommandContext): Promise<boolean> {
+  async execute(ctx: CommandContext<Client>): Promise<boolean> {
     const registered = this.registry.get(ctx.commandName);
 
     if (!registered) {

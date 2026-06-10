@@ -1,4 +1,5 @@
 import { Client as StoatClient, Message, PermissionResolvable } from "@stoatx/client";
+import { Client } from "./client";
 
 /**
  * Simple command options passed to @SimpleCommand decorator
@@ -43,9 +44,9 @@ export interface CommandMetadata {
 /**
  * Command execution context
  */
-export interface CommandContext {
+export interface CommandContext<TClient extends StoatClient = Client> {
   /** The client instance */
-  client: StoatClient;
+  client: TClient;
   /** The raw message content */
   content: string;
   /** The author ID */
@@ -71,11 +72,11 @@ export interface CommandContext {
  */
 export interface StoatLifecycle {
   /** Optional: Called when an error occurs during command execution */
-  onError?(ctx: CommandContext, error: Error): Promise<void> | void;
+  onError?(ctx: CommandContext<Client>, error: Error): Promise<void> | void;
   /** Optional: Called when a cooldown is active */
-  onCooldown?(ctx: CommandContext, remaining: number): Promise<void> | void;
+  onCooldown?(ctx: CommandContext<Client>, remaining: number): Promise<void> | void;
   /** Optional: Called when user doesn't have the permissions needed */
-  onMissingPermissions?(ctx: CommandContext, missing: PermissionResolvable[]): Promise<void> | void;
+  onMissingPermissions?(ctx: CommandContext<Client>, missing: PermissionResolvable[]): Promise<void> | void;
 
   /** Allows the class to contain other methods (such as your commands) */
   [method: string]: any;
@@ -85,15 +86,15 @@ export interface StoatLifecycle {
  * Cooldown manager interface for custom cooldown storage (e.g., database)
  */
 export interface CooldownManager {
-  check(ctx: CommandContext, metadata: CommandMetadata): boolean | Promise<boolean>;
-  getRemaining(ctx: CommandContext, metadata: CommandMetadata): number | Promise<number>;
-  set(ctx: CommandContext, metadata: CommandMetadata): void | Promise<void>;
+  check(ctx: CommandContext<any>, metadata: CommandMetadata): boolean | Promise<boolean>;
+  getRemaining(ctx: CommandContext<any>, metadata: CommandMetadata): number | Promise<number>;
+  set(ctx: CommandContext<any>, metadata: CommandMetadata): void | Promise<void>;
   clear?(): void | Promise<void>;
 }
 
 export interface StoatxGuard {
-  run(ctx: CommandContext): Promise<boolean> | boolean;
-  guardFail?(ctx: CommandContext): Promise<void> | void;
+  run(ctx: CommandContext<Client>): Promise<boolean> | boolean;
+  guardFail?(ctx: CommandContext<Client>): Promise<void> | void;
 }
 
 /**
@@ -113,7 +114,7 @@ export interface StoatxDiscoveryOptions {
  */
 export interface StoatxHandlerOptions {
   /** The client instance */
-  client: StoatClient;
+  client: Client;
   /** Directory to scan for command modules (absolute path) */
   commandsDir?: string;
   /** Auto-discovery options used when commandsDir is not provided */
