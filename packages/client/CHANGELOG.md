@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.3...client-v0.6.4) (2026-06-10)
+
+
+### Reverts
+
+* debug logs ([#85](https://github.com/stoatx-ts/stoatx/issues/85)) ([1c492c4](https://github.com/stoatx-ts/stoatx/commit/1c492c4d6f1caa6edc2e7cd8a499c0a0484d3a7a))
+
 ## [0.6.3](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.2...client-v0.6.3) (2026-06-10)
 
 
