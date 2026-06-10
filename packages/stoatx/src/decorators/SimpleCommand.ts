@@ -1,6 +1,7 @@
 import "reflect-metadata";
-import type { SimpleCommandOptions } from "../types";
+import type { CommandContext, SimpleCommandOptions } from "../types";
 import { METADATA_KEYS } from "./keys";
+import { Client } from "../client";
 
 /**
  * Stored simple command metadata from method decorator
@@ -9,6 +10,8 @@ export interface SimpleCommandDefinition {
   methodName: string;
   options: SimpleCommandOptions;
 }
+
+type CommandMethod = (ctx: CommandContext<Client>) => Promise<void>;
 
 /**
  * @SimpleCommand
@@ -30,15 +33,17 @@ export interface SimpleCommandDefinition {
  * }
  * ```
  */
-export function SimpleCommand(options: SimpleCommandOptions = {}): MethodDecorator {
-  return (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+export function SimpleCommand(options: SimpleCommandOptions = {}) {
+  return <T extends CommandMethod>(
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<T>,
+  ) => {
     const constructor = target.constructor;
 
-    // Get existing simple commands or create new array
     const existingCommands: SimpleCommandDefinition[] =
       Reflect.getMetadata(METADATA_KEYS.SIMPLE_COMMANDS, constructor) || [];
 
-    // Add this command definition
     existingCommands.push({
       methodName: String(propertyKey),
       options,
