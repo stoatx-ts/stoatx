@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.1...client-v0.6.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* ClientUser not updating from a UserUpdate event ([#80](https://github.com/stoatx-ts/stoatx/issues/80)) ([a31799b](https://github.com/stoatx-ts/stoatx/commit/a31799bb869d810e60f0dbd4fcca905df2f4dd86))
+
 ## [0.6.1](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.0...client-v0.6.1) (2026-06-10)
 
 
