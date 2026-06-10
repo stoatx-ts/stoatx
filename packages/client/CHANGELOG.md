@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.0...client-v0.6.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* force method to be uppercase so Cloudflare doesn't prevent it from reaching API ([#78](https://github.com/stoatx-ts/stoatx/issues/78)) ([0c31dd7](https://github.com/stoatx-ts/stoatx/commit/0c31dd77751cbda683be63d5363387cad8c02e6b))
+
 ## [0.6.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.5.0...client-v0.6.0) (2026-06-08)
 
 
