@@ -20,7 +20,10 @@ export interface MessageOptions {
   content?: string;
   embeds?: (TextEmbedData | EmbedBuilder)[];
   attachments?: string[] | AttachmentBuilder[];
-  interactions?: any[];
+  interactions?: {
+    reactions?: string[] | null;
+    restrict_reactions?: boolean;
+  };
   flags?: number;
   masquerade?: Masquerade;
   replies?: ReplyIntent[];
