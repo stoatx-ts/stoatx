@@ -384,11 +384,28 @@ export class GatewayManager {
 
       case "UserUpdate": {
         const existing = this.client.users.cache.get(payload.id);
+        const isClientUser = this.client.user?.id === payload.id;
+
+        let oldUser;
+        let newUser;
+
         if (existing) {
-          const oldUser = existing._clone();
+          oldUser = existing._clone();
           existing._patch(payload.data, payload.clear);
-          this.client.emit("userUpdate", oldUser, existing);
+          newUser = existing;
         }
+
+        if (isClientUser) {
+          oldUser = this.client.user?._clone();
+
+          this.client.user?._patch(payload.data, payload.clear);
+          newUser = this.client.user;
+        }
+
+        if (oldUser && newUser) {
+          this.client.emit("userUpdate", oldUser, newUser);
+        }
+
         break;
       }
 
