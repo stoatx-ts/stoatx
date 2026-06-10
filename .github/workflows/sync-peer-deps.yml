@@ -1,0 +1,40 @@
+name: Sync peerDependencies
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+jobs:
+  sync-peer-deps:
+    name: Sync @stoatx/client peerDependency
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'release-please--')
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.GH_STOATX_RELEASE_APP_ID }}
+          private-key: ${{ secrets.STOATX_RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Sync peerDependency version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const clientPkg = JSON.parse(fs.readFileSync('packages/client/package.json'));
+            const stoatxPkg = JSON.parse(fs.readFileSync('packages/stoatx/package.json'));
+            stoatxPkg.peerDependencies['@stoatx/client'] = '^' + clientPkg.version;
+            fs.writeFileSync('packages/stoatx/package.json', JSON.stringify(stoatxPkg, null, 2) + '\n');
+          "
+
+      - name: Commit if changed
+        run: |
+          git config user.name "stoatx-release[bot]"
+          git config user.email "stoatx-release[bot]@users.noreply.github.com"
+          git diff --quiet || (git add packages/stoatx/package.json && git commit -m "chore: sync @stoatx/client peerDependency")
+          git push

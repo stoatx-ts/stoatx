@@ -1,4 +1,3 @@
-import { request } from "undici";
 import { Client } from "../client/Client";
 import { CDNTag } from "../builders/AttachmentBuilder";
 import type { APIRoutes } from "stoat-api";
@@ -164,18 +163,25 @@ export class RESTManager {
       await sleep(waitTime);
     }
 
-    const options = {
-      method: method.toUpperCase() as any,
+    const headers: Record<string, string> = {
+      "X-Bot-Token": this.token,
+    };
+
+    if (body) {
+      headers["Content-Type"] = "application/json";
+    }
+    console.log("FETCH", method.toUpperCase(), url, JSON.stringify(body));
+    const response = await fetch(url, {
+      method: method.toUpperCase(),
       headers: {
         "X-Bot-Token": this.token,
         "Content-Type": "application/json",
       },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    };
-    const response = await request(url, options);
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
 
-    const remainingHeader = response.headers["x-ratelimit-remaining"];
-    const resetAfterHeader = response.headers["x-ratelimit-reset-after"];
+    const remainingHeader = response.headers.get("x-ratelimit-remaining");
+    const resetAfterHeader = response.headers.get("x-ratelimit-reset-after");
 
     if (remainingHeader !== undefined && resetAfterHeader !== undefined) {
       bucket.remaining = Number(remainingHeader);
@@ -183,7 +189,7 @@ export class RESTManager {
     }
 
     // Safely parse the body (handles cases where Cloudflare returns HTML/Text on 502s)
-    const textBody = await response.body.text();
+    const textBody = await response.text();
     let data;
     try {
       data = JSON.parse(textBody);
@@ -191,7 +197,7 @@ export class RESTManager {
       data = textBody;
     }
 
-    if (response.statusCode === 429) {
+    if (response.status === 429) {
       const retryMs =
         typeof data === "object" && data?.retry_after ? data.retry_after : Number(resetAfterHeader) || 5000;
 
@@ -205,8 +211,8 @@ export class RESTManager {
       return this.execute(method, endpoint, body, bucket);
     }
 
-    if (response.statusCode >= 400) {
-      throw new StoatAPIError(response.statusCode, data, method, endpoint);
+    if (response.status >= 400) {
+      throw new StoatAPIError(response.status, data, method, endpoint);
     }
 
     return data as any;
