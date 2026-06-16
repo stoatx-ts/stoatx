@@ -121,9 +121,9 @@ export class Client extends EventEmitter {
 
   private async fetchConfig(baseURL: string): Promise<RevoltConfig> {
     try {
-      const response = await fetch(baseURL)
+      const response = await fetch(baseURL);
 
-      return await response.json() as RevoltConfig;
+      return (await response.json()) as RevoltConfig;
     } catch (error) {
       throw new Error(`Failed to fetch ${baseURL}, make sure the instance is running.`);
     }

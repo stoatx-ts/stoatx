@@ -228,7 +228,6 @@ export class RESTManager {
 
     const url = `${this.cdnURL}/${tag}`;
 
-
     const formData = new FormData();
     formData.append("file", new Blob([fileBuffer as Uint8Array<ArrayBuffer>]), filename);
 
