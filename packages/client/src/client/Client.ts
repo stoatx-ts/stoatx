@@ -12,6 +12,7 @@ import { ClientUser } from "../structures/ClientUser";
 import { Member } from "../structures/Member";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
+import type { RevoltConfig } from "stoat-api";
 
 export interface ClientEvents {
   ready: [data: any];
@@ -45,6 +46,16 @@ export interface ClientOptions {
     channels?: number;
     emojis?: number;
   };
+  // API URL for self-hosts
+  apiURL?: string;
+
+  // Explicit overrides (Optional)
+  overrides?: {
+    // Websocket URL
+    wsURL?: string;
+    // CDN URL
+    cdnURL?: string;
+  };
 }
 
 export class Client extends EventEmitter {
@@ -74,9 +85,48 @@ export class Client extends EventEmitter {
    */
   public async login(token: string): Promise<any> {
     if (!token) throw new Error("A valid token must be provided.");
-    this.sweepers.start();
+
+    const rootApiUrl = this.options.apiURL ?? "https://api.stoat.chat";
+
+    this.rest.setBaseURL(rootApiUrl);
     this.rest.setToken(token);
+
+    const configData = await this.fetchConfig(rootApiUrl);
+
+    const finalWsUrl = this.options.overrides?.wsURL ?? configData.ws;
+
+    if (!finalWsUrl) {
+      throw new Error(
+        `[Stoat Misconfiguration] The server at '${rootApiUrl}' is running, but it has no WebSocket URL configured. ` +
+          `The server administrator needs to set their gateway config, or you must bypass it using 'options.overrides.wsURL'.`,
+      );
+    }
+
+    this.gateway.setGatewayUrl(finalWsUrl);
+
+    const finalCdnUrl = this.options.overrides?.cdnURL ?? configData.features.autumn.url;
+
+    if (!finalCdnUrl) {
+      throw new Error(
+        `[Stoat Misconfiguration] The server at '${rootApiUrl}' is running, but it has no CDN URL configured. ` +
+          `The server administrator needs to set their cdn config, or you must bypass it using 'options.overrides.cdnURL'.`,
+      );
+    }
+
+    this.rest.setCDNURL(finalCdnUrl);
+
+    this.sweepers.start();
     return this.gateway.connect(token);
+  }
+
+  private async fetchConfig(baseURL: string): Promise<RevoltConfig> {
+    try {
+      const response = await fetch(baseURL);
+
+      return (await response.json()) as RevoltConfig;
+    } catch (error) {
+      throw new Error(`Failed to fetch ${baseURL}, make sure the instance is running.`);
+    }
   }
 
   [Symbol.for("nodejs.rejection")](error: Error) {

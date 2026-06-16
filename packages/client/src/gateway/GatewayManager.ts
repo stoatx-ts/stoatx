@@ -6,6 +6,7 @@ import { ClientUser } from "../structures/ClientUser";
 
 export class GatewayManager {
   private ws: WebSocket | null = null;
+  private wsURL: string = "";
   private pingInterval: NodeJS.Timeout | null = null;
   private token: string | null = null;
 
@@ -25,7 +26,7 @@ export class GatewayManager {
       this.ws = null;
     }
 
-    const baseUrl = "wss://stoat.chat/events";
+    const baseUrl = this.wsURL ?? "wss://events.stoat.chat";
     const url = `${baseUrl}?version=1&format=json&token=${this.token}`;
 
     this.ws = new WebSocket(url);
@@ -49,6 +50,10 @@ export class GatewayManager {
     this.ws.on("error", (error) => {
       this.client.emit("error", error);
     });
+  }
+
+  public setGatewayUrl(url: string) {
+    this.wsURL = url;
   }
 
   private handleMessage(rawData: WebSocket.RawData) {

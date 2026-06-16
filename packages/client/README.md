@@ -61,7 +61,42 @@ client.on("messageCreate", async (message) => {
 client.login("YOUR_BOT_TOKEN");
 ```
 
-##️ Architecture & Managers
+## Self-Hosting & Custom Endpoints
+
+@stoatx/client natively supports self-hosted Stoat instances through using the root API request. 
+
+When connecting to a custom server, simply provide the root apiURL. The client will automatically fetch the routing configuration (such as the WebSocket and CDN URLs) 
+directly from the server before initializing the connection.
+
+```typescript
+import { Client } from "@stoatx/client";
+
+// Connecting to a self-hosted Stoat instance
+const client = new Client({
+  apiURL: "https://api.my-custom-stoat.net", // Your self-hosted domain
+});
+
+client.login("YOUR_BOT_TOKEN");
+```
+
+### Advanced Overrides
+
+If your backend is configured incorrectly, you can explicitly bypass the root request using the `overrides` object.
+
+```typescript
+const customClient = new Client({
+  apiURL: "https://api.my-custom-stoat.net",
+  overrides: {
+    // Forces the GatewayManager to use this exact URL, 
+    // since the server didn't configure websocket connection
+    wsURL: "wss://gateway.my-custom-stoat.net",
+  }
+});
+```
+
+*Note: If no custom configuration is provided, the client defaults to the official Stoat API.*
+
+## Architecture & Managers
 
 `@stoatx/client` organizes data using a predictable **Manager** hierarchy. Managers handle fetching, caching, and editing structures.
 
