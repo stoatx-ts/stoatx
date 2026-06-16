@@ -73,7 +73,9 @@ for (const routes of Object.values(queryParams)) {
 }
 
 export class RESTManager {
-  private baseURL = "https://stoat.chat/api";
+  private baseURL: string = "";
+
+  private cdnURL: string = "";
 
   private token: string | null = null;
 
@@ -94,6 +96,14 @@ export class RESTManager {
 
   public setToken(token: string) {
     this.token = token;
+  }
+
+  public setBaseURL(baseURL: string) {
+    this.baseURL = baseURL.replace(/\/+$/, "");
+  }
+
+  public setCDNURL(cdnURL: string) {
+    this.cdnURL = cdnURL.replace(/\/+$/, "");
   }
 
   /**
@@ -216,7 +226,8 @@ export class RESTManager {
   public async uploadFile(tag: CDNTag, fileBuffer: Buffer | Blob, filename?: string): Promise<string> {
     if (!this.token) throw new Error("REST_NOT_READY: No token available.");
 
-    const url = `https://cdn.stoatusercontent.com/${tag}`;
+    const url = `${this.cdnURL}/${tag}`;
+
 
     const formData = new FormData();
     formData.append("file", new Blob([fileBuffer as Uint8Array<ArrayBuffer>]), filename);
