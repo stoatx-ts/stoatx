@@ -6,3 +6,11 @@ pnpm-lock.yaml
 **/CHANGELOG.md
 **/README.md
 **/LICENSE
+# Ignore generated API documentation
+apps/docs/client
+apps/docs/api_versioned_docs
+apps/docs/api_versions.json
+
+# Ignore Docusaurus build output (just to be safe)
+apps/docs/build
+apps/docs/.docusaurus
