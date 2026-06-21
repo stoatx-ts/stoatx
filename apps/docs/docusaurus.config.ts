@@ -24,7 +24,7 @@ const dynamicVersions: Record<string, any> = {
 if (latestApiVersion !== "current") {
   dynamicVersions[latestApiVersion] = {
     label: latestApiVersion,
-    path: latestApiVersion,
+    path: "",
     banner: "none",
     badge: true,
   };
@@ -87,7 +87,7 @@ const config: Config = {
           label: "Tutorial",
         },
         {
-          to: `/docs/${latestApiVersion}/client`,
+          to: "/docs/client",
           position: "left",
           label: "API Reference",
           activeBaseRegex: `/docs/`,
