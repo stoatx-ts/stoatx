@@ -3,16 +3,13 @@ name: Deploy Documentation
 on:
   push:
     branches: ["main"]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -36,14 +33,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build docs
+      - name: Build packages and docs
         run: pnpm run build
 
       - name: Generate Test Coverage
         run: pnpm run coverage
 
       - name: Inject Coverage into Docs
-        run: mv coverage ./apps/docs/dist/coverage
+        run: mv -f coverage ./apps/docs/build/coverage
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -51,7 +48,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./apps/docs/dist"
+          path: "./apps/docs/build"
 
   deploy:
     environment:

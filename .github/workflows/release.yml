@@ -37,6 +37,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup pnpm
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
@@ -66,3 +67,32 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         run: pnpm publish -r --access public --no-git-checks
+
+      - name: Generate Versioned Docs
+        if: ${{ steps.rp.outputs.releases_created == 'true' }}
+        run: |
+          # Read the newly bumped version directly from the client package
+          # (Adjust 'packages/client/package.json' to wherever your primary version lives)
+          VERSION=$(node -p "require('./packages/client/package.json').version")
+
+          echo "Snapshotting docs for version: $VERSION"
+
+          pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Commit and Push Docs
+        if: ${{ steps.rp.outputs.releases_created == 'true' }}
+        run: |
+          # Configure Git as your GitHub App bot
+          git config user.name "stoatx-release[bot]"
+          git config user.email "stoatx-release[bot]@users.noreply.github.com"
+
+          # Stage the newly created version snapshot folder and the registry JSON
+          git add apps/docs/api_versioned_docs apps/docs/api_versions.json
+
+          # Commit the changes (using [skip ci] so it doesn't accidentally trigger another workflow loop)
+          git commit -m "docs: snapshot api version v${{ env.VERSION }} [skip ci]"
+
+          # Push directly to main
+          git push origin main

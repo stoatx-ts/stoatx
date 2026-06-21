@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# MISE description="Snapshot a new version of the API documentation"
+
+# 1. Safety Check: Ensure a version number was passed as the first argument ($1)
+if [ -z "$1" ]; then
+  echo "Error: You must provide a version number."
+  echo "Usage: mise run docs:version <version_number>"
+  echo "Example: mise run docs:version 0.6.4"
+  exit 1
+fi
+
+# 2. Execute the versioning command
+echo "Snapshotting API documentation for version: $1..."
+pnpm --filter @stoatx/docs exec docusaurus docs:version:api "$1"
+
+echo "✅ Version $1 successfully generated!"

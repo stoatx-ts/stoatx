@@ -2,4 +2,4 @@
 #MISE description="Check types are compiling"
 set -e
 
-pnpm exec tsc --noEmit
+pnpm -r exec tsc --noEmit
