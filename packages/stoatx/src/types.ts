@@ -1,6 +1,19 @@
 import { Client as StoatClient, Message, PermissionResolvable } from "@stoatx/client";
 import { Client } from "./client";
 
+export type OptionType = "string" | "number" | "boolean" | "user" | "channel" | "role";
+
+export interface CommandOptionDefinition {
+  /** The name of the flag (e.g., "deleteMessages") */
+  name: string;
+  /** The expected data type */
+  type: OptionType;
+  /** Whether the user MUST provide this flag */
+  required?: boolean;
+  /** Description for help menus */
+  description?: string;
+}
+
 /**
  * Simple command options passed to @SimpleCommand decorator
  * Used with @Stoat() decorated classes for method-based commands
@@ -24,6 +37,10 @@ export interface SimpleCommandOptions {
   nsfw?: boolean;
   /** Whether the command is owner only */
   ownerOnly?: boolean;
+  /** Command options/flags (e.g., --deleteMessages true) */
+  options?: CommandOptionDefinition[];
+  /** Command args that act like flags without passing flags */
+  args?: CommandOptionDefinition[];
 }
 
 /**
@@ -39,12 +56,18 @@ export interface CommandMetadata {
   cooldownStorage?: string;
   nsfw: boolean;
   ownerOnly: boolean;
+  options?: CommandOptionDefinition[];
+  args?: CommandOptionDefinition[];
 }
 
 /**
  * Command execution context
  */
-export interface CommandContext<TClient extends StoatClient = Client> {
+export interface CommandContext<
+  TOptions = Record<string, string | number | boolean>,
+  TArgs extends (string | number | boolean)[] = (string | number | boolean)[],
+  TClient extends StoatClient = Client,
+> {
   /** The client instance */
   client: TClient;
   /** The raw message content */
@@ -56,7 +79,8 @@ export interface CommandContext<TClient extends StoatClient = Client> {
   /** The server/guild ID (if applicable) */
   serverId?: string | undefined;
   /** Parsed command arguments */
-  args: string[];
+  args: TArgs;
+  options?: TOptions;
   /** The prefix used */
   prefix: string;
   /** The command name used (could be an alias) */
@@ -129,4 +153,8 @@ export interface StoatxHandlerOptions {
   disableMentionPrefix?: boolean;
   /** Custom cooldown manager */
   cooldownManager?: CooldownManager;
+  /** * The prefix used to identify flags/options (defaults to "-")
+   * @example "+" for +force, "/" for /force
+   */
+  flagPrefix?: string;
 }

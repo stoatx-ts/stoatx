@@ -18,5 +18,7 @@ export function buildSimpleCommandMetadata(
     ...(options.cooldownStorage !== undefined ? { cooldownStorage: options.cooldownStorage } : {}),
     nsfw: options.nsfw ?? false,
     ownerOnly: options.ownerOnly ?? false,
+    options: options.options ?? [],
+    args: options.args ?? [],
   };
 }
