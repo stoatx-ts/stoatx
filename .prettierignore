@@ -7,7 +7,7 @@ pnpm-lock.yaml
 **/README.md
 **/LICENSE
 # Ignore generated API documentation
-apps/docs/client
+apps/docs/docs
 apps/docs/api_versioned_docs
 apps/docs/api_versions.json
 
