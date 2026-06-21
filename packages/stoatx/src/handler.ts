@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { ClientEvents, Message } from "@stoatx/client";
 import { Client } from "./client";
+import { CommandValidationError } from "./error";
 
 /**
  * Default in-memory cooldown manager
@@ -73,6 +74,7 @@ export class StoatxHandler {
   private readonly cooldownManager: CooldownManager;
   private readonly disableMentionPrefix: boolean;
   private readonly client: Client;
+  private readonly flagPrefix: string;
   constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
     this.commandsDir = options.commandsDir;
@@ -82,6 +84,7 @@ export class StoatxHandler {
     this.registry = new CommandRegistry(options.extensions);
     this.disableMentionPrefix = options.disableMentionPrefix ?? false;
     this.cooldownManager = options.cooldownManager ?? new DefaultCooldownManager();
+    this.flagPrefix = options.flagPrefix || "-";
   }
 
   /**
@@ -125,6 +128,43 @@ export class StoatxHandler {
   }
 
   /**
+   * Parses raw string arguments into positional args and key-value options
+   */
+  private parseCommandOptions(rawArgs: string[]): { args: string[]; options: Record<string, string | boolean> } {
+    const args: string[] = [];
+    const options: Record<string, string | boolean> = {};
+
+    for (let i = 0; i < rawArgs.length; i++) {
+      const arg = rawArgs[i];
+      if (arg === undefined) continue;
+
+      // Check if it starts with the configured prefix (e.g., "-" or "+")
+      if (arg.startsWith(this.flagPrefix)) {
+        let key = arg;
+
+        // Strip all leading prefixes (e.g., turns "++force" into "force")
+        while (key.startsWith(this.flagPrefix)) {
+          key = key.slice(this.flagPrefix.length);
+        }
+
+        const nextArg = rawArgs[i + 1];
+
+        // Check if next argument exists and is NOT another flag
+        if (nextArg !== undefined && !nextArg.startsWith(this.flagPrefix)) {
+          options[key] = nextArg;
+          i++;
+        } else {
+          options[key] = true;
+        }
+      } else {
+        args.push(arg);
+      }
+    }
+
+    return { args, options };
+  }
+
+  /**
    * Parse a raw message into command context
    */
   async parseMessage(
@@ -136,7 +176,7 @@ export class StoatxHandler {
       serverId?: string | undefined;
       reply: (content: string) => Promise<Message>;
     },
-  ): Promise<CommandContext<Client> | null> {
+  ): Promise<CommandContext | null> {
     const prefix = await this.resolvePrefix(meta.serverId);
     let usedPrefix = prefix;
     let withoutPrefix = "";
@@ -166,11 +206,13 @@ export class StoatxHandler {
       return null;
     }
 
-    const [commandName, ...args] = withoutPrefix.split(/\s+/);
+    const [commandName, ...rawArgs] = withoutPrefix.split(/\s+/);
 
     if (!commandName) {
       return null;
     }
+
+    const { args, options } = this.parseCommandOptions(rawArgs);
 
     return {
       client: this.client,
@@ -179,6 +221,7 @@ export class StoatxHandler {
       channelId: meta.channelId,
       serverId: meta.serverId,
       args,
+      options,
       prefix: usedPrefix,
       commandName: commandName.toLowerCase(),
       reply: meta.reply,
@@ -263,7 +306,7 @@ export class StoatxHandler {
   /**
    * Execute a command with the given context
    */
-  async execute(ctx: CommandContext<Client>): Promise<boolean> {
+  async execute(ctx: CommandContext): Promise<boolean> {
     const registered = this.registry.get(ctx.commandName);
 
     if (!registered) {
@@ -271,7 +314,7 @@ export class StoatxHandler {
     }
 
     const { instance, metadata, methodName, classConstructor } = registered;
-
+    console.log(`[Debug] Metadata options for ${ctx.commandName}:`, metadata.options);
     // Owner-only check
     if (metadata.ownerOnly && !this.owners.has(ctx.authorId)) {
       await ctx.reply("This command is owner-only.");
@@ -309,6 +352,210 @@ export class StoatxHandler {
           return false;
         }
       }
+    }
+
+    if (metadata.args) {
+      const finalArgs: (string | number | boolean)[] = [];
+
+      for (let i = 0; i < metadata.args.length; i++) {
+        const def = metadata.args[i];
+        // Positional args are read by index
+        const rawValue = ctx.args[i] as string | undefined;
+
+        if (def === undefined) continue;
+
+        // Check if a required argument is missing
+        if (rawValue === undefined) {
+          if (def.required) {
+            try {
+              throw new CommandValidationError(def.name, `Missing required argument: \`<${def.name}>\``);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Missing required argument: \`<${def.name}>\``);
+              }
+              return false;
+            }
+          }
+          break; // If a positional arg is missing, everything after it is missing too
+        }
+
+        // Type Casting and Validation
+        if (def.type === "number") {
+          const numValue = Number(rawValue);
+          if (isNaN(numValue)) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid value for \`<${def.name}>\`. Expected a number.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid value for \`<${def.name}>\`. Expected a number.`);
+              }
+              return false;
+            }
+          }
+          finalArgs[i] = numValue;
+        } else if (def.type === "boolean") {
+          finalArgs[i] = rawValue === "false" ? false : Boolean(rawValue);
+        } else if (def.type === "user") {
+          const match = String(rawValue).match(/^(?:<@)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid user mention for \`<${def.name}>\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid user mention for \`<${def.name}>\`.`);
+              }
+              return false;
+            }
+          }
+          finalArgs[i] = match[1]!;
+        } else if (def.type === "channel") {
+          const match = String(rawValue).match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid channel mention for \`<${def.name}>\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid channel mention for \`<${def.name}>\`.`);
+              }
+              return false;
+            }
+          }
+          finalArgs[i] = match[1]!;
+        } else if (def.type === "role") {
+          const match = String(rawValue).match(/^(?:<%)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid role mention for \`<${def.name}>\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid role mention for \`<${def.name}>\`.`);
+              }
+              return false;
+            }
+          }
+          finalArgs[i] = match[1]!;
+        } else {
+          finalArgs[i] = String(rawValue);
+        }
+      }
+
+      // Preserve any extra, unmapped arguments the user typed at the end
+      if (ctx.args.length > metadata.args.length) {
+        for (let i = metadata.args.length; i < ctx.args.length; i++) {
+          if (ctx.args[i] !== undefined) {
+            finalArgs.push(ctx.args[i]!);
+          }
+        }
+      }
+
+      // Overwrite the context args with our strictly parsed ones
+      ctx.args = finalArgs;
+    }
+
+    const finalOptions: Record<string, string | number | boolean> = {};
+    const currentOptions = ctx.options || {};
+    if (metadata.options) {
+      for (const def of metadata.options) {
+        const rawValue = currentOptions[def.name];
+
+        if (rawValue === undefined) {
+          if (def.required) {
+            // Wait to throw inside the try/catch block so onError catches it
+            try {
+              throw new CommandValidationError(def.name, `Missing required option: \`--${def.name}\``);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Missing required option: \`--${def.name}\``);
+              }
+              return false;
+            }
+          }
+          continue;
+        }
+
+        if (def.type === "number") {
+          const numValue = Number(rawValue);
+          if (isNaN(numValue)) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid value for \`--${def.name}\`. Expected a number.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid value for \`--${def.name}\`. Expected a number.`);
+              }
+              return false;
+            }
+          }
+          finalOptions[def.name] = numValue;
+        } else if (def.type === "boolean") {
+          finalOptions[def.name] = rawValue === "false" ? false : Boolean(rawValue);
+        } else if (def.type === "user") {
+          // Matches <@ULID>, <@!ULID>, or just raw ULID
+          const match = String(rawValue).match(/^(?:<@)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid user mention for \`--${def.name}\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid user mention for \`--${def.name}\`.`);
+              }
+              return false;
+            }
+          }
+          finalOptions[def.name] = match[1]!; // Stores just the extracted ULID
+        } else if (def.type === "channel") {
+          // Matches <#ULID> or raw ULID
+          const match = String(rawValue).match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid channel mention for \`--${def.name}\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid channel mention for \`--${def.name}\`.`);
+              }
+              return false;
+            }
+          }
+          finalOptions[def.name] = match[1]!;
+        } else if (def.type === "role") {
+          // Matches <@%ULID> or raw ULID
+          const match = String(rawValue).match(/^(?:<%)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+          if (!match) {
+            try {
+              throw new CommandValidationError(def.name, `Invalid role mention for \`--${def.name}\`.`);
+            } catch (error) {
+              if (typeof (instance as any).onError === "function") {
+                await (instance as any).onError(ctx, error as Error);
+              } else {
+                await ctx.reply(`Invalid role mention for \`--${def.name}\`.`);
+              }
+              return false;
+            }
+          }
+          finalOptions[def.name] = match[1]!;
+        } else {
+          finalOptions[def.name] = String(rawValue);
+        }
+      }
+      // Re-assign the strictly typed options back to the context
+      ctx.options = finalOptions;
     }
 
     // Cooldown check

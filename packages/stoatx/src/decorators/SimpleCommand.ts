@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import type { CommandContext, SimpleCommandOptions } from "../types";
 import { METADATA_KEYS } from "./keys";
-import { Client } from "../client";
 
 /**
  * Stored simple command metadata from method decorator
@@ -11,7 +10,7 @@ export interface SimpleCommandDefinition {
   options: SimpleCommandOptions;
 }
 
-type CommandMethod = (ctx: CommandContext<Client>) => Promise<void>;
+type CommandMethod = (ctx: CommandContext) => Promise<void>;
 
 /**
  * @SimpleCommand
