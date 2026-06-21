@@ -121,6 +121,62 @@ Helper to quickly clone a structure
 
 ***
 
+### delete()
+
+> **delete**(): `Promise`\<`void`\>
+
+Deletes this emoji from the server.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+A promise that resolves when the emoji has been deleted.
+
+#### Throws
+
+If the API request fails or if the emoji is detached.
+
+#### Example
+
+```ts
+// Delete an emoji from the server
+await emoji.delete();
+```
+
+***
+
+### edit()
+
+> **edit**(`options`): `Promise`\<`Emoji`\>
+
+Edits this emoji's properties.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`EmojiEditOptions`](../interfaces/EmojiEditOptions.md) | The options to edit the emoji with. |
+
+#### Returns
+
+`Promise`\<`Emoji`\>
+
+A promise that resolves to the edited Emoji object.
+
+#### Throws
+
+If the API request fails or if the emoji is detached.
+
+#### Example
+
+```ts
+// Edit an emoji's name
+await emoji.edit({ name: "new_name" });
+```
+
+***
+
 ### equals()
 
 > **equals**(`other`): `boolean`
@@ -140,6 +196,37 @@ Compares this object with another to see if they represent the same entity.
 #### Inherited from
 
 [`Base`](Base.md).[`equals`](Base.md#equals)
+
+***
+
+### fetch()
+
+> **fetch**(`force?`): `Promise`\<`Emoji`\>
+
+Fetch this emoji from the API or resolves it from the local cache.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `force?` | `boolean` | Whether to skip the cache check and force a direct API request. Defaults to false. |
+
+#### Returns
+
+`Promise`\<`Emoji`\>
+
+A promise that resolves to the fetched Emoji object.
+
+#### Throws
+
+If the API request fails or if the emoji is detached.
+
+#### Example
+
+```ts
+// Force fetch emoji to update its data
+await emoji.fetch(true);
+```
 
 ***
 

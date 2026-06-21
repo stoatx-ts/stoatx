@@ -229,6 +229,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/EmojiCreateOptions",
+          label: "EmojiCreateOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/EmojiEditOptions",
+          label: "EmojiEditOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/FetchMembersOptions",
           label: "FetchMembersOptions"
         },
@@ -352,6 +362,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/EmojiParent",
           label: "EmojiParent"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/EmojiResolvable",
+          label: "EmojiResolvable"
         },
         {
           type: "doc",
