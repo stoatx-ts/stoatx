@@ -4,6 +4,9 @@
 {
   "extends": "@docusaurus/tsconfig",
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowJs": true,
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "strict": true
