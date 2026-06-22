@@ -1,4 +1,4 @@
-import { Client as StoatClient } from "@stoatx/client";
+import { Client as StoatClient, ClientOptions } from "@stoatx/client";
 import type { StoatxHandlerOptions } from "./types";
 import { StoatxHandler } from "./handler";
 
@@ -20,8 +20,8 @@ import { StoatxHandler } from "./handler";
 export class Client extends StoatClient {
   public readonly handler: StoatxHandler;
 
-  constructor(options: Omit<StoatxHandlerOptions, "client">) {
-    super();
+  constructor(options: Omit<StoatxHandlerOptions, "client"> & ClientOptions) {
+    super(options);
     this.handler = new StoatxHandler({ ...options, client: this });
 
     this.on("messageCreate", async (message) => {

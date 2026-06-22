@@ -46,7 +46,7 @@
 
 ### options
 
-> **options**: [`ClientOptions`](../interfaces/ClientOptions.md) = `{}`
+> **options**: [`ClientOptions`](../interfaces/ClientOptions.md)
 
 ***
 

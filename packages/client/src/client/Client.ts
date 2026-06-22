@@ -67,9 +67,11 @@ export class Client extends EventEmitter {
   public sweepers: SweeperManager;
   public emojis: EmojiManager;
   public user: ClientUser | null = null;
+  public options: ClientOptions;
 
-  constructor(public options: ClientOptions = {}) {
+  constructor(options: ClientOptions = {}) {
     super({ captureRejections: true });
+    this.options = options;
     this.rest = new RESTManager(this);
     this.gateway = new GatewayManager(this);
     this.channels = new ChannelManager(this, options.cacheLimits?.channels);
