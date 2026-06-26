@@ -37,6 +37,59 @@ export class GeneralEvents implements StoatLifecycle {
 }
 ```
 
+## Handling Commands via Message Events
+
+One key event you will almost always want to handle is `messageCreate`. This is how the framework knows to process incoming messages as commands.
+
+Add the following method to your `GeneralEvents` class:
+
+```typescript
+import { Stoat, On, Once, type StoatLifecycle } from "stoatx";
+import type { Client, Message } from "stoatx";
+
+@Stoat()
+export class GeneralEvents implements StoatLifecycle {
+  @Once("ready")
+  onReady(client: Client) {
+    console.log(`✅ ${client.user?.username} is successfully online!`);
+  }
+
+  // Without this method, the framework will not process any commands from messages!
+  @On("messageCreate")
+  async onMessage(message: Message, client: Client) {
+    await client.executeCommand(message);
+  }
+
+  @On("messageDelete")
+  messageDelete(message: Message) {
+    console.log(`A message by ${message.author?.username} was deleted.`);
+  }
+}
+```
+
+Because you own the `messageCreate` handler, you can add any filtering logic you need before passing the message to the framework:
+
+```typescript
+import { Stoat, On, Once, type StoatLifecycle } from "stoatx";
+import type { Client, Message } from "stoatx";
+
+@Stoat()
+export class GeneralEvents implements StoatLifecycle {
+  // Rest of the events...
+  
+  @On("messageCreate")
+  async onMessage(message: Message, client: Client) {
+    if(message.author?.bot) return; // Ignore messages from other bots
+    await client.executeCommand(message);
+  }
+}
+```
+
+:::tip
+You can also use the `@On("messageCreate")` decorator in a separate class if you want to isolate command handling from other background tasks. 
+The framework will automatically scan all your event classes and register them, so you can organize your code however you like!
+:::
+
 ## Understanding the Code
 
 Here is exactly how the framework handles your background events:
@@ -70,5 +123,6 @@ You have successfully transitioned from a raw API wrapper to a structured, scala
 - Boot up the framework registry.
 - Isolate commands using `@Stoat()` and `@SimpleCommand()`.
 - Modularize background tasks using `@On()` and `@Once()`.
+- Wire up command execution using `@On("messageCreate")` and `client.executeCommand()`.
 
 From here, you have the foundational knowledge to build anything. Check out the rest of the guides to learn about the rest of the Stoat ecosystem!

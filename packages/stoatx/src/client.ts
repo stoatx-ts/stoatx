@@ -1,4 +1,4 @@
-import { Client as StoatClient, ClientOptions } from "@stoatx/client";
+import { Client as StoatClient, ClientOptions, Message } from "@stoatx/client";
 import type { StoatxHandlerOptions } from "./types";
 import { StoatxHandler } from "./handler";
 
@@ -23,13 +23,14 @@ export class Client extends StoatClient {
   constructor(options: Omit<StoatxHandlerOptions, "client"> & ClientOptions) {
     super(options);
     this.handler = new StoatxHandler({ ...options, client: this });
-
-    this.on("messageCreate", async (message) => {
-      await this.handler.handle(message);
-    });
   }
 
-  async initCommands(): Promise<void> {
+  override async login(token: string): Promise<string> {
     await this.handler.init();
+    return super.login(token);
+  }
+
+  async executeCommand(message: Message): Promise<void> {
+    await this.handler.handle(message);
   }
 }

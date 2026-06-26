@@ -48,9 +48,10 @@ const client = new Client({
   prefix: "!",
   cooldownManager: new MixedCooldownManager(),
 });
-async function main() {
-  await client.initCommands();
-}
+
+client.on("messageCreate", async (message) => {
+  await client.executeCommand(message)
+})
 
 client.on("messageDelete", async (message) => {
   console.log(message);
@@ -58,6 +59,5 @@ client.on("messageDelete", async (message) => {
 client.on("error", (err) => {
   console.error(err);
 });
-void main();
 
 void client.login(env.BOT_TOKEN);

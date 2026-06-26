@@ -57,7 +57,7 @@ This new setup might look incredibly minimal, but it is doing a massive amount o
 
 1. StoatxClient vs Client: By importing StoatxClient from the framework instead of the base client, your bot gains a built-in "Registry". This registry is responsible for mapping out your decorators.
 2. **Automated Registration:** The framework is incredibly smart. Notice how we didn't have to specify where our commands or events live? The framework will automatically scan your directory for @Command and @Event decorators, instantiate the classes, and wire them into the bot's memory.
-3. No More Spaghetti Code: Notice that there is no client.on("messageCreate") in this file. Your main file is now purely a configuration file. Its only job is to boot up the engine.
+3. No More Spaghetti Code: Notice that there is no client.on("messageCreate") in this file. Instead, you handle message events yourself using the @On decorator in your event classes — giving you full control over filtering, logging, or any custom logic before commands are executed. (You could still use client.on if you wanted to, but the framework encourages a more structured approach.)
 
 ## Running the Code
 
@@ -67,4 +67,4 @@ In the next section, we will populate those folders and write our very first dec
 
 ## Next Steps
 
-Head over to [Creating Commands](./creating-commands.md) to learn how to use the `@Command` decorator to build scalable, isolated features for your bot.
+Head over to [Event Handling](./event-handling.md) to learn how to create your first event listener using the @On decorator.
