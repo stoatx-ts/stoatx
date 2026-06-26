@@ -76,17 +76,17 @@ import type { Client, Message } from "stoatx";
 @Stoat()
 export class GeneralEvents implements StoatLifecycle {
   // Rest of the events...
-  
+
   @On("messageCreate")
   async onMessage(message: Message, client: Client) {
-    if(message.author?.bot) return; // Ignore messages from other bots
+    if (message.author?.bot) return; // Ignore messages from other bots
     await client.executeCommand(message);
   }
 }
 ```
 
 :::tip
-You can also use the `@On("messageCreate")` decorator in a separate class if you want to isolate command handling from other background tasks. 
+You can also use the `@On("messageCreate")` decorator in a separate class if you want to isolate command handling from other background tasks.
 The framework will automatically scan all your event classes and register them, so you can organize your code however you like!
 :::
 

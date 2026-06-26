@@ -50,8 +50,8 @@ const client = new Client({
 });
 
 client.on("messageCreate", async (message) => {
-  await client.executeCommand(message)
-})
+  await client.executeCommand(message);
+});
 
 client.on("messageDelete", async (message) => {
   console.log(message);
