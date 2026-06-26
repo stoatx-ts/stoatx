@@ -1,5 +1,20 @@
 # @stoatx/bot
 
+## [0.5.0](https://github.com/stoatx-ts/stoatx/compare/bot-v0.4.8...bot-v0.5.0) (2026-06-26)
+
+
+### Features
+
+* emoji methods ([#93](https://github.com/stoatx-ts/stoatx/issues/93)) ([7919d8a](https://github.com/stoatx-ts/stoatx/commit/7919d8adfa6141a850165413825534cf72988cc0))
+* options and args parser to remove overhead of validating ([#92](https://github.com/stoatx-ts/stoatx/issues/92)) ([5e21227](https://github.com/stoatx-ts/stoatx/commit/5e212278c44227dc0f50b479c770e3bc573aef44))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * stoatx bumped to 0.8.0
+
 ## [0.4.8](https://github.com/stoatx-ts/stoatx/compare/bot-v0.4.7...bot-v0.4.8) (2026-06-10)
 
 

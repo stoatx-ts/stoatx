@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.4...client-v0.7.0) (2026-06-26)
+
+
+### Features
+
+* Add ability to define a custom API URL to connect to self-hosts ([#89](https://github.com/stoatx-ts/stoatx/issues/89)) ([80446b2](https://github.com/stoatx-ts/stoatx/commit/80446b293013cb11fa51613655f1730cbe07443d))
+* emoji methods ([#93](https://github.com/stoatx-ts/stoatx/issues/93)) ([7919d8a](https://github.com/stoatx-ts/stoatx/commit/7919d8adfa6141a850165413825534cf72988cc0))
+
+
+### Bug Fixes
+
+* fix client options not being passed down for others to use ([#94](https://github.com/stoatx-ts/stoatx/issues/94)) ([786368f](https://github.com/stoatx-ts/stoatx/commit/786368f2bdcc93736450802e4ac9ff44a70e891a))
+
 ## [0.6.4](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.3...client-v0.6.4) (2026-06-10)
 
 
