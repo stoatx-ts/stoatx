@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.7...stoatx-v0.8.0) (2026-06-26)
+
+
+### Features
+
+* options and args parser to remove overhead of validating ([#92](https://github.com/stoatx-ts/stoatx/issues/92)) ([5e21227](https://github.com/stoatx-ts/stoatx/commit/5e212278c44227dc0f50b479c770e3bc573aef44))
+
+
+### Bug Fixes
+
+* fix client options not being passed down for others to use ([#94](https://github.com/stoatx-ts/stoatx/issues/94)) ([786368f](https://github.com/stoatx-ts/stoatx/commit/786368f2bdcc93736450802e4ac9ff44a70e891a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 0.7.0
+  * peerDependencies
+    * @stoatx/client bumped from ^0.6.4 to ^0.7.0
+
 ## [0.7.7](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.6...stoatx-v0.7.7) (2026-06-10)
 
 
