@@ -28,3 +28,13 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Hide the version dropdown on all pages */
+.navbar__item.dropdown:has(a[href*="/stoatx/docs/"]) {
+  display: none;
+}
+
+/* Show it only when we're currently on an API page */
+.navbar__item.dropdown:has(a.dropdown__link--active[href*="/stoatx/docs/"]) {
+  display: block;
+}
