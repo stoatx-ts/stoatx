@@ -15,6 +15,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "creating-your-first-app/project-setup",
         "creating-your-first-app/the-main-file",
+        "creating-your-first-app/event-handling",
         "creating-your-first-app/creating-commands",
       ],
     },

@@ -1,7 +1,7 @@
 ---
 title: Creating Commands
 sidebar_label: Creating Commands
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Creating Commands
