@@ -1,7 +1,7 @@
 ---
 title: Event Handling
 sidebar_label: Event Handling
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # Event Handling

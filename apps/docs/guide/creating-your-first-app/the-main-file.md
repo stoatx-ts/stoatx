@@ -61,7 +61,7 @@ This new setup might look incredibly minimal, but it is doing a massive amount o
 
 ## Running the Code
 
-If you run pnpm tsx src/index.ts right now, your bot will successfully log in, but it won't actually do anything. That is because our commands and events folders are currently empty!
+If you run `pnpm tsx src/index.ts` right now, your bot will successfully log in, but it won't actually do anything. That is because our commands and events folders are currently empty!
 
 In the next section, we will populate those folders and write our very first decorator-based command.
 
