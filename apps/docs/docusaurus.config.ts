@@ -12,13 +12,7 @@ try {
 
 const latestApiVersion = apiVersions[0] ?? "current";
 
-const dynamicVersions: Record<string, any> = {
-  current: {
-    label: "main (unreleased)",
-    path: "next",
-    banner: "unreleased",
-  },
-};
+const dynamicVersions: Record<string, any> = {};
 
 // If a stable version exists, automatically strip the legacy banner from it
 if (latestApiVersion !== "current") {
@@ -134,6 +128,8 @@ const config: Config = {
         path: "docs",
         routeBasePath: "docs",
         sidebarPath: "./sidebars.ts",
+
+        includeCurrentVersion: false,
 
         lastVersion: latestApiVersion,
         versions: dynamicVersions,

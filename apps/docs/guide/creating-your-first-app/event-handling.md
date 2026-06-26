@@ -99,7 +99,7 @@ Here is exactly how the framework handles your background events:
 3. **The `@On()` Decorator:** This tells the registry to execute the method _every time_ the event (`"messageDelete"`) fires.
 4. **Method Names:** Unlike `@SimpleCommand`, the names of the methods inside an event class (e.g., `ready` or `messageDelete`) do not have to match anything specific. The framework only cares about the string passed into the decorator!
 
-:::tip Grouping Events
+:::tip
 You don't need to create a new file for every single event. Because the decorators attach directly to methods, you can group related events together in the same class. For example, a `ServerLogging` class could contain `@On("messageDelete")`, `@On("messageUpdate")`, and `@On("serverMemberJoin")` all in one place!
 :::
 
