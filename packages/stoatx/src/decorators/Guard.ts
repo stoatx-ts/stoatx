@@ -32,17 +32,28 @@ import { METADATA_KEYS } from "./keys";
  * }
  * ```
  */
-export function Guard(guardClass: Function): ClassDecorator {
-  return (target: Function) => {
-    const existingGuards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, target) || [];
-    existingGuards.push(guardClass);
-    Reflect.defineMetadata(METADATA_KEYS.GUARDS, existingGuards, target);
+export function Guard(guardClass: Function) {
+  return (target: any, propertyKey?: string | symbol) => {
+    if (propertyKey) {
+      // METHOD DECORATOR: target is the prototype, propertyKey is the method name
+      const existingGuards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, target, propertyKey) || [];
+      existingGuards.push(guardClass);
+      Reflect.defineMetadata(METADATA_KEYS.GUARDS, existingGuards, target, propertyKey);
+    } else {
+      // CLASS DECORATOR: target is the class constructor
+      const existingGuards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, target) || [];
+      existingGuards.push(guardClass);
+      Reflect.defineMetadata(METADATA_KEYS.GUARDS, existingGuards, target);
+    }
   };
 }
 
 /**
  * Get all guards from a decorated class
  */
-export function getGuards(target: Function): Function[] {
+export function getGuards(target: Function, propertyKey?: string | symbol): Function[] {
+  if (propertyKey) {
+    return Reflect.getMetadata(METADATA_KEYS.GUARDS, target.prototype, propertyKey) || [];
+  }
   return Reflect.getMetadata(METADATA_KEYS.GUARDS, target) || [];
 }
