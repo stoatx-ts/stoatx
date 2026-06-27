@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.7.0...client-v0.8.0) (2026-06-27)
+
+
+### Features
+
+* voice functionality ([#118](https://github.com/stoatx-ts/stoatx/issues/118)) ([01a81c8](https://github.com/stoatx-ts/stoatx/commit/01a81c899a1abe0f89e6f3eb739261b46b6f032d))
+
 ## [0.7.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.6.4...client-v0.7.0) (2026-06-26)
 
 
