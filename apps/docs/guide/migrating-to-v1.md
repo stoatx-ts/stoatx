@@ -2,16 +2,18 @@
 title: "Migrating to v1"
 description: "A guide to help you migrate your application to v1."
 ---
+
 # Migrating to v1
 
 This guide covers all breaking changes introduced in v1.0.0 and how to update your bot accordingly.
 
 ## `messageCreate` is no longer handled internally
 
-The framework no longer registers a `messageCreate` listener automatically. You must wire it up yourself using `@On` in an event class. 
+The framework no longer registers a `messageCreate` listener automatically. You must wire it up yourself using `@On` in an event class.
 Or you can use `client.on("messageCreate", ...)` if you prefer to handle it inline.
 
 **Before:**
+
 ```ts
 const client = new Client({ prefix: "!" });
 await client.initCommands();
@@ -19,6 +21,7 @@ await client.login(token);
 ```
 
 **After:**
+
 ```ts
 const client = new Client({ prefix: "!" });
 await client.login(token);
@@ -39,6 +42,7 @@ export class MessageEvents {
 ```
 
 This gives you full control over filtering before commands are executed:
+
 ```ts
 @On("messageCreate")
 async onMessage(message: Message, client: Client) {
@@ -56,6 +60,7 @@ Command loading now happens automatically inside `login()`. You can remove any `
 The `args` and `options` arrays on `@SimpleCommand` have been removed. Define your command parameters directly on the method using the `@Arg` and `@Option` decorators instead.
 
 **Before:**
+
 ```ts
 @SimpleCommand({
   name: "ban",
@@ -72,6 +77,7 @@ async ban(ctx: CommandContext<{ reason?: string; deleteDays?: number }, [string]
 ```
 
 **After:**
+
 ```ts
 @SimpleCommand({ name: "ban" })
 async ban(
@@ -101,6 +107,7 @@ If the fetch fails, `onError` is called with a `CommandValidationError`.
 `CommandContext<TOptions, TArgs>` no longer accepts generics. Since args and options are now typed method parameters, the generics are unnecessary.
 
 **Before:**
+
 ```ts
 async ban(ctx: CommandContext<BanOptions, BanArgs>) {
   const targetId = ctx.args[0];
@@ -109,6 +116,7 @@ async ban(ctx: CommandContext<BanOptions, BanArgs>) {
 ```
 
 **After:**
+
 ```ts
 async ban(
   @Arg({ required: true }) target: User,
