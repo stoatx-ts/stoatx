@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   workflow_run:
-    workflows: ["Release Please"]   # must match the release-please workflow's `name:` exactly
+    workflows: ["Release Please"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
