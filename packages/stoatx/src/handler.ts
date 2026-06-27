@@ -170,7 +170,7 @@ export class StoatxHandler {
     let usedPrefix = "";
     let withoutPrefix = "";
 
-    const matchedPrefix = prefixes.find(p => rawContent.startsWith(p));
+    const matchedPrefix = prefixes.find((p) => rawContent.startsWith(p));
     if (matchedPrefix !== undefined) {
       usedPrefix = matchedPrefix;
       withoutPrefix = rawContent.slice(matchedPrefix.length).trim();
