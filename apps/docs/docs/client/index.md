@@ -4,6 +4,8 @@
 
 - [Attachment](classes/Attachment.md)
 - [AttachmentBuilder](classes/AttachmentBuilder.md)
+- [AudioPlayer](classes/AudioPlayer.md)
+- [AudioResource](classes/AudioResource.md)
 - [Base](classes/Base.md)
 - [BaseChannel](classes/BaseChannel.md)
 - [BitField](classes/BitField.md)
@@ -38,9 +40,13 @@
 - [UnknownChannel](classes/UnknownChannel.md)
 - [User](classes/User.md)
 - [UserManager](classes/UserManager.md)
+- [VoiceConnection](classes/VoiceConnection.md)
+- [VoiceManager](classes/VoiceManager.md)
 
 ## Interfaces
 
+- [AudioPlayerEvents](interfaces/AudioPlayerEvents.md)
+- [AudioResourceOptions](interfaces/AudioResourceOptions.md)
 - [BotInformation](interfaces/BotInformation.md)
 - [ChannelCreateOptions](interfaces/ChannelCreateOptions.md)
 - [ChannelEditOptions](interfaces/ChannelEditOptions.md)
@@ -68,10 +74,13 @@
 - [TextEmbedData](interfaces/TextEmbedData.md)
 - [UserEditOptions](interfaces/UserEditOptions.md)
 - [UserProfile](interfaces/UserProfile.md)
+- [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
 
 ## Type Aliases
 
 - [AttachmentMetadata](type-aliases/AttachmentMetadata.md)
+- [AudioPlayerStatus](type-aliases/AudioPlayerStatus.md)
+- [AudioSource](type-aliases/AudioSource.md)
 - [BitFieldResolvable](type-aliases/BitFieldResolvable.md)
 - [CDNTag](type-aliases/CDNTag.md)
 - [ChannelResolvable](type-aliases/ChannelResolvable.md)
@@ -90,6 +99,7 @@
 - [UserRelationShip](type-aliases/UserRelationShip.md)
 - [UserResolvable](type-aliases/UserResolvable.md)
 - [UserStatus](type-aliases/UserStatus.md)
+- [VoiceConnectionStatus](type-aliases/VoiceConnectionStatus.md)
 
 ## Variables
 
