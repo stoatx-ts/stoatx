@@ -172,14 +172,14 @@ export class RESTManager {
       this.client.emit("debug", `Bucket [${method}:${endpoint}] exhausted. Waiting ${waitTime}ms proactively...`);
       await sleep(waitTime);
     }
-
+    const isBodyMethod = ["post", "patch", "put"].includes(method.toLowerCase());
     const response = await fetch(url, {
       method: method.toUpperCase(),
       headers: {
         "X-Bot-Token": this.token,
         "Content-Type": "application/json",
       },
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(isBodyMethod ? { body: JSON.stringify(body ?? {}) } : {}),
     });
 
     const remainingHeader = response.headers.get("x-ratelimit-remaining");

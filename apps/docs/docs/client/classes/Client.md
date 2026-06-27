@@ -78,6 +78,12 @@
 
 > **users**: [`UserManager`](UserManager.md)
 
+***
+
+### voice
+
+> `readonly` **voice**: [`VoiceManager`](VoiceManager.md)
+
 ## Methods
 
 ### emit()

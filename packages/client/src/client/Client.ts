@@ -13,6 +13,7 @@ import { Member } from "../structures/Member";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { RevoltConfig } from "stoat-api";
+import { VoiceManager } from "../voice";
 
 export interface ClientEvents {
   ready: [data: any];
@@ -68,6 +69,7 @@ export class Client extends EventEmitter {
   public emojis: EmojiManager;
   public user: ClientUser | null = null;
   public options: ClientOptions;
+  readonly voice: VoiceManager;
 
   constructor(options: ClientOptions = {}) {
     super({ captureRejections: true });
@@ -78,6 +80,7 @@ export class Client extends EventEmitter {
     this.servers = new ServerManager(this, options.cacheLimits?.servers);
     this.users = new UserManager(this, options.cacheLimits?.users);
     this.emojis = new EmojiManager(this, undefined, options.cacheLimits?.emojis);
+    this.voice = new VoiceManager(this);
 
     this.sweepers = new SweeperManager(this, options.sweepers ?? {});
   }

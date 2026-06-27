@@ -5,10 +5,12 @@ import { UnknownChannel } from "../structures/UnknownChannel";
 import { DMChannel } from "../structures/DMChannel";
 import { GroupChannel } from "../structures/GroupChannel";
 import { Channel as RawChannel } from "stoat-api";
+import { VoiceChannel } from "../structures/VoiceChannel";
 
 export function createChannel(client: Client, data: RawChannel): BaseChannel {
   switch (data.channel_type) {
     case "TextChannel":
+      if (data.voice) return new VoiceChannel(client, data);
       return new TextChannel(client, data);
     case "DirectMessage":
       return new DMChannel(client, data);

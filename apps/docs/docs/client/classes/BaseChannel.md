@@ -359,6 +359,16 @@ console.log(`Fetched ${messages.size} messages sent around the specified message
 
 ***
 
+### isVoice()
+
+> **isVoice**(): `this is VoiceChannel`
+
+#### Returns
+
+`this is VoiceChannel`
+
+***
+
 ### send()
 
 > **send**(`contentOrOptions`): `Promise`\<[`Message`](Message.md)\>
