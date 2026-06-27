@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/stoatx-ts/stoatx/compare/stoatx-v1.0.0...stoatx-v1.0.1) (2026-06-27)
+
+
+### Bug Fixes
+
+* force release-please ([acf160b](https://github.com/stoatx-ts/stoatx/commit/acf160b4d63817acc8d49805458e5c5526fdea1a))
+
 ## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.8.0...stoatx-v1.0.0) (2026-06-27)
 
 
