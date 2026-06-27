@@ -25,7 +25,7 @@ conn.subscribe(player);
 ## Events
 
 | Event   | Description                                                     |
-|---------|-----------------------------------------------------------------|
+| ------- | --------------------------------------------------------------- |
 | `idle`  | Emitted when the current track finishes playing.                |
 | `error` | Emitted when playback fails. Receives the error as an argument. |
 
@@ -42,7 +42,7 @@ player.on("error", (err) => {
 ## Controls
 
 ```ts
-player.pause();   // Pause playback
-player.resume();  // Resume playback
-player.stop();    // Stop and discard the current track
+player.pause(); // Pause playback
+player.resume(); // Resume playback
+player.stop(); // Stop and discard the current track
 ```

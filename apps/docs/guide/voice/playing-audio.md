@@ -28,7 +28,7 @@ player.play(resource);
 
 ```ts
 AudioResource.from(source, {
-  volume: 0.5,       // Adjust volume, 1.0 = original (default)
+  volume: 0.5, // Adjust volume, 1.0 = original (default)
   inputType: "webm", // Override ffmpeg input format if autodetection fails
 });
 ```

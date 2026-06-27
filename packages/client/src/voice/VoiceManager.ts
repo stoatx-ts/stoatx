@@ -13,9 +13,7 @@ export class VoiceManager {
     const existing = this.connections.get(channelId);
     if (existing?.status === "ready") return existing;
 
-    const { token, url } = await this.client.rest.post(
-      `/channels/${channelId}/join_call`,
-    );
+    const { token, url } = await this.client.rest.post(`/channels/${channelId}/join_call`);
 
     const connection = new VoiceConnection(channelId, guildId);
     this.connections.set(channelId, connection);
