@@ -42,4 +42,7 @@ export * from "./utils/MessageCollector";
 export * from "./utils/ReactionCollector";
 export * from "./utils/BitField";
 
+// Voice
+export * from "./voice";
+
 export * as API from "stoat-api";

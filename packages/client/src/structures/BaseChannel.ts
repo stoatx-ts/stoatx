@@ -9,6 +9,7 @@ import { ChannelEditOptions } from "../managers/ChannelManager";
 import { Collection } from "../utils/Collection";
 import { MessageCollector, MessageCollectorOptions } from "../utils/MessageCollector";
 import { Channel as RawChannel } from "stoat-api";
+import type { VoiceChannel } from "./VoiceChannel";
 
 export type ChannelType = "SavedMessages" | "DirectMessage" | "Group" | "TextChannel";
 
@@ -167,5 +168,9 @@ export abstract class BaseChannel extends Base {
 
   public isGroup(): this is GroupChannel {
     return this.type === "Group";
+  }
+
+  public isVoice(): this is VoiceChannel {
+    return this.isText() && (this as TextChannel).voice !== null;
   }
 }
