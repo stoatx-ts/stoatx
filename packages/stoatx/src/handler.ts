@@ -7,6 +7,7 @@ import type {
   StoatxDiscoveryOptions,
   StoatxHandlerOptions,
   CooldownManager,
+  GuardInterface,
 } from "./types";
 import { ClientEvents, Message } from "@stoatx/client";
 import { Client } from "./client";
@@ -20,6 +21,7 @@ import {
   NoServerContextError,
 } from "./error";
 import { METADATA_KEYS } from "./decorators";
+import { StoatxContainer } from "./di/Container";
 
 /**
  * Default in-memory cooldown manager
@@ -76,6 +78,7 @@ export class StoatxHandler {
   private readonly client: Client;
   private readonly flagPrefix: string;
   private readonly globalGuards: Function[];
+  public readonly container = new StoatxContainer();
 
   constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
@@ -83,7 +86,7 @@ export class StoatxHandler {
     this.discoveryOptions = options.discovery;
     this.prefixResolver = options.prefix;
     this.owners = new Set(options.owners ?? []);
-    this.registry = new CommandRegistry(options.extensions);
+    this.registry = new CommandRegistry(this.container, options.extensions);
     this.disableMentionPrefix = options.disableMentionPrefix ?? false;
     this.cooldownManager = options.cooldownManager ?? new DefaultCooldownManager();
     this.flagPrefix = options.flagPrefix || "-";
@@ -268,7 +271,7 @@ export class StoatxHandler {
     const allGuards = [...globalGuards, ...classGuards, ...methodGuards];
 
     for (const guardClass of allGuards) {
-      const guardInstance = new (guardClass as any)();
+      const guardInstance = this.container.resolve<GuardInterface>(guardClass);
       if (typeof guardInstance.run === "function") {
         const guardResult = await guardInstance.run(ctx);
         if (!guardResult) {

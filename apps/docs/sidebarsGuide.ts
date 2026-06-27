@@ -18,6 +18,8 @@ const sidebars: SidebarsConfig = {
         "creating-your-first-app/the-main-file",
         "creating-your-first-app/event-handling",
         "creating-your-first-app/creating-commands",
+        "creating-your-first-app/advanced-commands",
+        "creating-your-first-app/dependency-injection",
       ],
     },
   ],

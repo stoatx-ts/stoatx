@@ -2,12 +2,13 @@ import * as path from "node:path";
 import * as fs from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { glob } from "tinyglobby";
-import { buildSimpleCommandMetadata, getSimpleCommands, getEventsMetadata } from "./decorators";
+import { buildSimpleCommandMetadata, getSimpleCommands, getEventsMetadata, METADATA_KEYS } from "./decorators";
 import { getArgs } from "./decorators/Arg";
 import { getOptions } from "./decorators/Option";
 import { decoratorStore } from "./decorators/store";
-import type { CommandMetadata, ParamSchema } from "./types";
+import type { CommandMetadata, GuardInterface, ParamSchema } from "./types";
 import { PARAM_TYPE_MAP } from "./types";
+import { StoatxContainer } from "./di/Container";
 
 interface AutoDiscoveryOptions {
   roots?: string[];
@@ -43,8 +44,10 @@ export class CommandRegistry {
   private readonly registeredEvents: RegisteredEvent[] = [];
   private readonly extensions: string[];
   private readonly processedStoatClasses: Set<Function> = new Set();
+  private readonly container: StoatxContainer;
 
-  constructor(extensions: string[] = [".js", ".mjs", ".cjs"]) {
+  constructor(container: StoatxContainer, extensions: string[] = [".js", ".mjs", ".cjs"]) {
+    this.container = container;
     this.extensions = extensions;
   }
 
@@ -189,10 +192,10 @@ export class CommandRegistry {
   }
 
   private validateGuards(commandClass: Function, commandName: string): void {
-    const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", commandClass) || [];
+    const guards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, commandClass) || [];
 
     for (const GuardClass of guards) {
-      const guardInstance = new (GuardClass as any)();
+      const guardInstance = this.container.resolve<GuardInterface>(GuardClass);
 
       if (typeof guardInstance.run !== "function") {
         console.error(
@@ -205,7 +208,6 @@ export class CommandRegistry {
         console.error(
           `[Stoatx] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a guardFail() method.`,
         );
-        console.error(`[Stoatx] All guards must implement guardFail() to handle failed checks.`);
         process.exit(1);
       }
     }
@@ -218,18 +220,19 @@ export class CommandRegistry {
       await import(fileUrl);
 
       const allStoatClasses = decoratorStore.getStoatClasses();
-      for (const [stoatClass, stoatInstance] of allStoatClasses.entries()) {
+      for (const [stoatClass] of allStoatClasses.entries()) {
         if (knownStoatClasses.has(stoatClass) || this.processedStoatClasses.has(stoatClass)) {
           continue;
         }
-        this.registerStoatClassCommands(stoatClass, stoatInstance, filePath, baseDir);
+        this.registerStoatClassCommands(stoatClass, filePath, baseDir);
       }
     } catch (error) {
       console.error(`[Stoatx] Failed to load command file: ${filePath}`, error);
     }
   }
 
-  private registerStoatClassCommands(stoatClass: Function, instance: object, filePath: string, baseDir: string): void {
+  private registerStoatClassCommands(stoatClass: Function, filePath: string, baseDir: string): void {
+    const instance = this.container.resolve<object>(stoatClass);
     const simpleCommands = getSimpleCommands(stoatClass);
     const events = getEventsMetadata(stoatClass);
     const category = this.getCategoryFromPath(filePath, baseDir);
