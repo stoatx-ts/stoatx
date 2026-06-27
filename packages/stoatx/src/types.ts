@@ -141,7 +141,10 @@ export interface StoatxHandlerOptions {
   client: Client;
   commandsDir?: string;
   discovery?: StoatxDiscoveryOptions;
-  prefix: string | ((ctx: { serverId?: string | undefined }) => string | Promise<string>);
+  prefix:
+    | string
+    | string[]
+    | ((ctx: { serverId?: string | undefined }) => string | string[] | Promise<string | string[]>);
   owners?: string[];
   extensions?: string[];
   disableMentionPrefix?: boolean;

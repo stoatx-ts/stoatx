@@ -70,7 +70,11 @@ export class DefaultCooldownManager implements CooldownManager {
 export class StoatxHandler {
   private readonly commandsDir: string | undefined;
   private readonly discoveryOptions: StoatxDiscoveryOptions | undefined;
-  private readonly prefixResolver: string | ((ctx: { serverId?: string | undefined }) => string | Promise<string>);
+  // After
+  private readonly prefixResolver:
+    | string
+    | string[]
+    | ((ctx: { serverId?: string | undefined }) => string | string[] | Promise<string | string[]>);
   private readonly owners: Set<string>;
   private readonly registry: CommandRegistry;
   private readonly cooldownManager: CooldownManager;
@@ -162,15 +166,16 @@ export class StoatxHandler {
       reply: (content: string) => Promise<Message>;
     },
   ): Promise<(CommandContext & { _rawArgs: string[]; _rawFlags: Record<string, string | boolean> }) | null> {
-    const prefix = await this.resolvePrefix(meta.serverId);
-    let usedPrefix = prefix;
+    const prefixes = await this.resolvePrefix(meta.serverId);
+    let usedPrefix = "";
     let withoutPrefix = "";
 
-    if (rawContent.startsWith(prefix)) {
-      withoutPrefix = rawContent.slice(prefix.length).trim();
-      usedPrefix = prefix;
-    } else if (!this.disableMentionPrefix && rawContent.match(/^<@!?[\w]+>/)) {
-      const mentionMatch = rawContent.match(/^<@!?([\w]+)>\s*/);
+    const matchedPrefix = prefixes.find(p => rawContent.startsWith(p));
+    if (matchedPrefix !== undefined) {
+      usedPrefix = matchedPrefix;
+      withoutPrefix = rawContent.slice(matchedPrefix.length).trim();
+    } else if (!this.disableMentionPrefix && rawContent.match(/^<@!?\w+>/)) {
+      const mentionMatch = rawContent.match(/^<@!?(\w+)>\s*/);
       if (mentionMatch) {
         const mentionedId = mentionMatch[1];
         const botId = this.client.user?.id;
@@ -524,10 +529,9 @@ export class StoatxHandler {
     this.owners.delete(userId);
   }
 
-  private async resolvePrefix(serverId?: string | undefined): Promise<string> {
-    if (typeof this.prefixResolver === "function") {
-      return this.prefixResolver({ serverId });
-    }
-    return this.prefixResolver;
+  private async resolvePrefix(serverId?: string | undefined): Promise<string[]> {
+    const result =
+      typeof this.prefixResolver === "function" ? await this.prefixResolver({ serverId }) : this.prefixResolver;
+    return Array.isArray(result) ? result : [result];
   }
 }
