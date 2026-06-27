@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/bot",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "",
   "type": "module",
   "main": "dist/index.js",
