@@ -400,6 +400,20 @@ console.log(`Fetched ${messages.size} messages sent around the specified message
 
 ***
 
+### isVoice()
+
+> **isVoice**(): `this is VoiceChannel`
+
+#### Returns
+
+`this is VoiceChannel`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`isVoice`](BaseChannel.md#isvoice)
+
+***
+
 ### send()
 
 > **send**(`contentOrOptions`): `Promise`\<[`Message`](Message.md)\>

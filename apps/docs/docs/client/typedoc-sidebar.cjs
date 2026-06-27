@@ -18,6 +18,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/AudioPlayer",
+          label: "AudioPlayer"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/AudioResource",
+          label: "AudioResource"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/Base",
           label: "Base"
         },
@@ -185,6 +195,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/UserManager",
           label: "UserManager"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/VoiceConnection",
+          label: "VoiceConnection"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/VoiceManager",
+          label: "VoiceManager"
         }
       ]
     },
@@ -192,6 +212,16 @@ const typedocSidebar = {
       type: "category",
       label: "Interfaces",
       items: [
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/AudioPlayerEvents",
+          label: "AudioPlayerEvents"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/AudioResourceOptions",
+          label: "AudioResourceOptions"
+        },
         {
           type: "doc",
           id: "../docs/client/interfaces/BotInformation",
@@ -326,6 +356,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/UserProfile",
           label: "UserProfile"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/VoiceConnectionEvents",
+          label: "VoiceConnectionEvents"
         }
       ]
     },
@@ -337,6 +372,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/AttachmentMetadata",
           label: "AttachmentMetadata"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/AudioPlayerStatus",
+          label: "AudioPlayerStatus"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/AudioSource",
+          label: "AudioSource"
         },
         {
           type: "doc",
@@ -427,6 +472,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/UserStatus",
           label: "UserStatus"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/VoiceConnectionStatus",
+          label: "VoiceConnectionStatus"
         }
       ]
     },

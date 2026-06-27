@@ -22,6 +22,12 @@ const sidebars: SidebarsConfig = {
         "creating-your-first-app/dependency-injection",
       ],
     },
+    {
+      type: "category",
+      label: "Voice",
+      collapsed: false,
+      items: ["voice/intro", "voice/audio-player", "voice/playing-audio"],
+    },
   ],
 };
 
