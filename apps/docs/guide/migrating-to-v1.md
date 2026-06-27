@@ -2,6 +2,7 @@
 title: "Migrating to v1"
 description: "A guide to help you migrate your application to v1."
 ---
+
 # Migrating to v1
 
 This guide covers all breaking changes introduced in v1.0.0 and how to update your bot accordingly.
@@ -13,6 +14,7 @@ This guide covers all breaking changes introduced in v1.0.0 and how to update yo
 The framework no longer registers a `messageCreate` listener automatically. You must wire it up yourself using `@On` in an event class, or inline with `client.on("messageCreate", ...)`.
 
 **Before:**
+
 ```ts
 const client = new Client({ prefix: "!" });
 await client.initCommands();
@@ -20,6 +22,7 @@ await client.login(token);
 ```
 
 **After:**
+
 ```ts
 const client = new Client({ prefix: "!" });
 await client.login(token);
@@ -49,6 +52,7 @@ Command loading now happens automatically inside `login()`. Remove any `initComm
 The `args` and `options` arrays on `@SimpleCommand` have been removed. Define your command parameters directly on the method using the `@Arg` and `@Option` decorators instead.
 
 **Before:**
+
 ```ts
 @SimpleCommand({
   name: "ban",
@@ -65,6 +69,7 @@ async ban(ctx: CommandContext<{ reason?: string; deleteDays?: number }, [string]
 ```
 
 **After:**
+
 ```ts
 @SimpleCommand({ name: "ban" })
 async ban(
@@ -94,6 +99,7 @@ If the fetch fails, `onValidationError` is called with a `FetchFailedError`.
 `CommandContext<TOptions, TArgs>` no longer accepts generics. Since args and options are now typed method parameters, the generics are unnecessary.
 
 **Before:**
+
 ```ts
 async ban(ctx: CommandContext<BanOptions, BanArgs>) {
   const targetId = ctx.args[0];
@@ -102,6 +108,7 @@ async ban(ctx: CommandContext<BanOptions, BanArgs>) {
 ```
 
 **After:**
+
 ```ts
 async ban(
   @Arg({ required: true }) target: User,
@@ -121,6 +128,7 @@ Validation errors and runtime errors are now handled separately.
 Previously all errors — both runtime and validation — went through `onError`. Validation errors (missing arguments, wrong types, invalid mentions, failed fetches) now go through `onValidationError` instead.
 
 **Before:**
+
 ```ts
 async onError(ctx: CommandContext, error: Error) {
   if (error instanceof CommandValidationError) {
@@ -132,6 +140,7 @@ async onError(ctx: CommandContext, error: Error) {
 ```
 
 **After:**
+
 ```ts
 async onValidationError(ctx: CommandContext, error: CommandValidationError) {
   await ctx.reply(`⚠️ ${error.message}`);
@@ -180,13 +189,15 @@ async onValidationError(ctx: CommandContext, error: CommandValidationError) {
 If you were constructing `CommandValidationError` directly, the signature has changed.
 
 **Before:**
+
 ```ts
-new CommandValidationError(optionName, message)
+new CommandValidationError(optionName, message);
 ```
 
 **After:**
+
 ```ts
-new CommandValidationError(paramName, paramKind, message)
+new CommandValidationError(paramName, paramKind, message);
 // e.g.
-new CommandValidationError("target", "arg", "Custom error message")
+new CommandValidationError("target", "arg", "Custom error message");
 ```

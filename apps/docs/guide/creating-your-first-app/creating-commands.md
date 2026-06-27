@@ -245,7 +245,7 @@ export class ModerationCommand implements StoatLifecycle {
   async ban(
     @Arg({ name: "target", required: true, fetch: true }) target: User,
     @Option({ name: "reason" }) reason: string | undefined,
-    ctx: CommandContext
+    ctx: CommandContext,
   ) {
     await ctx.reply(`Banned ${target.username} for ${reason ?? "no reason"}.`);
   }
@@ -280,7 +280,7 @@ Called when an unhandled runtime error is thrown inside the command body — the
 ### Available error types
 
 | Class                  | When thrown                             |
-|------------------------|-----------------------------------------|
+| ---------------------- | --------------------------------------- |
 | `MissingArgumentError` | Required `@Arg` not provided            |
 | `MissingOptionError`   | Required `@Option` not provided         |
 | `InvalidTypeError`     | Value couldn't be cast to expected type |
