@@ -82,7 +82,7 @@ jobs:
 
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then
-            git commit -m "docs: snapshot api version v$VERSION [skip ci]"
+            git commit -m "docs: snapshot api version v$VERSION"
             git push origin HEAD
           else
             echo "Docs are already up to date for this PR."
