@@ -3,6 +3,7 @@ import { CommandRegistry, RegisteredCommand } from "./registry";
 import type {
   CommandContext,
   CommandMetadata,
+  ParamSchema,
   StoatxDiscoveryOptions,
   StoatxHandlerOptions,
   CooldownManager,
@@ -60,10 +61,7 @@ export class DefaultCooldownManager implements CooldownManager {
 
 /**
  * StoatxHandler - The execution engine for commands
- *
- * Handles message parsing, middleware execution, and command dispatching
- *
- * @internal This class is not intended to be instantiated directly. Use the `Client` from `stoatx` instead.
+ * @internal
  */
 export class StoatxHandler {
   private readonly commandsDir: string | undefined;
@@ -75,6 +73,7 @@ export class StoatxHandler {
   private readonly disableMentionPrefix: boolean;
   private readonly client: Client;
   private readonly flagPrefix: string;
+
   constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
     this.commandsDir = options.commandsDir;
@@ -87,22 +86,15 @@ export class StoatxHandler {
     this.flagPrefix = options.flagPrefix || "-";
   }
 
-  /**
-   * Initialize the handler - load all commands
-   */
   async init(): Promise<void> {
     if (this.commandsDir) {
       await this.registry.loadFromDirectory(this.commandsDir);
     } else {
       await this.registry.autoDiscover(this.discoveryOptions);
     }
-
     this.attachEvents();
   }
 
-  /**
-   * Attach registered events to the client
-   */
   private attachEvents(): void {
     const events = this.registry.getEvents();
 
@@ -128,45 +120,37 @@ export class StoatxHandler {
   }
 
   /**
-   * Parses raw string arguments into positional args and key-value options
+   * Parses raw string arguments into positional args and key-value flags
    */
-  private parseCommandOptions(rawArgs: string[]): { args: string[]; options: Record<string, string | boolean> } {
+  private parseRawInput(rawArgs: string[]): { args: string[]; flags: Record<string, string | boolean> } {
     const args: string[] = [];
-    const options: Record<string, string | boolean> = {};
+    const flags: Record<string, string | boolean> = {};
 
     for (let i = 0; i < rawArgs.length; i++) {
       const arg = rawArgs[i];
       if (arg === undefined) continue;
 
-      // Check if it starts with the configured prefix (e.g., "-" or "+")
       if (arg.startsWith(this.flagPrefix)) {
         let key = arg;
-
-        // Strip all leading prefixes (e.g., turns "++force" into "force")
         while (key.startsWith(this.flagPrefix)) {
           key = key.slice(this.flagPrefix.length);
         }
 
         const nextArg = rawArgs[i + 1];
-
-        // Check if next argument exists and is NOT another flag
         if (nextArg !== undefined && !nextArg.startsWith(this.flagPrefix)) {
-          options[key] = nextArg;
+          flags[key] = nextArg;
           i++;
         } else {
-          options[key] = true;
+          flags[key] = true;
         }
       } else {
         args.push(arg);
       }
     }
 
-    return { args, options };
+    return { args, flags };
   }
 
-  /**
-   * Parse a raw message into command context
-   */
   async parseMessage(
     rawContent: string,
     message: Message,
@@ -176,43 +160,32 @@ export class StoatxHandler {
       serverId?: string | undefined;
       reply: (content: string) => Promise<Message>;
     },
-  ): Promise<CommandContext | null> {
+  ): Promise<(CommandContext & { _rawArgs: string[]; _rawFlags: Record<string, string | boolean> }) | null> {
     const prefix = await this.resolvePrefix(meta.serverId);
     let usedPrefix = prefix;
     let withoutPrefix = "";
 
-    // Check for string prefix
     if (rawContent.startsWith(prefix)) {
       withoutPrefix = rawContent.slice(prefix.length).trim();
       usedPrefix = prefix;
-    }
-    // Check for mention prefix (e.g., "<@bot-id> command") - unless disabled
-    else if (!this.disableMentionPrefix && rawContent.match(/^<@!?[\w]+>/)) {
+    } else if (!this.disableMentionPrefix && rawContent.match(/^<@!?[\w]+>/)) {
       const mentionMatch = rawContent.match(/^<@!?([\w]+)>\s*/);
       if (mentionMatch) {
         const mentionedId = mentionMatch[1];
         const botId = this.client.user?.id;
-
-        // Only process if mentioned user is the bot
         if (botId && mentionedId === botId) {
           usedPrefix = mentionMatch[0];
           withoutPrefix = rawContent.slice(mentionMatch[0].length).trim();
-        } else {
         }
       }
     }
 
-    if (!withoutPrefix) {
-      return null;
-    }
+    if (!withoutPrefix) return null;
 
     const [commandName, ...rawArgs] = withoutPrefix.split(/\s+/);
+    if (!commandName) return null;
 
-    if (!commandName) {
-      return null;
-    }
-
-    const { args, options } = this.parseCommandOptions(rawArgs);
+    const { args, flags } = this.parseRawInput(rawArgs);
 
     return {
       client: this.client,
@@ -220,70 +193,29 @@ export class StoatxHandler {
       authorId: meta.authorId,
       channelId: meta.channelId,
       serverId: meta.serverId,
-      args,
-      options,
       prefix: usedPrefix,
       commandName: commandName.toLowerCase(),
       reply: meta.reply,
       message,
+      _rawArgs: args,
+      _rawFlags: flags,
     };
   }
 
-  /**
-   * Handle a message object using the configured message adapter
-   *
-   * @example
-   * ```ts
-   * // With message adapter configured
-   * client.on('messageCreate', (message) => {
-   *   handler.handle(message);
-   * });
-   * ```
-   */
   async handle(message: Message): Promise<boolean> {
-    if (!message.channel || !message.author || !message.content) {
-      return false;
-    }
-
-    // Skip messages from bots
-    if (message.author.bot) {
-      return false;
-    }
+    if (!message.channel || !message.author || !message.content) return false;
+    if (message.author.bot) return false;
 
     const rawContent = message.content;
     const authorId = message.author.id;
     const channelId = message.channel.id;
     const serverId = message.server?.id;
-    const reply = async (content: string) => {
-      return await message.channel!.send(content);
-    };
+    const reply = async (content: string) => await message.channel!.send(content);
 
-    await this.handleMessage(rawContent, message, {
-      authorId,
-      channelId,
-      serverId,
-      reply,
-    });
-
+    await this.handleMessage(rawContent, message, { authorId, channelId, serverId, reply });
     return true;
   }
 
-  /**
-   * Handle a raw message string with metadata
-   *
-   * @example
-   * ```ts
-   * // Manual usage without message adapter
-   * client.on('messageCreate', (message) => {
-   *   handler.handleMessage(message.content, message, {
-   *     authorId: message.author.id,
-   *     channelId: message.channel.id,
-   *     serverId: message.server?.id,
-   *     reply: (content) => message.channel.sendMessage(content),
-   *   });
-   * });
-   * ```
-   */
   async handleMessage(
     rawContent: string,
     message: Message,
@@ -295,26 +227,18 @@ export class StoatxHandler {
     },
   ): Promise<void> {
     const ctx = await this.parseMessage(rawContent, message, meta);
-
-    if (!ctx) {
-      return;
-    }
-
+    if (!ctx) return;
     await this.execute(ctx);
   }
 
-  /**
-   * Execute a command with the given context
-   */
-  async execute(ctx: CommandContext): Promise<boolean> {
+  async execute(
+    ctx: CommandContext & { _rawArgs: string[]; _rawFlags: Record<string, string | boolean> },
+  ): Promise<boolean> {
     const registered = this.registry.get(ctx.commandName);
-
-    if (!registered) {
-      return false;
-    }
+    if (!registered) return false;
 
     const { instance, metadata, methodName, classConstructor } = registered;
-    console.log(`[Debug] Metadata options for ${ctx.commandName}:`, metadata.options);
+
     // Owner-only check
     if (metadata.ownerOnly && !this.owners.has(ctx.authorId)) {
       await ctx.reply("This command is owner-only.");
@@ -322,7 +246,7 @@ export class StoatxHandler {
     }
 
     // Permissions check
-    if (metadata.permissions) {
+    if (metadata.permissions.length > 0) {
       const server = ctx.message.server;
       const member = server ? await server.members.fetch(ctx.authorId) : null;
 
@@ -337,7 +261,7 @@ export class StoatxHandler {
       }
     }
 
-    // Guard checks - use classConstructor for guard metadata
+    // Guard checks
     const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", classConstructor) || [];
     for (const guardClass of guards) {
       const guardInstance = new (guardClass as any)();
@@ -354,215 +278,9 @@ export class StoatxHandler {
       }
     }
 
-    if (metadata.args) {
-      const finalArgs: (string | number | boolean)[] = [];
-
-      for (let i = 0; i < metadata.args.length; i++) {
-        const def = metadata.args[i];
-        // Positional args are read by index
-        const rawValue = ctx.args[i] as string | undefined;
-
-        if (def === undefined) continue;
-
-        // Check if a required argument is missing
-        if (rawValue === undefined) {
-          if (def.required) {
-            try {
-              throw new CommandValidationError(def.name, `Missing required argument: \`<${def.name}>\``);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Missing required argument: \`<${def.name}>\``);
-              }
-              return false;
-            }
-          }
-          break; // If a positional arg is missing, everything after it is missing too
-        }
-
-        // Type Casting and Validation
-        if (def.type === "number") {
-          const numValue = Number(rawValue);
-          if (isNaN(numValue)) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid value for \`<${def.name}>\`. Expected a number.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid value for \`<${def.name}>\`. Expected a number.`);
-              }
-              return false;
-            }
-          }
-          finalArgs[i] = numValue;
-        } else if (def.type === "boolean") {
-          finalArgs[i] = rawValue === "false" ? false : Boolean(rawValue);
-        } else if (def.type === "user") {
-          const match = String(rawValue).match(/^(?:<@)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid user mention for \`<${def.name}>\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid user mention for \`<${def.name}>\`.`);
-              }
-              return false;
-            }
-          }
-          finalArgs[i] = match[1]!;
-        } else if (def.type === "channel") {
-          const match = String(rawValue).match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid channel mention for \`<${def.name}>\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid channel mention for \`<${def.name}>\`.`);
-              }
-              return false;
-            }
-          }
-          finalArgs[i] = match[1]!;
-        } else if (def.type === "role") {
-          const match = String(rawValue).match(/^(?:<%)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid role mention for \`<${def.name}>\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid role mention for \`<${def.name}>\`.`);
-              }
-              return false;
-            }
-          }
-          finalArgs[i] = match[1]!;
-        } else {
-          finalArgs[i] = String(rawValue);
-        }
-      }
-
-      // Preserve any extra, unmapped arguments the user typed at the end
-      if (ctx.args.length > metadata.args.length) {
-        for (let i = metadata.args.length; i < ctx.args.length; i++) {
-          if (ctx.args[i] !== undefined) {
-            finalArgs.push(ctx.args[i]!);
-          }
-        }
-      }
-
-      // Overwrite the context args with our strictly parsed ones
-      ctx.args = finalArgs;
-    }
-
-    const finalOptions: Record<string, string | number | boolean> = {};
-    const currentOptions = ctx.options || {};
-    if (metadata.options) {
-      for (const def of metadata.options) {
-        const rawValue = currentOptions[def.name];
-
-        if (rawValue === undefined) {
-          if (def.required) {
-            // Wait to throw inside the try/catch block so onError catches it
-            try {
-              throw new CommandValidationError(def.name, `Missing required option: \`--${def.name}\``);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Missing required option: \`--${def.name}\``);
-              }
-              return false;
-            }
-          }
-          continue;
-        }
-
-        if (def.type === "number") {
-          const numValue = Number(rawValue);
-          if (isNaN(numValue)) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid value for \`--${def.name}\`. Expected a number.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid value for \`--${def.name}\`. Expected a number.`);
-              }
-              return false;
-            }
-          }
-          finalOptions[def.name] = numValue;
-        } else if (def.type === "boolean") {
-          finalOptions[def.name] = rawValue === "false" ? false : Boolean(rawValue);
-        } else if (def.type === "user") {
-          // Matches <@ULID>, <@!ULID>, or just raw ULID
-          const match = String(rawValue).match(/^(?:<@)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid user mention for \`--${def.name}\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid user mention for \`--${def.name}\`.`);
-              }
-              return false;
-            }
-          }
-          finalOptions[def.name] = match[1]!; // Stores just the extracted ULID
-        } else if (def.type === "channel") {
-          // Matches <#ULID> or raw ULID
-          const match = String(rawValue).match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid channel mention for \`--${def.name}\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid channel mention for \`--${def.name}\`.`);
-              }
-              return false;
-            }
-          }
-          finalOptions[def.name] = match[1]!;
-        } else if (def.type === "role") {
-          // Matches <@%ULID> or raw ULID
-          const match = String(rawValue).match(/^(?:<%)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-          if (!match) {
-            try {
-              throw new CommandValidationError(def.name, `Invalid role mention for \`--${def.name}\`.`);
-            } catch (error) {
-              if (typeof (instance as any).onError === "function") {
-                await (instance as any).onError(ctx, error as Error);
-              } else {
-                await ctx.reply(`Invalid role mention for \`--${def.name}\`.`);
-              }
-              return false;
-            }
-          }
-          finalOptions[def.name] = match[1]!;
-        } else {
-          finalOptions[def.name] = String(rawValue);
-        }
-      }
-      // Re-assign the strictly typed options back to the context
-      ctx.options = finalOptions;
-    }
-
     // Cooldown check
     if (!(await this.cooldownManager.check(ctx, metadata))) {
       const remaining = await this.cooldownManager.getRemaining(ctx, metadata);
-
-      // For method-based commands, check if instance has onCooldown
       if (typeof (instance as any).onCooldown === "function") {
         await (instance as any).onCooldown(ctx, remaining);
       } else {
@@ -571,17 +289,18 @@ export class StoatxHandler {
       return false;
     }
 
+    // Resolve parameters from @Arg/@Option schema
+    const resolvedParams = await this.resolveParams(metadata.params, ctx, instance);
+    if (resolvedParams === null) return false;
+
     try {
-      // Set cooldown before execution to prevent concurrent executions
       if (metadata.cooldown > 0) {
         await this.cooldownManager.set(ctx, metadata);
       }
 
-      await (instance as any)[methodName](ctx);
-
+      await (instance as any)[methodName](...resolvedParams);
       return true;
     } catch (error) {
-      // Handle errors
       if (typeof (instance as any).onError === "function") {
         await (instance as any).onError(ctx, error as Error);
       } else {
@@ -592,29 +311,218 @@ export class StoatxHandler {
   }
 
   /**
-   * Get the command registry
+   * Resolve all parameters for a command method from the parsed input.
+   * Returns null if validation fails (error already reported to user).
    */
+  private async resolveParams(
+    params: ParamSchema[],
+    ctx: CommandContext & { _rawArgs: string[]; _rawFlags: Record<string, string | boolean> },
+    instance: object,
+  ): Promise<any[] | null> {
+    const resolved: any[] = new Array(params.length);
+    let argCursor = 0;
+
+    for (const param of params) {
+      if (param.kind === "ctx") {
+        resolved[param.index] = ctx;
+        continue;
+      }
+
+      if (param.kind === "arg") {
+        const rawValue = ctx._rawArgs[argCursor++];
+
+        if (rawValue === undefined) {
+          if (param.required) {
+            const label = param.name ?? `arg[${param.index}]`;
+            const error = new CommandValidationError(label, `Missing required argument: \`<${label}>\``);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+          resolved[param.index] = undefined;
+          continue;
+        }
+
+        const value = await this.resolveValue(rawValue, param, ctx, instance, "arg");
+        if (value === null) return null;
+        resolved[param.index] = value;
+        continue;
+      }
+
+      if (param.kind === "option") {
+        const rawValue = ctx._rawFlags[param.name!];
+
+        if (rawValue === undefined) {
+          if (param.required) {
+            const error = new CommandValidationError(param.name!, `Missing required option: \`--${param.name}\``);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+          resolved[param.index] = undefined;
+          continue;
+        }
+
+        const value = await this.resolveValue(String(rawValue), param, ctx, instance, "option");
+        if (value === null) return null;
+        resolved[param.index] = value;
+      }
+    }
+
+    return resolved;
+  }
+
+  /**
+   * Resolve and validate a single raw string value to its target type.
+   * Returns null if validation fails (error already reported to user).
+   */
+  private async resolveValue(
+    rawValue: string,
+    param: ParamSchema,
+    ctx: CommandContext,
+    instance: object,
+    kind: "arg" | "option",
+  ): Promise<any | null> {
+    const label = kind === "arg" ? (param.name ?? `arg[${param.index}]`) : `${this.flagPrefix.repeat(2)}${param.name}`;
+
+    switch (param.resolvedType) {
+      case "string":
+        return String(rawValue);
+
+      case "number": {
+        const num = Number(rawValue);
+        if (isNaN(num)) {
+          const error = new CommandValidationError(label, `Invalid value for \`${label}\`. Expected a number.`);
+          if (typeof (instance as any).onError === "function") {
+            await (instance as any).onError(ctx, error);
+          } else {
+            await ctx.reply(error.message);
+          }
+          return null;
+        }
+        return num;
+      }
+
+      case "boolean":
+        return rawValue === "false" ? false : Boolean(rawValue);
+
+      case "user": {
+        const match = rawValue.match(/^(?:<@!?)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+        if (!match) {
+          const error = new CommandValidationError(label, `Invalid user mention for \`${label}\`.`);
+          if (typeof (instance as any).onError === "function") {
+            await (instance as any).onError(ctx, error);
+          } else {
+            await ctx.reply(error.message);
+          }
+          return null;
+        }
+        const userId = match[1]!;
+        if (param.fetch) {
+          try {
+            return await this.client.users.fetch(userId);
+          } catch {
+            const error = new CommandValidationError(label, `Could not fetch user for \`${label}\`.`);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+        }
+        return this.client.users.cache.get(userId) ?? userId;
+      }
+
+      case "channel": {
+        const match = rawValue.match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+        if (!match) {
+          const error = new CommandValidationError(label, `Invalid channel mention for \`${label}\`.`);
+          if (typeof (instance as any).onError === "function") {
+            await (instance as any).onError(ctx, error);
+          } else {
+            await ctx.reply(error.message);
+          }
+          return null;
+        }
+        const channelId = match[1]!;
+        if (param.fetch) {
+          try {
+            return await this.client.channels.fetch(channelId);
+          } catch {
+            const error = new CommandValidationError(label, `Could not fetch channel for \`${label}\`.`);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+        }
+        return this.client.channels.cache.get(channelId) ?? channelId;
+      }
+
+      case "role": {
+        const match = rawValue.match(/^(?:<@&)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
+        if (!match) {
+          const error = new CommandValidationError(label, `Invalid role mention for \`${label}\`.`);
+          if (typeof (instance as any).onError === "function") {
+            await (instance as any).onError(ctx, error);
+          } else {
+            await ctx.reply(error.message);
+          }
+          return null;
+        }
+        const roleId = match[1]!;
+        if (param.fetch) {
+          const server = ctx.message.server;
+          if (!server) {
+            const error = new CommandValidationError(label, `Cannot fetch role outside of a server.`);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+          try {
+            return await server.roles.fetch(roleId);
+          } catch {
+            const error = new CommandValidationError(label, `Could not fetch role for \`${label}\`.`);
+            if (typeof (instance as any).onError === "function") {
+              await (instance as any).onError(ctx, error);
+            } else {
+              await ctx.reply(error.message);
+            }
+            return null;
+          }
+        }
+        return ctx.message.server?.roles.cache.get(roleId) ?? roleId;
+      }
+
+      default:
+        return rawValue;
+    }
+  }
+
   getRegistry(): CommandRegistry {
     return this.registry;
   }
 
-  /**
-   * Get a command by name or alias
-   */
   getCommand(name: string): RegisteredCommand | undefined {
     return this.registry.get(name);
   }
 
-  /**
-   * Get all commands
-   */
   getCommands(): RegisteredCommand[] {
     return this.registry.getAll();
   }
 
-  /**
-   * Reload all commands
-   */
   async reload(): Promise<void> {
     this.registry.clear();
     if (this.cooldownManager.clear) {
@@ -624,34 +532,21 @@ export class StoatxHandler {
       await this.registry.loadFromDirectory(this.commandsDir);
       return;
     }
-
     await this.registry.autoDiscover(this.discoveryOptions);
   }
 
-  /**
-   * Check if a user is an owner
-   */
   isOwner(userId: string): boolean {
     return this.owners.has(userId);
   }
 
-  /**
-   * Add an owner
-   */
   addOwner(userId: string): void {
     this.owners.add(userId);
   }
 
-  /**
-   * Remove an owner
-   */
   removeOwner(userId: string): void {
     this.owners.delete(userId);
   }
 
-  /**
-   * Resolve the prefix for a context
-   */
   private async resolvePrefix(serverId?: string | undefined): Promise<string> {
     if (typeof this.prefixResolver === "function") {
       return this.prefixResolver({ serverId });

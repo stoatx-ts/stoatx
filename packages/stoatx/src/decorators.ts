@@ -15,6 +15,10 @@ export {
   SimpleCommand,
   getSimpleCommands,
 
+  //SimpleCommandOptions (type for @SimpleCommand decorator)
+  Arg,
+  Option,
+
   // Guard
   Guard,
   getGuards,

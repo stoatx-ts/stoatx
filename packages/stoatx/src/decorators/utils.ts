@@ -1,4 +1,4 @@
-import type { CommandMetadata, SimpleCommandOptions } from "../types";
+import type { CommandMetadata, ParamSchema, SimpleCommandOptions } from "../types";
 
 /**
  * Build CommandMetadata from SimpleCommandOptions
@@ -6,7 +6,8 @@ import type { CommandMetadata, SimpleCommandOptions } from "../types";
 export function buildSimpleCommandMetadata(
   options: SimpleCommandOptions,
   methodName: string,
-  category?: string,
+  category: string | undefined,
+  params: ParamSchema[],
 ): CommandMetadata {
   return {
     name: options.name ?? methodName.toLowerCase(),
@@ -18,7 +19,6 @@ export function buildSimpleCommandMetadata(
     ...(options.cooldownStorage !== undefined ? { cooldownStorage: options.cooldownStorage } : {}),
     nsfw: options.nsfw ?? false,
     ownerOnly: options.ownerOnly ?? false,
-    options: options.options ?? [],
-    args: options.args ?? [],
+    params,
   };
 }

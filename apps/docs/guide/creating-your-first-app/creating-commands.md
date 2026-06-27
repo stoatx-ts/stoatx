@@ -28,7 +28,6 @@ export class PingCommand implements StoatLifecycle {
     description: "Replies with Pong and tests the bot's responsiveness.",
     aliases: ["p"], // Users can type !ping or !p
   })
-  // The method must match the name of the command, in this case "ping"
   async ping(ctx: CommandContext) {
     await ctx.message.reply({
       content: "Pong! 🏓",
@@ -43,7 +42,7 @@ Let's break down exactly what is happening in this file:
 
 1. The `@Stoat()` decorator marks this class to be automatically loaded by the framework. Without it, the command will not be registered.
 2. The `@SimpleCommand()` decorator defines the command's name, description, and any aliases. This is what users will type to invoke the command.
-3. The method name (`ping`) must match the command name defined in the decorator. This is where the logic for the command is implemented.
+3. The method name (`ping`) does not have to match the command name, but it is a good practice to keep them consistent for clarity. This method will be called when the command is executed.
 4. The `CommandContext` parameter provides access to the message that triggered the command, allowing you to reply or perform other actions.
 
 :::tip
@@ -144,127 +143,102 @@ Now, any command that includes `cooldownStorage: "database"` in its decorator me
 
 # Command Arguments & Options
 
-Stoatx provides a powerful, type-safe parsing engine for your commands. It automatically handles positional arguments, optional flags, type casting, and Stoat mentions—saving you from writing manual regex or validation checks.
+Stoatx provides a powerful, type-safe parsing engine for your commands. Instead of defining args and options inside the decorator config, you declare them directly as method parameters using the `@Arg` and `@Option` decorators. Types are inferred automatically from your TypeScript parameter types — no manual type strings needed.
 
 ## Basic Usage
 
-You can define expected inputs directly inside the `@SimpleCommand` decorator using the `args` (positional) and `options` (flags) arrays.
-
 ```typescript
-import { Stoat, SimpleCommand, CommandContext } from "stoatx";
+import { Stoat, SimpleCommand, Arg, Option, type CommandContext } from "stoatx";
+import type { User } from "stoatx";
 
 @Stoat()
 export class ModerationCommand {
   @SimpleCommand({
     name: "ban",
     description: "Bans a user from the server",
-    // Positional Arguments (e.g., !ban @user)
-    args: [{ name: "target", type: "user", required: true }],
-    // Optional Flags (e.g., --reason spam --deleteDays 7)
-    options: [
-      { name: "reason", type: "string" },
-      { name: "deleteDays", type: "number" },
-    ],
   })
-  async ban(ctx: CommandContext) {
-    const targetId = ctx.args[0];
-    const reason = ctx.options.reason || "No reason provided";
-    const deleteDays = ctx.options.deleteDays || 0;
-
-    await ctx.reply(`Banning <@${targetId}> for ${reason}. (Deleting ${deleteDays} days)`);
+  async ban(
+    @Arg({ required: true }) target: User,
+    @Option({ name: "reason" }) reason: string | undefined,
+    @Option({ name: "deleteDays" }) deleteDays: number | undefined,
+    ctx: CommandContext,
+  ) {
+    const why = reason ?? "No reason provided";
+    const days = deleteDays ?? 0;
+    await ctx.reply(`Banning ${target.username} for ${why}. (Deleting ${days} days of messages)`);
   }
 }
 ```
 
-### Supported Types
+The `ctx` parameter always goes last and requires no decorator — Stoatx identifies it automatically.
 
-Both `args` and `options` support the following types:
+## Supported Types
 
-- `"string"` - Standard text.
-- `"number"` - Automatically casts to a JavaScript `Number`.
-- `"boolean"` - Automatically casts to `true`/`false` (e.g., `--force` becomes `true`).
-- `"user"`, `"channel"`, `"role"` - Stoat mentions.
+Types are inferred from the TypeScript parameter type:
 
-## Stoat Mentions (ULID Support)
+- `string` — standard text
+- `number` — automatically cast and validated
+- `boolean` — `"false"` becomes `false`, anything else becomes `true`; bare flags (e.g. `--force`) become `true`
+- `User`, `BaseChannel`, `Role` — Stoat mention types from `stoatx`
 
-When you require a `"user"`, `"channel"`, or `"role"`, the Stoatx parser is smart enough to accept either a raw ID or a formatted chat mention (like `<@01ARZ3...>`).
+## Stoat Mentions
 
-Regardless of what the user types, **the parser automatically strips the formatting and guarantees a clean, valid 26-character ULID string** is passed to your command.
+When a parameter is typed as `User`, `BaseChannel`, or `Role`, the parser accepts either a raw ULID or a formatted mention (e.g. `<@01ARZ3...>`). By default, it resolves from the cache. If you need a guaranteed fresh object from the API, use `fetch: true`:
 
 ```typescript
-// If the user types: !lock <#01ARZ3NDEKTSV4RRFFQ69G5FAV>
-const channelId = ctx.args[0];
+@SimpleCommand({ name: "info" })
+async info(
+  @Arg({ required: true, fetch: true }) target: User,
+  ctx: CommandContext
+) {
+  await ctx.reply(`Username: ${target.username}`);
+}
+```
 
-// ctx.args[0] is strictly "01ARZ3NDEKTSV4RRFFQ69G5FAV"
-const channel = await ctx.client.channels.fetch(channelId);
+If the fetch fails (user not found, API error), `onError` is called with a `CommandValidationError`.
+
+## Positional Args vs Named Options
+
+`@Arg` maps to positional arguments — the order they appear on the decorator is the order the user types them:
+
+```
+!ban @user
+```
+
+`@Option` maps to named flags — the user passes them explicitly by name:
+
+```
+!ban @user --reason spam --deleteDays 7
 ```
 
 ## Custom Flag Prefixes
 
-By default, options are parsed using the `-` or `--` prefix (e.g., `--force`). You can customize this prefix globally when initializing your bot handler.
+By default flags use `-` (so `--reason` works since all leading prefix chars are stripped). You can customize this globally:
 
 ```typescript
-const handler = new StoatxHandler({
-  client: myClient,
-  flagPrefix: "+", // Users will now type +force or ++force
-  commandsDir: "./commands",
+const client = new StoatxClient({
+  flagPrefix: "+", // users type +reason or ++reason
 });
-```
-
-## Advanced: Full Type Safety
-
-Stoatx allows you to pass generics to your `CommandContext` to achieve complete, compile-time type safety for your parsed arguments and options.
-
-To use this, define an interface for your options and a tuple for your arguments:
-
-```typescript
-// 1. Define your expected shapes
-interface BanOptions {
-  reason?: string;
-  deleteDays?: number;
-  force?: boolean;
-}
-
-type BanArgs = [string]; // Index 0 is guaranteed to be a string ID
-
-@Stoat()
-export class ModerationCommand {
-  @SimpleCommand({
-    name: "ban",
-    args: [{ name: "target", type: "user", required: true }],
-    options: [
-      { name: "reason", type: "string" },
-      { name: "deleteDays", type: "number" },
-      { name: "force", type: "boolean" },
-    ],
-  })
-  // 2. Pass them to the context
-  async ban(ctx: CommandContext<BanOptions, BanArgs>) {
-    // IDE Autocomplete works perfectly here!
-    const targetId = ctx.args[0];
-    const isForced = ctx.options.force;
-    const days = ctx.options.deleteDays;
-  }
-}
 ```
 
 ## Error Handling
 
-If a user provides an invalid type (like typing `!purge --count apples` when a `number` is expected), Stoatx will automatically abort the command execution and throw a `CommandValidationError`.
-
-You can catch and format these errors gracefully using your class's `onError` lifecycle method:
+If a required argument is missing or a value fails type validation, Stoatx aborts execution and calls `onError` on your class with a `CommandValidationError`. The error's `optionName` tells you which parameter failed:
 
 ```typescript
 import { CommandValidationError } from "stoatx";
 
 @Stoat()
 export class ModerationCommand {
-  // ... your commands ...
+  @SimpleCommand({ name: "ban" })
+  async ban(@Arg({ name: "target", required: true }) target: User, ctx: CommandContext) {
+    await ctx.reply(`Banning ${target.username}!`);
+  }
 
   async onError(ctx: CommandContext, error: Error) {
     if (error instanceof CommandValidationError) {
       await ctx.reply(`⚠️ **Invalid Input:** ${error.message}`);
-      // Example output: "⚠️ Invalid Input: Invalid value for `--count`. Expected a number."
+      // e.g. "⚠️ Invalid Input: Missing required argument: `<target>`"
     } else {
       console.error(error);
       await ctx.reply("An unexpected error occurred.");

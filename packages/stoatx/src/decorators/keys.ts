@@ -6,4 +6,6 @@ export const METADATA_KEYS = {
   SIMPLE_COMMANDS: Symbol("stoatx:stoat:simpleCommands"),
   GUARDS: "stoatx:command:guards",
   EVENTS: Symbol("stoatx:stoat:events"),
+  ARGS: Symbol("stoatx:param:args"),
+  OPTIONS: Symbol("stoatx:param:options"),
 } as const;

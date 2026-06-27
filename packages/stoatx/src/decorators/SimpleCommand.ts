@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import type { CommandContext, SimpleCommandOptions } from "../types";
+import type { SimpleCommandOptions } from "../types";
 import { METADATA_KEYS } from "./keys";
 
 /**
@@ -10,7 +10,7 @@ export interface SimpleCommandDefinition {
   options: SimpleCommandOptions;
 }
 
-type CommandMethod = (ctx: CommandContext) => Promise<void>;
+type CommandMethod = (...args: any[]) => Promise<void>;
 
 /**
  * @SimpleCommand
