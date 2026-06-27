@@ -2,13 +2,14 @@ import * as path from "node:path";
 import * as fs from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { glob } from "tinyglobby";
-import { buildSimpleCommandMetadata, getSimpleCommands, getEventsMetadata, METADATA_KEYS } from "./decorators";
+import { buildSimpleCommandMetadata, getEventsMetadata, getSimpleCommands, METADATA_KEYS } from "./decorators";
 import { getArgs } from "./decorators/Arg";
 import { getOptions } from "./decorators/Option";
 import { decoratorStore } from "./decorators/store";
 import type { CommandMetadata, GuardInterface, ParamSchema } from "./types";
 import { PARAM_TYPE_MAP } from "./types";
 import { StoatxContainer } from "./di/Container";
+import { getSubCommands } from "./decorators/utils";
 
 interface AutoDiscoveryOptions {
   roots?: string[];
@@ -116,7 +117,15 @@ export class CommandRegistry {
   }
 
   register(instance: object, metadata: CommandMetadata, classConstructor: Function, methodName: string): void {
-    const name = metadata.name.toLowerCase();
+    const groupOptions = Reflect.getMetadata(METADATA_KEYS.COMMAND_GROUP, classConstructor);
+    const subCommandOptions = Reflect.getMetadata(METADATA_KEYS.SUBCOMMAND, instance, methodName);
+
+    const subCommandName = subCommandOptions?.name;
+
+    const name =
+      groupOptions && subCommandName
+        ? `${groupOptions.name}:${subCommandName}`.toLowerCase()
+        : metadata.name.toLowerCase();
 
     if (this.commands.has(name)) {
       console.warn(`[Stoatx] Duplicate command name: ${name}. Skipping...`);
@@ -233,27 +242,27 @@ export class CommandRegistry {
 
   private registerStoatClassCommands(stoatClass: Function, filePath: string, baseDir: string): void {
     const instance = this.container.resolve<object>(stoatClass);
+
     const simpleCommands = getSimpleCommands(stoatClass);
+    const subCommands = getSubCommands(stoatClass);
     const events = getEventsMetadata(stoatClass);
     const category = this.getCategoryFromPath(filePath, baseDir);
 
-    if (simpleCommands.length === 0 && events.length === 0) {
-      console.warn(
-        `[Stoatx] Class ${stoatClass.name} is decorated with @Stoat but has no @SimpleCommand, @On or @Once methods. Skipping...`,
-      );
+    const allCommands = [...simpleCommands, ...subCommands];
+
+    if (allCommands.length === 0 && events.length === 0) {
       this.processedStoatClasses.add(stoatClass);
       return;
     }
 
-    for (const cmdDef of simpleCommands) {
+    for (const cmdDef of allCommands) {
       const method = (instance as any)[cmdDef.methodName];
-      if (typeof method !== "function") {
-        console.warn(`[Stoatx] Method ${cmdDef.methodName} not found on ${stoatClass.name}. Skipping...`);
-        continue;
-      }
+      if (typeof method !== "function") continue;
 
       const params = this.buildParamSchema(stoatClass.prototype, cmdDef.methodName);
+
       const metadata = buildSimpleCommandMetadata(cmdDef.options, cmdDef.methodName, category, params);
+
       this.register(instance, metadata, stoatClass, cmdDef.methodName);
     }
 

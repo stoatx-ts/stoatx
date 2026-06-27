@@ -6,6 +6,8 @@ export { On, Once, getEventsMetadata } from "./Events";
 export { Arg } from "./Arg";
 export { Option } from "./Option";
 export { Injectable } from "./Injectable";
+export { CommandGroup } from "./CommandGroup";
+export { SubCommand } from "./SubCommand";
 
 // Types
 export type { SimpleCommandDefinition } from "./SimpleCommand";

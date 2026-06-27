@@ -9,4 +9,6 @@ export const METADATA_KEYS = {
   ARGS: Symbol("stoatx:param:args"),
   OPTIONS: Symbol("stoatx:param:options"),
   INJECTABLE: Symbol("stoatx:injectable"),
+  SUBCOMMAND: Symbol("stoatx:subcommand"),
+  COMMAND_GROUP: Symbol("stoatx:commandGroup"),
 } as const;

@@ -64,6 +64,41 @@ export class AdminCommands {
 }
 ```
 
+## Command Groups & Subcommands
+
+As your bot grows, having 50+ individual command files can become difficult to manage. **Command Groups** allow you to create namespaces (e.g., `!config prefix`) and centralize configuration.
+
+### Defining Groups
+
+Use `@CommandGroup` on your class to define the parent namespace. You can also define default configuration—like `ownerOnly` or `cooldown`—which will **automatically apply to all subcommands** within that class.
+
+### Defining Subcommands
+
+Use `@SubCommand` on your methods. These behave exactly like `@SimpleCommand`, but they inherit the group's configuration unless you explicitly override it.
+
+```typescript
+@Stoat()
+@CommandGroup({
+  name: "config",
+  ownerOnly: true, // Group-wide security
+  cooldown: 5,
+})
+export class ConfigCommands {
+  @SubCommand({ name: "prefix" })
+  async setPrefix(@Arg() p: string, ctx: CommandContext) {
+    await ctx.reply(`Prefix set to: ${p}`);
+  }
+
+  @SubCommand({
+    name: "status",
+    ownerOnly: false, // Override: This command is public!
+  })
+  async getStatus(ctx: CommandContext) {
+    await ctx.reply("Everything is operational.");
+  }
+}
+```
+
 ## Command Arguments & Options
 
 Stoatx provides a powerful, type-safe parsing engine. Declare arguments and options directly as method parameters using `@Arg` and `@Option`.
@@ -100,4 +135,4 @@ async onError(ctx: CommandContext, error: Error) {
 
 ## Next Steps
 
-Now that you know how to secure your commands, manage spam, and handle complex input, you can explore more advanced features like Dependency Injection in our [Dependency Injection](./dependency-injection.md) guide.
+Now that you've mastered command logic, head over to [Event Handling](https://www.google.com/search?q=./event-handling.md) to learn how to listen to background events like users joining the server or messages being deleted.

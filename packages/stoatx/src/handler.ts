@@ -183,10 +183,22 @@ export class StoatxHandler {
 
     if (!withoutPrefix) return null;
 
-    const [commandName, ...rawArgs] = withoutPrefix.split(/\s+/);
-    if (!commandName) return null;
+    const parts = withoutPrefix.split(/\s+/);
+    const part1 = parts[0];
+    const part2 = parts[1];
 
-    const { args, flags } = this.parseRawInput(rawArgs);
+    if (!part1) return null;
+
+    let commandKey = part1.toLowerCase();
+    let remainingParts = parts.slice(1);
+
+    if (part2 && this.registry.has(`${part1}:${part2}`)) {
+      commandKey = `${part1}:${part2}`.toLowerCase();
+      remainingParts = parts.slice(2);
+    }
+
+    // 4. Parse the remaining parts
+    const { args, flags } = this.parseRawInput(remainingParts);
 
     return {
       client: this.client,
@@ -195,7 +207,7 @@ export class StoatxHandler {
       channelId: meta.channelId,
       serverId: meta.serverId,
       prefix: usedPrefix,
-      commandName: commandName.toLowerCase(),
+      commandName: commandKey,
       reply: meta.reply,
       message,
       _rawArgs: args,

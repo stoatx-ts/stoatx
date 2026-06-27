@@ -43,6 +43,15 @@ export interface SimpleCommandOptions {
   ownerOnly?: boolean;
 }
 
+export interface GroupOptions {
+  name: string;
+  description?: string;
+  permissions?: PermissionResolvable[];
+  ownerOnly?: boolean;
+  cooldown?: number;
+  nsfw?: boolean;
+}
+
 /**
  * Resolved command metadata with required fields
  */

@@ -22,6 +22,10 @@ export {
   //Injectables
   Injectable,
 
+  //SubCommands
+  CommandGroup,
+  SubCommand,
+
   // Guard
   Guard,
   getGuards,
