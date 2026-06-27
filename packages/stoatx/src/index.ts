@@ -1,6 +1,8 @@
 // Types
 export * from "./types";
 
+// Errors
+
 // Decorators
 export * from "./decorators";
 
@@ -11,5 +13,5 @@ export * from "./registry";
 export { DefaultCooldownManager } from "./handler";
 export { Client } from "./client";
 export type { StoatxHandler } from "./handler";
-export { CommandValidationError } from "./error";
+export * from "./error";
 export * from "@stoatx/client";
