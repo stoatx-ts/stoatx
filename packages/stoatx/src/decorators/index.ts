@@ -5,6 +5,7 @@ export { Guard, getGuards } from "./Guard";
 export { On, Once, getEventsMetadata } from "./Events";
 export { Arg } from "./Arg";
 export { Option } from "./Option";
+export { Injectable } from "./Injectable";
 
 // Types
 export type { SimpleCommandDefinition } from "./SimpleCommand";

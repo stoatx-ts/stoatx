@@ -19,6 +19,9 @@ export {
   Arg,
   Option,
 
+  //Injectables
+  Injectable,
+
   // Guard
   Guard,
   getGuards,

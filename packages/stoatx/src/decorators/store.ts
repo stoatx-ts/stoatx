@@ -8,7 +8,7 @@ export class DecoratorStore {
   private static instance: DecoratorStore;
 
   /** Stoat classes with their SimpleCommand methods */
-  private stoatClasses: Map<Function, object> = new Map();
+  private stoatClasses: Set<Function> = new Set();
 
   /** Registered commands from @Stoat/@SimpleCommand decorators */
   private commands: RegisteredCommand[] = [];
@@ -29,17 +29,13 @@ export class DecoratorStore {
    * Register a @Stoat decorated class
    */
   registerStoatClass(classConstructor: Function): void {
-    if (!this.stoatClasses.has(classConstructor)) {
-      // Create instance immediately when decorated
-      const instance = new (classConstructor as new () => object)();
-      this.stoatClasses.set(classConstructor, instance);
-    }
+    this.stoatClasses.add(classConstructor);
   }
 
   /**
    * Get all registered Stoat classes with their instances
    */
-  getStoatClasses(): Map<Function, object> {
+  getStoatClasses(): Set<Function> {
     return this.stoatClasses;
   }
 
