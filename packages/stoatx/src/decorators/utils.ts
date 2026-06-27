@@ -1,4 +1,5 @@
 import type { CommandMetadata, ParamSchema, SimpleCommandOptions } from "../types";
+import { METADATA_KEYS } from "./keys";
 
 /**
  * Build CommandMetadata from SimpleCommandOptions
@@ -21,4 +22,17 @@ export function buildSimpleCommandMetadata(
     ownerOnly: options.ownerOnly ?? false,
     params,
   };
+}
+
+export function getSubCommands(target: Function): { methodName: string; options: any }[] {
+  const methods = Object.getOwnPropertyNames(target.prototype);
+  const subCommands = [];
+
+  for (const method of methods) {
+    const options = Reflect.getMetadata(METADATA_KEYS.SUBCOMMAND, target.prototype, method);
+    if (options) {
+      subCommands.push({ methodName: method, options });
+    }
+  }
+  return subCommands;
 }
