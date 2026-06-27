@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { METADATA_KEYS } from "./keys";
+import { ClientEvents } from "@stoatx/client";
 
 export interface EventDefinition {
   methodName: string;
@@ -47,7 +48,7 @@ function createEventDecorator(event: string, type: "on" | "once"): MethodDecorat
  *
  * @param event The name of the client event to listen to
  */
-export function On(event: string): MethodDecorator {
+export function On(event: keyof ClientEvents): MethodDecorator {
   return createEventDecorator(event, "on");
 }
 
@@ -72,7 +73,7 @@ export function On(event: string): MethodDecorator {
  *
  * @param event The name of the client event to listen to
  */
-export function Once(event: string): MethodDecorator {
+export function Once(event: keyof ClientEvents): MethodDecorator {
   return createEventDecorator(event, "once");
 }
 
