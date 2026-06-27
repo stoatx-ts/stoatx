@@ -96,6 +96,11 @@ export interface StoatLifecycle {
   [method: string]: any;
 }
 
+export interface GuardInterface {
+  run(ctx: CommandContext): Promise<boolean> | boolean;
+  guardFail?(ctx: CommandContext): Promise<void> | void;
+}
+
 /**
  * Cooldown manager interface for custom cooldown storage
  */
@@ -133,6 +138,7 @@ export interface StoatxHandlerOptions {
   disableMentionPrefix?: boolean;
   cooldownManager?: CooldownManager;
   flagPrefix?: string;
+  globalGuards?: Function[];
 }
 
 /**

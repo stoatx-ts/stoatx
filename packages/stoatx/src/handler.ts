@@ -19,6 +19,7 @@ import {
   MissingOptionError,
   NoServerContextError,
 } from "./error";
+import { METADATA_KEYS } from "./decorators";
 
 /**
  * Default in-memory cooldown manager
@@ -74,6 +75,7 @@ export class StoatxHandler {
   private readonly disableMentionPrefix: boolean;
   private readonly client: Client;
   private readonly flagPrefix: string;
+  private readonly globalGuards: Function[];
 
   constructor(options: StoatxHandlerOptions) {
     this.client = options.client;
@@ -85,6 +87,7 @@ export class StoatxHandler {
     this.disableMentionPrefix = options.disableMentionPrefix ?? false;
     this.cooldownManager = options.cooldownManager ?? new DefaultCooldownManager();
     this.flagPrefix = options.flagPrefix || "-";
+    this.globalGuards = options.globalGuards ?? [];
   }
 
   async init(): Promise<void> {
@@ -256,8 +259,15 @@ export class StoatxHandler {
     }
 
     // Guard checks
-    const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", classConstructor) || [];
-    for (const guardClass of guards) {
+    const globalGuards = this.globalGuards;
+
+    const classGuards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, classConstructor) || [];
+
+    const methodGuards: Function[] = Reflect.getMetadata(METADATA_KEYS.GUARDS, instance, methodName) || [];
+
+    const allGuards = [...globalGuards, ...classGuards, ...methodGuards];
+
+    for (const guardClass of allGuards) {
       const guardInstance = new (guardClass as any)();
       if (typeof guardInstance.run === "function") {
         const guardResult = await guardInstance.run(ctx);

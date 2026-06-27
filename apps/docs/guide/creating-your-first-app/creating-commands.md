@@ -53,6 +53,8 @@ You can name the class itself whatever you want (e.g., `class PingCommand` or `c
 
 Now that we have our command defined, let's test it out. Make sure your bot is running and type `!ping` or `!p` in a channel where the bot has access. You should see the bot reply with "Pong! 🏓".
 
+---
+
 ## Adding Cooldowns
 
 To prevent users from spamming your commands, you can add a `cooldown` property directly to your `@SimpleCommand` decorator. The value is defined in seconds.
@@ -140,6 +142,118 @@ const client = new StoatxClient({
 ```
 
 Now, any command that includes `cooldownStorage: "database"` in its decorator metadata will route through your custom persistence logic, keeping your bot perfectly synchronized even after updates!
+
+---
+
+## Execution Guards
+
+Sometimes you need to restrict a command so it can only be used under specific conditions like requiring a certain role, ensuring the user is in a voice channel, or checking a database first. Instead of writing the same `if/else` checks inside every command body, you can use **Guards**.
+
+Guards act as middleware that runs _before_ your command. If a guard fails, the command is safely blocked from executing.
+
+### Creating a Guard
+
+To create a reusable guard with parameters (like checking for a specific role name), you can write a factory function that returns an anonymous class implementing the `GuardInterface`.
+
+Here is an example of a `HasRole` guard:
+
+```typescript
+// src/guards/HasRole.ts
+import type { CommandContext, GuardInterface } from "stoatx";
+
+export function HasRole(roleName: string) {
+  return class implements GuardInterface {
+    async run(ctx: CommandContext): Promise<boolean> {
+      const server = ctx.message.server;
+      if (!server) return false;
+
+      const member = server.members.cache.get(ctx.authorId);
+      return member?.roles.cache.has(roleName) ?? false;
+    }
+
+    async guardFail(ctx: CommandContext): Promise<void> {
+      await ctx.reply(`⛔ You need the **${roleName}** role to use this command.`);
+    }
+  };
+}
+```
+
+- `run(ctx)`: Returns `true` if the command should execute, and `false` if it should be blocked.
+- `guardFail(ctx)`: An optional method called automatically when `run` returns `false`, allowing you to centrally manage custom error messages without repeating them in your commands.
+
+### Applying Guards
+
+To use your new guard, import it and apply the `@Guard` decorator. You can apply guards in two ways: at the **Class Level** or the **Method Level**.
+
+- **Class Level:** Applying `@Guard` right below `@Stoat()` protects _every_ command inside that file.
+- **Method Level:** Applying `@Guard` right above `@SimpleCommand()` protects only that specific command.
+
+You can safely mix and match these scopes! When both are used, the framework is smart enough to run the class-level guards first, followed by the specific method-level guards.
+
+```typescript
+// src/commands/admin.ts
+import { Stoat, SimpleCommand, Guard, type CommandContext } from "stoatx";
+import { HasRole } from "../guards/HasRole.js";
+import { InVoiceChannel } from "../guards/InVoiceChannel.js";
+
+@Stoat()
+@Guard(HasRole("Admin")) // 1. Must be an Admin to use ANYTHING in this file
+export class AdminCommands {
+  @SimpleCommand({ name: "view-logs" })
+  async viewLogs(ctx: CommandContext) {
+    // Only needs Admin (Inherited from the class)
+    await ctx.reply("Fetching logs...");
+  }
+
+  @SimpleCommand({ name: "nuke" })
+  @Guard(InVoiceChannel) // 2. Must ALSO be in a voice channel to run this specific command
+  async nuke(ctx: CommandContext) {
+    // Needs Admin AND Voice Channel
+    await ctx.reply("Nuking the channel...");
+  }
+}
+```
+
+### Global Guards
+
+Sometimes you need to block execution before it even reaches a specific command file—like putting your entire bot into maintenance mode or creating a global user blacklist.
+
+You can register **Global Guards** directly in your client configuration. These run before any Class-Level or Method-Level guards.
+
+**1. Create the Global Guard:**
+
+```typescript
+// src/guards/MaintenanceMode.ts
+import type { CommandContext, GuardInterface } from "stoatx";
+
+export function MaintenanceMode(isActive: boolean) {
+  return class implements GuardInterface {
+    async run(ctx: CommandContext): Promise<boolean> {
+      // If maintenance is NOT active, allow execution
+      return !isActive;
+    }
+
+    async guardFail(ctx: CommandContext): Promise<void> {
+      await ctx.reply("🛠️ The bot is currently in maintenance mode. Try again later!");
+    }
+  };
+}
+```
+
+**2. Register it in your Client:**
+
+```typescript
+// src/index.ts
+import { Client as StoatxClient } from "stoatx";
+import { MaintenanceMode } from "./guards/MaintenanceMode.js";
+
+const client = new StoatxClient({
+  // ... your other options ...
+  globalGuards: [MaintenanceMode(true)], // Pass the factory directly!
+});
+```
+
+---
 
 # Command Arguments & Options
 
