@@ -32,20 +32,76 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      - name: Checkout Repo
+      - name: Extract PR Branch Name
+        id: extract-branch
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        run: |
+          # Parse the branch name from the JSON array output
+          BRANCH_NAME=$(echo '${{ steps.rp.outputs.prs }}' | jq -r '.[0].headBranchName')
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Checkout PR Branch
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.extract-branch.outputs.branch }}
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup pnpm (PR Docs)
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js (PR Docs)
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies (PR Docs)
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Versioned Docs and Commit
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        run: |
+          # Read the bumped version that release-please just put in package.json
+          VERSION=$(node -p "require('./packages/client/package.json').version")
+
+          echo "Snapshotting docs for version: $VERSION"
+          pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
+
+          # Configure Git
+          git config user.name "stoatx-release[bot]"
+          git config user.email "stoatx-release[bot]@users.noreply.github.com"
+
+          git add apps/docs/api_versioned_docs apps/docs/api_versions.json
+
+          # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: snapshot api version v$VERSION [skip ci]"
+            git push origin HEAD
+          else
+            echo "Docs are already up to date for this PR."
+          fi
+
+      - name: Checkout Repo (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Setup pnpm
+      - name: Setup pnpm (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
         uses: pnpm/action-setup@v2
         with:
           version: 10.28.0
 
-      - name: Setup Node.js
+      - name: Setup Node.js (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
         uses: actions/setup-node@v4
         with:
@@ -53,11 +109,11 @@ jobs:
           cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install dependencies
+      - name: Install dependencies (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
+      - name: Build packages (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
         run: pnpm run build
 
@@ -67,32 +123,3 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         run: pnpm publish -r --access public --no-git-checks
-
-      - name: Generate Versioned Docs
-        if: ${{ steps.rp.outputs.releases_created == 'true' }}
-        run: |
-          # Read the newly bumped version directly from the client package
-          # (Adjust 'packages/client/package.json' to wherever your primary version lives)
-          VERSION=$(node -p "require('./packages/client/package.json').version")
-
-          echo "Snapshotting docs for version: $VERSION"
-
-          pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
-
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Commit and Push Docs
-        if: ${{ steps.rp.outputs.releases_created == 'true' }}
-        run: |
-          # Configure Git as your GitHub App bot
-          git config user.name "stoatx-release[bot]"
-          git config user.email "stoatx-release[bot]@users.noreply.github.com"
-
-          # Stage the newly created version snapshot folder and the registry JSON
-          git add apps/docs/api_versioned_docs apps/docs/api_versions.json
-
-          # Commit the changes (using [skip ci] so it doesn't accidentally trigger another workflow loop)
-          git commit -m "docs: snapshot api version v${{ env.VERSION }} [skip ci]"
-
-          # Push directly to main
-          git push origin main
