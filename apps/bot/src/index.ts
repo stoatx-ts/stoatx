@@ -45,7 +45,7 @@ class MixedCooldownManager implements CooldownManager {
 }
 
 const client = new Client({
-  prefix: "!",
+  prefix: ["!", "?"],
   cooldownManager: new MixedCooldownManager(),
 });
 
