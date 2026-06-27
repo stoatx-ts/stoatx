@@ -1,4 +1,4 @@
-import { type CommandContext, SimpleCommand, Stoat, StoatLifecycle } from "stoatx";
+import { type CommandContext, SimpleCommand, Stoat, StoatLifecycle, Arg, User } from "stoatx";
 
 @Stoat()
 export class PingCommand implements StoatLifecycle {
@@ -11,5 +11,11 @@ export class PingCommand implements StoatLifecycle {
     const latency = reply.createdAt!.getTime() - ctx.message.createdAt!.getTime();
 
     await reply.edit(`Pong! Latency: ${latency}ms,`);
+  }
+
+  @SimpleCommand({ name: "hello" })
+  async hello(@Arg({ required: true, fetch: true }) user: User, ctx: CommandContext) {
+    console.log(user);
+    await ctx.reply(`Hello, ${user}!`);
   }
 }

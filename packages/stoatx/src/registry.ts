@@ -3,8 +3,11 @@ import * as fs from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { glob } from "tinyglobby";
 import { buildSimpleCommandMetadata, getSimpleCommands, getEventsMetadata } from "./decorators";
+import { getArgs } from "./decorators/Arg";
+import { getOptions } from "./decorators/Option";
 import { decoratorStore } from "./decorators/store";
-import type { CommandMetadata } from "./types";
+import type { CommandMetadata, ParamSchema } from "./types";
+import { PARAM_TYPE_MAP } from "./types";
 
 interface AutoDiscoveryOptions {
   roots?: string[];
@@ -12,23 +15,13 @@ interface AutoDiscoveryOptions {
   ignore?: string[];
 }
 
-/**
- * Stored command entry from @Stoat/@SimpleCommand registration.
- */
 export interface RegisteredCommand {
-  /** Instance of the @Stoat class */
   instance: object;
-  /** Command metadata */
   metadata: CommandMetadata;
-  /** Method name to call */
   methodName: string;
-  /** The original class constructor (for guard validation) */
   classConstructor: Function;
 }
 
-/**
- * Stored event entry from @On/@Once registration.
- */
 export interface RegisteredEvent {
   instance: object;
   methodName: string;
@@ -36,18 +29,6 @@ export interface RegisteredEvent {
   type: "on" | "once";
 }
 
-/**
- * CommandRegistry - Scans directories and stores commands in a Map
- *
- * @example
- * ```ts
- * const registry = new CommandRegistry();
- * await registry.loadFromDirectory('./src/commands');
- *
- * const ping = registry.get('ping');
- * const allCommands = registry.getAll();
- * ```
- */
 export class CommandRegistry {
   private static readonly DEFAULT_AUTO_DISCOVERY_IGNORES = [
     "**/node_modules/**",
@@ -67,16 +48,10 @@ export class CommandRegistry {
     this.extensions = extensions;
   }
 
-  /**
-   * Get the number of registered commands
-   */
   get size(): number {
     return this.commands.size;
   }
 
-  /**
-   * Load commands from a directory using glob pattern matching
-   */
   async loadFromDirectory(directory: string): Promise<void> {
     const patterns = this.extensions.map((ext) => path.join(directory, "**", `*${ext}`).replace(/\\/g, "/"));
 
@@ -94,9 +69,6 @@ export class CommandRegistry {
     console.log(`[Stoatx] Loaded ${this.commands.size} command(s) and ${this.registeredEvents.length} event(s)`);
   }
 
-  /**
-   * Auto-discover command files across one or more roots.
-   */
   async autoDiscover(options: AutoDiscoveryOptions = {}): Promise<void> {
     const roots = options.roots?.length ? options.roots : [process.cwd()];
     const includePatterns = options.include?.length ? options.include : this.getDefaultAutoDiscoveryPatterns();
@@ -111,12 +83,10 @@ export class CommandRegistry {
     });
 
     const uniqueFiles = [...new Set(files)];
-    let candidateFiles = 0;
     for (const file of uniqueFiles) {
       if (!(await this.isLikelyCommandModule(file))) {
         continue;
       }
-      candidateFiles++;
 
       const baseDir =
         roots.find((root) => {
@@ -130,7 +100,6 @@ export class CommandRegistry {
   }
 
   private getDefaultAutoDiscoveryPatterns(): string[] {
-    // discordx-like default: scan broadly, then register only decorated classes
     return this.extensions.map((ext) => `**/*${ext}`);
   }
 
@@ -139,14 +108,10 @@ export class CommandRegistry {
       const source = await fs.readFile(filePath, "utf8");
       return source.includes("Stoat") || source.includes("SimpleCommand") || source.includes("stoatx:command");
     } catch {
-      // If the file can't be pre-read, fall back to attempting import.
       return true;
     }
   }
 
-  /**
-   * Register a command instance
-   */
   register(instance: object, metadata: CommandMetadata, classConstructor: Function, methodName: string): void {
     const name = metadata.name.toLowerCase();
 
@@ -156,7 +121,6 @@ export class CommandRegistry {
     }
 
     this.validateGuards(classConstructor, metadata.name);
-
     this.commands.set(name, { instance, metadata, methodName, classConstructor });
 
     for (const alias of metadata.aliases) {
@@ -169,47 +133,29 @@ export class CommandRegistry {
     }
   }
 
-  /**
-   * Get a command by name or alias
-   */
   get(name: string): RegisteredCommand | undefined {
     const lowerName = name.toLowerCase();
     const resolvedName = this.aliases.get(lowerName) ?? lowerName;
     return this.commands.get(resolvedName);
   }
 
-  /**
-   * Check if a command exists
-   */
   has(name: string): boolean {
     const lowerName = name.toLowerCase();
     return this.commands.has(lowerName) || this.aliases.has(lowerName);
   }
 
-  /**
-   * Get all registered commands
-   */
   getAll(): RegisteredCommand[] {
     return Array.from(this.commands.values());
   }
 
-  /**
-   * Get all command metadata
-   */
   getAllMetadata(): CommandMetadata[] {
     return this.getAll().map((c) => c.metadata);
   }
 
-  /**
-   * Get all registered events
-   */
   getEvents(): RegisteredEvent[] {
     return this.registeredEvents;
   }
 
-  /**
-   * Get commands grouped by category
-   */
   getByCategory(): Map<string, RegisteredCommand[]> {
     const categories = new Map<string, RegisteredCommand[]>();
 
@@ -223,9 +169,6 @@ export class CommandRegistry {
     return categories;
   }
 
-  /**
-   * Clear all commands
-   */
   clear(): void {
     this.commands.clear();
     this.aliases.clear();
@@ -233,33 +176,18 @@ export class CommandRegistry {
     this.processedStoatClasses.clear();
   }
 
-  /**
-   * Iterate over commands
-   */
   [Symbol.iterator](): IterableIterator<[string, RegisteredCommand]> {
     return this.commands.entries();
   }
 
-  /**
-   * Iterate over command values
-   */
   values(): IterableIterator<RegisteredCommand> {
     return this.commands.values();
   }
 
-  /**
-   * Iterate over command names
-   */
   keys(): IterableIterator<string> {
     return this.commands.keys();
   }
 
-  /**
-   * Validate that all guards on a command implement the required methods
-   * @param commandClass
-   * @param commandName
-   * @private
-   */
   private validateGuards(commandClass: Function, commandName: string): void {
     const guards: Function[] = Reflect.getMetadata("stoatx:command:guards", commandClass) || [];
 
@@ -283,9 +211,6 @@ export class CommandRegistry {
     }
   }
 
-  /**
-   * Load commands from a single file
-   */
   private async loadFile(filePath: string, baseDir: string): Promise<void> {
     try {
       const knownStoatClasses = new Set(decoratorStore.getStoatClasses().keys());
@@ -324,7 +249,8 @@ export class CommandRegistry {
         continue;
       }
 
-      const metadata = buildSimpleCommandMetadata(cmdDef.options, cmdDef.methodName, category);
+      const params = this.buildParamSchema(stoatClass.prototype, cmdDef.methodName);
+      const metadata = buildSimpleCommandMetadata(cmdDef.options, cmdDef.methodName, category, params);
       this.register(instance, metadata, stoatClass, cmdDef.methodName);
     }
 
@@ -347,16 +273,65 @@ export class CommandRegistry {
   }
 
   /**
-   * Derive category from file path relative to base directory
+   * Build the parameter schema for a command method by combining
+   * reflect-metadata param types with @Arg/@Option decorator metadata.
    */
+  private buildParamSchema(prototype: object, methodName: string): ParamSchema[] {
+    // Reflected constructor list for each parameter position
+    const paramTypes: Function[] = Reflect.getMetadata("design:paramtypes", prototype, methodName) ?? [];
+
+    const argDefs = getArgs(prototype, methodName);
+    const optionDefs = getOptions(prototype, methodName);
+
+    // Index lookup for fast access
+    const argByIndex = new Map(argDefs.map((a) => [a.index, a]));
+    const optionByIndex = new Map(optionDefs.map((o) => [o.index, o]));
+
+    const params: ParamSchema[] = [];
+
+    for (let i = 0; i < paramTypes.length; i++) {
+      const reflectedType = paramTypes[i];
+
+      if (optionByIndex.has(i)) {
+        const optDef = optionByIndex.get(i)!;
+        const resolvedType = reflectedType ? (PARAM_TYPE_MAP.get(reflectedType) ?? "string") : "string";
+        params.push({
+          index: i,
+          kind: "option",
+          resolvedType,
+          name: optDef.name,
+          required: optDef.required,
+        });
+        continue;
+      }
+
+      if (argByIndex.has(i)) {
+        const argDef = argByIndex.get(i)!;
+        const resolvedType = reflectedType ? (PARAM_TYPE_MAP.get(reflectedType) ?? "string") : "string";
+        params.push({
+          index: i,
+          kind: "arg",
+          resolvedType,
+          required: argDef.required,
+          fetch: argDef.fetch,
+        });
+        continue;
+      }
+
+      // No decorator — treat as ctx (should be the last parameter)
+      params.push({
+        index: i,
+        kind: "ctx",
+        resolvedType: "ctx",
+      });
+    }
+
+    return params;
+  }
+
   private getCategoryFromPath(filePath: string, baseDir: string): string | undefined {
     const relative = path.relative(baseDir, filePath);
     const parts = relative.split(path.sep);
-
-    if (parts.length > 1) {
-      return parts[0];
-    }
-
-    return undefined;
+    return parts.length > 1 ? parts[0] : undefined;
   }
 }
