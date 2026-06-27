@@ -149,7 +149,7 @@ Now, any command that includes `cooldownStorage: "database"` in its decorator me
 
 Sometimes you need to restrict a command so it can only be used under specific conditions like requiring a certain role, ensuring the user is in a voice channel, or checking a database first. Instead of writing the same `if/else` checks inside every command body, you can use **Guards**.
 
-Guards act as middleware that runs *before* your command. If a guard fails, the command is safely blocked from executing.
+Guards act as middleware that runs _before_ your command. If a guard fails, the command is safely blocked from executing.
 
 ### Creating a Guard
 
@@ -178,15 +178,15 @@ export function HasRole(roleName: string) {
 }
 ```
 
-* `run(ctx)`: Returns `true` if the command should execute, and `false` if it should be blocked.
-* `guardFail(ctx)`: An optional method called automatically when `run` returns `false`, allowing you to centrally manage custom error messages without repeating them in your commands.
+- `run(ctx)`: Returns `true` if the command should execute, and `false` if it should be blocked.
+- `guardFail(ctx)`: An optional method called automatically when `run` returns `false`, allowing you to centrally manage custom error messages without repeating them in your commands.
 
 ### Applying Guards
 
 To use your new guard, import it and apply the `@Guard` decorator. You can apply guards in two ways: at the **Class Level** or the **Method Level**.
 
-* **Class Level:** Applying `@Guard` right below `@Stoat()` protects *every* command inside that file.
-* **Method Level:** Applying `@Guard` right above `@SimpleCommand()` protects only that specific command.
+- **Class Level:** Applying `@Guard` right below `@Stoat()` protects _every_ command inside that file.
+- **Method Level:** Applying `@Guard` right above `@SimpleCommand()` protects only that specific command.
 
 You can safely mix and match these scopes! When both are used, the framework is smart enough to run the class-level guards first, followed by the specific method-level guards.
 
@@ -199,7 +199,6 @@ import { InVoiceChannel } from "../guards/InVoiceChannel.js";
 @Stoat()
 @Guard(HasRole("Admin")) // 1. Must be an Admin to use ANYTHING in this file
 export class AdminCommands {
-  
   @SimpleCommand({ name: "view-logs" })
   async viewLogs(ctx: CommandContext) {
     // Only needs Admin (Inherited from the class)
@@ -291,10 +290,10 @@ The `ctx` parameter always goes last and requires no decorator — Stoatx identi
 
 Types are inferred from the TypeScript parameter type:
 
-* `string` — standard text
-* `number` — automatically cast and validated
-* `boolean` — `"false"` becomes `false`, anything else becomes `true`; bare flags (e.g. `--force`) become `true`
-* `User`, `BaseChannel`, `Role` — Stoat mention types from `stoatx`
+- `string` — standard text
+- `number` — automatically cast and validated
+- `boolean` — `"false"` becomes `false`, anything else becomes `true`; bare flags (e.g. `--force`) become `true`
+- `User`, `BaseChannel`, `Role` — Stoat mention types from `stoatx`
 
 ## Stoat Mentions
 
@@ -395,7 +394,7 @@ Called when an unhandled runtime error is thrown inside the command body — the
 ### Available error types
 
 | Class                  | When thrown                             |
-|------------------------|-----------------------------------------|
+| ---------------------- | --------------------------------------- |
 | `MissingArgumentError` | Required `@Arg` not provided            |
 | `MissingOptionError`   | Required `@Option` not provided         |
 | `InvalidTypeError`     | Value couldn't be cast to expected type |
