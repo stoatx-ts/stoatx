@@ -1,5 +1,26 @@
 # @stoatx/bot
 
+## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/bot-v0.5.0...bot-v1.0.0) (2026-06-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* add Arg and Option decorators ([#98](https://github.com/stoatx-ts/stoatx/issues/98))
+
+### Features
+
+* add Arg and Option decorators ([#98](https://github.com/stoatx-ts/stoatx/issues/98)) ([de4d347](https://github.com/stoatx-ts/stoatx/commit/de4d3474047a1d762070c0364d7116bab7d96e33))
+* dependency injection ([#104](https://github.com/stoatx-ts/stoatx/issues/104)) ([3d2d499](https://github.com/stoatx-ts/stoatx/commit/3d2d499651b71e5c749658c4d060a87607d1dc68))
+* multiple prefix support ([#107](https://github.com/stoatx-ts/stoatx/issues/107)) ([52e8026](https://github.com/stoatx-ts/stoatx/commit/52e80268b62344601a96c47da60026b07594b34c))
+* subcommands ([#105](https://github.com/stoatx-ts/stoatx/issues/105)) ([a98e537](https://github.com/stoatx-ts/stoatx/commit/a98e5371d7a0755ce507513152f0cdb8f62aac4f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * stoatx bumped to 1.0.0
+
 ## [0.5.0](https://github.com/stoatx-ts/stoatx/compare/bot-v0.4.8...bot-v0.5.0) (2026-06-26)
 
 
