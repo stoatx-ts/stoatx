@@ -1,28 +1,5 @@
 # Changelog
 
-## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.8.0...stoatx-v1.0.0) (2026-06-27)
-
-
-### ⚠ BREAKING CHANGES
-
-* better error handling ([#101](https://github.com/stoatx-ts/stoatx/issues/101))
-* add Arg and Option decorators ([#98](https://github.com/stoatx-ts/stoatx/issues/98))
-
-### Features
-
-* add Arg and Option decorators ([#98](https://github.com/stoatx-ts/stoatx/issues/98)) ([de4d347](https://github.com/stoatx-ts/stoatx/commit/de4d3474047a1d762070c0364d7116bab7d96e33))
-* better error handling ([#101](https://github.com/stoatx-ts/stoatx/issues/101)) ([2e84c93](https://github.com/stoatx-ts/stoatx/commit/2e84c9321ab1d292d0276ded041ad8da883bf9a9))
-* dependency injection ([#104](https://github.com/stoatx-ts/stoatx/issues/104)) ([3d2d499](https://github.com/stoatx-ts/stoatx/commit/3d2d499651b71e5c749658c4d060a87607d1dc68))
-* introduce better guards ([#103](https://github.com/stoatx-ts/stoatx/issues/103)) ([ce19e4b](https://github.com/stoatx-ts/stoatx/commit/ce19e4b56e92da3cc7f5df480a9e0255a58341c3))
-* multiple prefix support ([#107](https://github.com/stoatx-ts/stoatx/issues/107)) ([52e8026](https://github.com/stoatx-ts/stoatx/commit/52e80268b62344601a96c47da60026b07594b34c))
-* subcommands ([#105](https://github.com/stoatx-ts/stoatx/issues/105)) ([a98e537](https://github.com/stoatx-ts/stoatx/commit/a98e5371d7a0755ce507513152f0cdb8f62aac4f))
-
-
-### Bug Fixes
-
-* make workflow create docs on release-please instead of on main  ([#102](https://github.com/stoatx-ts/stoatx/issues/102)) ([74e014b](https://github.com/stoatx-ts/stoatx/commit/74e014b393a921d4e5850c10310ad4ff00799ddb))
-* use keyof ClientEvents for type safety ([#106](https://github.com/stoatx-ts/stoatx/issues/106)) ([0ee1a4d](https://github.com/stoatx-ts/stoatx/commit/0ee1a4decaa87c271f22d6468a54147399cb92fa))
-
 ## [0.8.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v0.7.7...stoatx-v0.8.0) (2026-06-26)
 
 
