@@ -10,7 +10,15 @@ import type {
 } from "./types";
 import { ClientEvents, Message } from "@stoatx/client";
 import { Client } from "./client";
-import { CommandValidationError } from "./error";
+import {
+  CommandValidationError,
+  FetchFailedError,
+  InvalidMentionError,
+  InvalidTypeError,
+  MissingArgumentError,
+  MissingOptionError,
+  NoServerContextError,
+} from "./error";
 
 /**
  * Default in-memory cooldown manager
@@ -20,28 +28,22 @@ export class DefaultCooldownManager implements CooldownManager {
 
   check(ctx: CommandContext, metadata: CommandMetadata): boolean {
     if (metadata.cooldown <= 0) return true;
-
     const commandCooldowns = this.cooldowns.get(metadata.name);
     if (!commandCooldowns) return true;
-
     const expirationTime = commandCooldowns.get(ctx.authorId);
     if (!expirationTime) return true;
-
     if (Date.now() > expirationTime) {
       commandCooldowns.delete(ctx.authorId);
       return true;
     }
-
     return false;
   }
 
   getRemaining(ctx: CommandContext, metadata: CommandMetadata): number {
     const commandCooldowns = this.cooldowns.get(metadata.name);
     if (!commandCooldowns) return 0;
-
     const userCooldown = commandCooldowns.get(ctx.authorId);
     if (!userCooldown) return 0;
-
     return Math.max(0, userCooldown - Date.now());
   }
 
@@ -49,7 +51,6 @@ export class DefaultCooldownManager implements CooldownManager {
     if (!this.cooldowns.has(metadata.name)) {
       this.cooldowns.set(metadata.name, new Map());
     }
-
     const commandCooldowns = this.cooldowns.get(metadata.name)!;
     commandCooldowns.set(ctx.authorId, Date.now() + metadata.cooldown);
   }
@@ -97,7 +98,6 @@ export class StoatxHandler {
 
   private attachEvents(): void {
     const events = this.registry.getEvents();
-
     for (const eventDef of events) {
       const handler = async (...args: any[]) => {
         try {
@@ -109,7 +109,6 @@ export class StoatxHandler {
           );
         }
       };
-
       const eventName = eventDef.event as keyof ClientEvents;
       if (eventDef.type === "once") {
         this.client.once(eventName, handler);
@@ -119,9 +118,6 @@ export class StoatxHandler {
     }
   }
 
-  /**
-   * Parses raw string arguments into positional args and key-value flags
-   */
   private parseRawInput(rawArgs: string[]): { args: string[]; flags: Record<string, string | boolean> } {
     const args: string[] = [];
     const flags: Record<string, string | boolean> = {};
@@ -135,7 +131,6 @@ export class StoatxHandler {
         while (key.startsWith(this.flagPrefix)) {
           key = key.slice(this.flagPrefix.length);
         }
-
         const nextArg = rawArgs[i + 1];
         if (nextArg !== undefined && !nextArg.startsWith(this.flagPrefix)) {
           flags[key] = nextArg;
@@ -249,7 +244,6 @@ export class StoatxHandler {
     if (metadata.permissions.length > 0) {
       const server = ctx.message.server;
       const member = server ? await server.members.fetch(ctx.authorId) : null;
-
       if (!member || !member.permissions.has(metadata.permissions)) {
         if (typeof (instance as any).onMissingPermissions === "function") {
           const missing = member?.permissions.missing(metadata.permissions) || [];
@@ -289,7 +283,7 @@ export class StoatxHandler {
       return false;
     }
 
-    // Resolve parameters from @Arg/@Option schema
+    // Resolve parameters
     const resolvedParams = await this.resolveParams(metadata.params, ctx, instance);
     if (resolvedParams === null) return false;
 
@@ -297,7 +291,6 @@ export class StoatxHandler {
       if (metadata.cooldown > 0) {
         await this.cooldownManager.set(ctx, metadata);
       }
-
       await (instance as any)[methodName](...resolvedParams);
       return true;
     } catch (error) {
@@ -305,15 +298,30 @@ export class StoatxHandler {
         await (instance as any).onError(ctx, error as Error);
       } else {
         console.error(`[Stoatx] Error in command ${metadata.name}:`, error);
+        await ctx.reply("Something went wrong. Please try again later.");
       }
       return false;
     }
   }
 
   /**
-   * Resolve all parameters for a command method from the parsed input.
-   * Returns null if validation fails (error already reported to user).
+   * Report a validation error to the instance via onValidationError → onError → default reply
    */
+  private async reportValidationError(
+    instance: object,
+    ctx: CommandContext,
+    error: CommandValidationError,
+  ): Promise<null> {
+    if (typeof (instance as any).onValidationError === "function") {
+      await (instance as any).onValidationError(ctx, error);
+    } else if (typeof (instance as any).onError === "function") {
+      await (instance as any).onError(ctx, error);
+    } else {
+      await ctx.reply(error.message);
+    }
+    return null;
+  }
+
   private async resolveParams(
     params: ParamSchema[],
     ctx: CommandContext & { _rawArgs: string[]; _rawFlags: Record<string, string | boolean> },
@@ -333,14 +341,8 @@ export class StoatxHandler {
 
         if (rawValue === undefined) {
           if (param.required) {
-            const label = param.name ?? `arg[${param.index}]`;
-            const error = new CommandValidationError(label, `Missing required argument: \`<${label}>\``);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            const paramName = param.name ?? `arg[${param.index}]`;
+            return this.reportValidationError(instance, ctx, new MissingArgumentError(paramName));
           }
           resolved[param.index] = undefined;
           continue;
@@ -357,13 +359,7 @@ export class StoatxHandler {
 
         if (rawValue === undefined) {
           if (param.required) {
-            const error = new CommandValidationError(param.name!, `Missing required option: \`--${param.name}\``);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            return this.reportValidationError(instance, ctx, new MissingOptionError(param.name!, this.flagPrefix));
           }
           resolved[param.index] = undefined;
           continue;
@@ -378,10 +374,6 @@ export class StoatxHandler {
     return resolved;
   }
 
-  /**
-   * Resolve and validate a single raw string value to its target type.
-   * Returns null if validation fails (error already reported to user).
-   */
   private async resolveValue(
     rawValue: string,
     param: ParamSchema,
@@ -389,7 +381,7 @@ export class StoatxHandler {
     instance: object,
     kind: "arg" | "option",
   ): Promise<any | null> {
-    const label = kind === "arg" ? (param.name ?? `arg[${param.index}]`) : `${this.flagPrefix.repeat(2)}${param.name}`;
+    const paramName = kind === "arg" ? (param.name ?? `arg[${param.index}]`) : param.name!;
 
     switch (param.resolvedType) {
       case "string":
@@ -398,13 +390,7 @@ export class StoatxHandler {
       case "number": {
         const num = Number(rawValue);
         if (isNaN(num)) {
-          const error = new CommandValidationError(label, `Invalid value for \`${label}\`. Expected a number.`);
-          if (typeof (instance as any).onError === "function") {
-            await (instance as any).onError(ctx, error);
-          } else {
-            await ctx.reply(error.message);
-          }
-          return null;
+          return this.reportValidationError(instance, ctx, new InvalidTypeError(paramName, kind, "a number", rawValue));
         }
         return num;
       }
@@ -415,26 +401,14 @@ export class StoatxHandler {
       case "user": {
         const match = rawValue.match(/^(?:<@!?)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
         if (!match) {
-          const error = new CommandValidationError(label, `Invalid user mention for \`${label}\`.`);
-          if (typeof (instance as any).onError === "function") {
-            await (instance as any).onError(ctx, error);
-          } else {
-            await ctx.reply(error.message);
-          }
-          return null;
+          return this.reportValidationError(instance, ctx, new InvalidMentionError(paramName, kind, "user", rawValue));
         }
         const userId = match[1]!;
         if (param.fetch) {
           try {
             return await this.client.users.fetch(userId);
           } catch {
-            const error = new CommandValidationError(label, `Could not fetch user for \`${label}\`.`);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            return this.reportValidationError(instance, ctx, new FetchFailedError(paramName, kind, "user", userId));
           }
         }
         return this.client.users.cache.get(userId) ?? userId;
@@ -443,26 +417,22 @@ export class StoatxHandler {
       case "channel": {
         const match = rawValue.match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
         if (!match) {
-          const error = new CommandValidationError(label, `Invalid channel mention for \`${label}\`.`);
-          if (typeof (instance as any).onError === "function") {
-            await (instance as any).onError(ctx, error);
-          } else {
-            await ctx.reply(error.message);
-          }
-          return null;
+          return this.reportValidationError(
+            instance,
+            ctx,
+            new InvalidMentionError(paramName, kind, "channel", rawValue),
+          );
         }
         const channelId = match[1]!;
         if (param.fetch) {
           try {
             return await this.client.channels.fetch(channelId);
           } catch {
-            const error = new CommandValidationError(label, `Could not fetch channel for \`${label}\`.`);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            return this.reportValidationError(
+              instance,
+              ctx,
+              new FetchFailedError(paramName, kind, "channel", channelId),
+            );
           }
         }
         return this.client.channels.cache.get(channelId) ?? channelId;
@@ -471,36 +441,18 @@ export class StoatxHandler {
       case "role": {
         const match = rawValue.match(/^(?:<@&)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
         if (!match) {
-          const error = new CommandValidationError(label, `Invalid role mention for \`${label}\`.`);
-          if (typeof (instance as any).onError === "function") {
-            await (instance as any).onError(ctx, error);
-          } else {
-            await ctx.reply(error.message);
-          }
-          return null;
+          return this.reportValidationError(instance, ctx, new InvalidMentionError(paramName, kind, "role", rawValue));
         }
         const roleId = match[1]!;
         if (param.fetch) {
           const server = ctx.message.server;
           if (!server) {
-            const error = new CommandValidationError(label, `Cannot fetch role outside of a server.`);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            return this.reportValidationError(instance, ctx, new NoServerContextError(paramName, kind));
           }
           try {
             return await server.roles.fetch(roleId);
           } catch {
-            const error = new CommandValidationError(label, `Could not fetch role for \`${label}\`.`);
-            if (typeof (instance as any).onError === "function") {
-              await (instance as any).onError(ctx, error);
-            } else {
-              await ctx.reply(error.message);
-            }
-            return null;
+            return this.reportValidationError(instance, ctx, new FetchFailedError(paramName, kind, "role", roleId));
           }
         }
         return ctx.message.server?.roles.cache.get(roleId) ?? roleId;

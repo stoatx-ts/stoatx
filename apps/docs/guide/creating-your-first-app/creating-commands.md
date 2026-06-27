@@ -195,7 +195,7 @@ async info(
 }
 ```
 
-If the fetch fails (user not found, API error), `onError` is called with a `CommandValidationError`.
+If the fetch fails (user not found, API error), `onValidationError` is called with a `FetchFailedError`.
 
 ## Positional Args vs Named Options
 
@@ -213,7 +213,7 @@ If the fetch fails (user not found, API error), `onError` is called with a `Comm
 
 ## Custom Flag Prefixes
 
-By default flags use `-` (so `--reason` works since all leading prefix chars are stripped). You can customize this globally:
+By default, flags use `-` (so `--reason` works since all leading prefix chars are stripped). You can customize this globally:
 
 ```typescript
 const client = new StoatxClient({
@@ -223,29 +223,72 @@ const client = new StoatxClient({
 
 ## Error Handling
 
-If a required argument is missing or a value fails type validation, Stoatx aborts execution and calls `onError` on your class with a `CommandValidationError`. The error's `optionName` tells you which parameter failed:
+Stoatx separates validation errors from runtime errors, giving you precise control over each.
+
+### `onValidationError`
+
+Called when user input fails validation before the command runs — missing arguments, wrong types, invalid mentions, or failed fetches. If not implemented, falls back to `onError`, then a default reply.
 
 ```typescript
-import { CommandValidationError } from "stoatx";
+import {
+  CommandValidationError,
+  MissingArgumentError,
+  MissingOptionError,
+  InvalidTypeError,
+  InvalidMentionError,
+  FetchFailedError,
+} from "stoatx";
 
 @Stoat()
-export class ModerationCommand {
+export class ModerationCommand implements StoatLifecycle {
   @SimpleCommand({ name: "ban" })
-  async ban(@Arg({ name: "target", required: true }) target: User, ctx: CommandContext) {
-    await ctx.reply(`Banning ${target.username}!`);
+  async ban(
+    @Arg({ name: "target", required: true, fetch: true }) target: User,
+    @Option({ name: "reason" }) reason: string | undefined,
+    ctx: CommandContext
+  ) {
+    await ctx.reply(`Banned ${target.username} for ${reason ?? "no reason"}.`);
+  }
+
+  async onValidationError(ctx: CommandContext, error: CommandValidationError) {
+    if (error instanceof FetchFailedError) {
+      await ctx.reply(`Couldn't find that ${error.mentionKind}.`);
+    } else if (error instanceof MissingArgumentError) {
+      await ctx.reply(`Usage: \`!ban <target>\``);
+    } else if (error instanceof InvalidMentionError) {
+      await ctx.reply(`\`${error.rawValue}\` is not a valid ${error.mentionKind}.`);
+    } else if (error instanceof InvalidTypeError) {
+      await ctx.reply(`Expected ${error.expected} but got \`${error.received}\`.`);
+    } else {
+      await ctx.reply(`⚠️ ${error.message}`);
+    }
   }
 
   async onError(ctx: CommandContext, error: Error) {
-    if (error instanceof CommandValidationError) {
-      await ctx.reply(`⚠️ **Invalid Input:** ${error.message}`);
-      // e.g. "⚠️ Invalid Input: Missing required argument: `<target>`"
-    } else {
-      console.error(error);
-      await ctx.reply("An unexpected error occurred.");
-    }
+    console.error(error);
+    await ctx.reply("Something went wrong. Please try again later.");
   }
 }
 ```
+
+The `else` branch acts as a catch-all for any validation error you didn't handle specifically. For simple bots that just want a generic message, you can skip the `instanceof` checks entirely and just use `error.message`.
+
+### `onError`
+
+Called when an unhandled runtime error is thrown inside the command body — the safety net for errors you didn't anticipate. If not implemented, the framework logs the error and replies with a generic message so the bot never silently fails.
+
+### Available error types
+
+| Class                  | When thrown                             |
+|------------------------|-----------------------------------------|
+| `MissingArgumentError` | Required `@Arg` not provided            |
+| `MissingOptionError`   | Required `@Option` not provided         |
+| `InvalidTypeError`     | Value couldn't be cast to expected type |
+| `InvalidMentionError`  | Mention string isn't a valid ULID       |
+| `FetchFailedError`     | `fetch: true` but API call failed       |
+| `NoServerContextError` | Role fetch attempted outside a server   |
+
+All extend `CommandValidationError` which extends `StoatxError`.
 
 ## Next Steps
 

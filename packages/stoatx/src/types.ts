@@ -1,5 +1,6 @@
 import { Client as StoatClient, Message, PermissionResolvable, User, BaseChannel, Role } from "@stoatx/client";
 import { Client } from "./client";
+import { CommandValidationError } from "./error";
 
 /**
  * Resolved parameter type from reflect-metadata or explicit decorator config
@@ -89,6 +90,7 @@ export interface CommandContext<TClient extends StoatClient = Client> {
  */
 export interface StoatLifecycle {
   onError?(ctx: CommandContext, error: Error): Promise<void> | void;
+  onValidationError?(ctx: CommandContext, error: CommandValidationError): Promise<void> | void;
   onCooldown?(ctx: CommandContext, remaining: number): Promise<void> | void;
   onMissingPermissions?(ctx: CommandContext, missing: PermissionResolvable[]): Promise<void> | void;
   [method: string]: any;
