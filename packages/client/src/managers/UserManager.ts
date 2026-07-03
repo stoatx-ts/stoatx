@@ -92,7 +92,7 @@ export class UserManager extends BaseManager<string, User, RawUser> {
 
     const id = this.resolveId(user);
 
-    const data = await this.client.rest.get(`/users/${id}`) as RawUser;
+    const data = (await this.client.rest.get(`/users/${id}`)) as RawUser;
 
     return this._add(data);
   }

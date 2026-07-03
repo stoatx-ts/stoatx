@@ -96,7 +96,7 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
     }
 
     const id = this.resolveId(member);
-    const data = await this.client.rest.get(`/servers/${this.server.id}/members/${id}`) as RawMember;
+    const data = (await this.client.rest.get(`/servers/${this.server.id}/members/${id}`)) as RawMember;
 
     return this._add(data);
   }

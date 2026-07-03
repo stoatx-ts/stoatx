@@ -120,7 +120,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
     }
 
     const id = this.resolveId(channel);
-    const data = await this.client.rest.get(`/channels/${id}`) as RawChannel;
+    const data = (await this.client.rest.get(`/channels/${id}`)) as RawChannel;
 
     return this._add(data);
   }
@@ -171,7 +171,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(channel);
 
-    const data = await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload) as RawChannel;
+    const data = (await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload)) as RawChannel;
     return this._add(data);
   }
 
