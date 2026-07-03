@@ -37,7 +37,7 @@ export interface RolePermissionOptions {
 
 export type RoleResolvable = Role | string;
 
-export class RoleManager extends BaseManager<string, Role> {
+export class RoleManager extends BaseManager<string, Role, RawRole> {
   /**
    * Manages API methods and caching for server roles.
    */

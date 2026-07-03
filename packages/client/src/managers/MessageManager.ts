@@ -20,7 +20,7 @@ export interface MessageFetchOptions {
   includeUsers?: boolean;
 }
 
-export class MessageManager extends BaseManager<string, Message> {
+export class MessageManager extends BaseManager<string, Message, RawMessage> {
   constructor(
     client: Client,
     public channel: BaseChannel,

@@ -13,7 +13,7 @@ export interface UserEditOptions {
   status?: UserStatus;
 }
 
-export class UserManager extends BaseManager<string, User> {
+export class UserManager extends BaseManager<string, User, RawUser> {
   constructor(client: Client, limit: number = Infinity) {
     super(client, limit);
   }
@@ -92,7 +92,7 @@ export class UserManager extends BaseManager<string, User> {
 
     const id = this.resolveId(user);
 
-    const data = await this.client.rest.get(`/users/${id}`);
+    const data = (await this.client.rest.get(`/users/${id}`)) as RawUser;
 
     return this._add(data);
   }

@@ -326,7 +326,7 @@ export class GatewayManager {
       case "ServerMemberJoin": {
         const server = this.client.servers.cache.get(payload.id);
         if (server) {
-          const member = server.members._add({ user: payload.user });
+          const member = server.members._add(payload.member);
           this.client.emit("serverMemberJoin", member);
         }
         break;
@@ -346,7 +346,7 @@ export class GatewayManager {
         if (payload.reason === "Ban") {
           if (server) {
             const dummyBanPayload = {
-              id: payload.user,
+              _id: payload.user,
               reason: null,
             };
 

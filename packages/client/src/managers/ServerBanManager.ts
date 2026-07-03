@@ -3,13 +3,14 @@ import type { Client } from "../client/Client";
 import { Collection } from "../utils/Collection";
 import { BaseManager } from "./BaseManager";
 import { ServerBan } from "../structures/ServerBan";
+import { ServerBan as RawServerBan } from "stoat-api";
 
 export interface Ban {
   userId: string;
   reason: string | null;
 }
 
-export class ServerBanManager extends BaseManager<string, ServerBan> {
+export class ServerBanManager extends BaseManager<string, ServerBan, RawServerBan> {
   constructor(
     client: Client,
     public server: Server,
@@ -18,11 +19,11 @@ export class ServerBanManager extends BaseManager<string, ServerBan> {
     super(client, limit);
   }
 
-  protected extractId(data: any): string {
-    return data._id?.user ?? data.id;
+  protected extractId(data: RawServerBan): string {
+    return data._id?.user;
   }
 
-  protected construct(data: any): ServerBan {
+  protected construct(data: RawServerBan): ServerBan {
     return new ServerBan(data);
   }
 
@@ -33,13 +34,6 @@ export class ServerBanManager extends BaseManager<string, ServerBan> {
    */
   public async fetch(): Promise<Collection<string, ServerBan>> {
     const data = await this.client.rest.get(`/servers/${this.server.id}/bans`);
-
-    // Cache associated users globally
-    if (data.users && Array.isArray(data.users)) {
-      for (const userData of data.users) {
-        this.client.users._add(userData);
-      }
-    }
 
     const rawBans = data.bans || (Array.isArray(data) ? data : []);
     const fetched = new Collection<string, ServerBan>();

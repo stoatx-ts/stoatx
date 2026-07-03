@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Emoji`](Emoji.md)\>
+- `BaseManager`\<`string`, [`Emoji`](Emoji.md), `RawEmoji`\>
 
 ## Constructors
 
@@ -24,7 +24,7 @@
 
 #### Overrides
 
-`BaseManager<string, Emoji>.constructor`
+`BaseManager<string, Emoji, RawEmoji>.constructor`
 
 ## Properties
 
