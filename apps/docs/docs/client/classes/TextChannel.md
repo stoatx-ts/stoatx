@@ -49,6 +49,18 @@ The base class for all structures.
 
 ***
 
+### createdAt
+
+> **createdAt**: `Date`
+
+***
+
+### createdTimestamp
+
+> **createdTimestamp**: `number`
+
+***
+
 ### defaultPermissions?
 
 > `optional` **defaultPermissions?**: \{ `a`: `number`; `d`: `number`; \} \| `null`

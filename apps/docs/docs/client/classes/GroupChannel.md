@@ -49,6 +49,18 @@ The base class for all structures.
 
 ***
 
+### createdAt
+
+> **createdAt**: `Date`
+
+***
+
+### createdTimestamp
+
+> **createdTimestamp**: `number`
+
+***
+
 ### description?
 
 > `optional` **description?**: `string` \| `null` = `null`

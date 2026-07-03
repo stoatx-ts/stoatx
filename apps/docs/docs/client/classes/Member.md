@@ -84,6 +84,12 @@ Represents a member of a server on Stoat
 
 ***
 
+### joinedTimestamp
+
+> **joinedTimestamp**: `number`
+
+***
+
 ### nickname
 
 > **nickname**: `string` \| `null` = `null`

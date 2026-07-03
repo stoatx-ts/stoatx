@@ -75,7 +75,13 @@ The base class for all structures.
 
 ### createdAt
 
-> **createdAt**: `Date` \| `null` = `null`
+> **createdAt**: `Date`
+
+***
+
+### createdTimestamp
+
+> **createdTimestamp**: `number`
 
 ***
 
