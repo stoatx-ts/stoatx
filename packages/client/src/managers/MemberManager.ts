@@ -27,7 +27,7 @@ export interface FetchMembersOptions {
   excludeOffline?: boolean;
 }
 
-export class MemberManager extends BaseManager<string, Member> {
+export class MemberManager extends BaseManager<string, Member, RawMember> {
   constructor(
     client: Client,
     public server: Server,
@@ -96,7 +96,7 @@ export class MemberManager extends BaseManager<string, Member> {
     }
 
     const id = this.resolveId(member);
-    const data = await this.client.rest.get(`/servers/${this.server.id}/members/${id}`);
+    const data = await this.client.rest.get(`/servers/${this.server.id}/members/${id}`) as RawMember;
 
     return this._add(data);
   }

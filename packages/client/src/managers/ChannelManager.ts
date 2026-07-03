@@ -35,7 +35,7 @@ export interface ChannelRolePermissionOptions {
   deny?: PermissionResolvable;
 }
 
-export class ChannelManager extends BaseManager<string, BaseChannel> {
+export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel> {
   /**
    * Manages API methods and caching for all channels globally.
    * @param client The active Client instance.
@@ -120,7 +120,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     }
 
     const id = this.resolveId(channel);
-    const data = await this.client.rest.get(`/channels/${id}`);
+    const data = await this.client.rest.get(`/channels/${id}`) as RawChannel;
 
     return this._add(data);
   }
@@ -171,7 +171,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel> {
     if (remove.length > 0) payload.remove = remove;
     if (Object.keys(payload).length === 0) return this.fetch(channel);
 
-    const data = await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload);
+    const data = await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload) as RawChannel;
     return this._add(data);
   }
 

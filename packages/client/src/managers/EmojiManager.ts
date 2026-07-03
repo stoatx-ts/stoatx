@@ -20,7 +20,7 @@ export interface EmojiEditOptions {
 
 export type EmojiResolvable = string | Emoji;
 
-export class EmojiManager extends BaseManager<string, Emoji> {
+export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
   constructor(
     client: Client,
     public server?: Server,

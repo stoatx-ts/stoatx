@@ -11,7 +11,7 @@ export interface Invite {
   channelId: string;
 }
 
-export class ServerInviteManager extends BaseManager<string, ServerInvite> {
+export class ServerInviteManager extends BaseManager<string, ServerInvite, RawInvite> {
   constructor(
     client: Client,
     public server: Server,

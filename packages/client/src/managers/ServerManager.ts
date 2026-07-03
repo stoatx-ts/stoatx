@@ -24,7 +24,7 @@ export interface ServerEditOptions {
   owner?: string;
 }
 
-export class ServerManager extends BaseManager<string, Server> {
+export class ServerManager extends BaseManager<string, Server, RawServer> {
   constructor(client: Client, limit: number = Infinity) {
     super(client, limit);
   }
@@ -54,7 +54,7 @@ export class ServerManager extends BaseManager<string, Server> {
       if (cached) return cached;
     }
 
-    const data = await this.client.rest.get(`/servers/${id}`);
+    const data = await this.client.rest.get(`/servers/${id}`) as RawServer;
     return this._add(data);
   }
 
@@ -107,7 +107,7 @@ export class ServerManager extends BaseManager<string, Server> {
 
     if (remove.length > 0) payload.remove = remove;
 
-    const data = await this.client.rest.patch(`/servers/${serverId}`, payload);
+    const data = await this.client.rest.patch(`/servers/${serverId}`, payload) as RawServer;
 
     return this._add(data);
   }
