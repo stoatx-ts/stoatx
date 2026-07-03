@@ -51,7 +51,8 @@ export class Message extends Base {
   public embeds: RawEmbed[] | null = [];
   public attachments: Attachment[] = [];
   public editedAt: Date | null = null;
-  public createdAt: Date | null = null;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
   public flags: number = 0;
   public interactions: Interaction | null = null;
   public masquerade: Masquerade | null = null;
@@ -66,10 +67,9 @@ export class Message extends Base {
     this.authorId = data.author;
     this.channelId = data.channel;
 
-    const timestamp = decodeTime(this.id);
-    if (timestamp) {
-      this.createdAt = new Date(timestamp);
-    }
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
 
     if (data.attachments) {
       this.attachments = data.attachments.map((fileData: any) => new Attachment(this.client, fileData));

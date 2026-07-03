@@ -79,6 +79,26 @@ Represents the authenticated bot's user object.
 
 ***
 
+### createdAt
+
+> **createdAt**: `Date`
+
+#### Inherited from
+
+[`User`](User.md).[`createdAt`](User.md#createdat)
+
+***
+
+### createdTimestamp
+
+> **createdTimestamp**: `number`
+
+#### Inherited from
+
+[`User`](User.md).[`createdTimestamp`](User.md#createdtimestamp)
+
+***
+
 ### discriminator
 
 > **discriminator**: `string`

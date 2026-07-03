@@ -27,6 +27,8 @@ export class Member extends Base {
   private _roles: string[] = [];
   // The date the member joined the server
   public joinedAt!: Date;
+  // The timestamp the member joined the server
+  public joinedTimestamp!: number;
   // The date the member's timeout expires, or null if not timed out
   public timeout: Date | null = null;
   // Whatever the user can talk in Voice Chat
@@ -43,7 +45,10 @@ export class Member extends Base {
     // 2. Fallback to the ID passed from the Manager
     this.serverId = data._id?.server ?? serverId;
 
-    this.joinedAt = new Date(data.joined_at);
+    const timestamp = new Date(data.joined_at);
+    this.joinedAt = timestamp;
+    this.joinedTimestamp = timestamp.getTime();
+
     this.roles = new MemberRoleManager(this);
 
     this._patch(data);

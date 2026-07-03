@@ -2,6 +2,7 @@ import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import type { Emoji as RawEmoji } from "stoat-api";
 import { EmojiEditOptions } from "../managers/EmojiManager";
+import { decodeTime } from "ulid";
 
 export type EmojiParent = { type: "Server"; id: string } | { type: "Detached" };
 
@@ -9,11 +10,18 @@ export class Emoji extends Base {
   public creatorId!: string;
   public name!: string;
   public parent!: EmojiParent;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
   public animated: boolean = false;
   public nsfw: boolean = false;
 
   constructor(client: Client, data: RawEmoji) {
     super(client, data);
+
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
+
     this._patch(data);
   }
 

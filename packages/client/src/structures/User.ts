@@ -2,6 +2,7 @@ import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import type { User as RawUser } from "stoat-api";
+import { decodeTime } from "ulid";
 
 export type UserRelationShip = "None" | "User" | "Friend" | "Outgoing" | "Incoming" | "Blocked" | "BlockedOther";
 
@@ -29,12 +30,19 @@ export class User extends Base {
   public flags?: number;
   public privileged?: boolean;
   public status?: UserStatus | null;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
 
   constructor(client: Client, data: RawUser) {
     super(client, data);
     this.bot = false;
     this.privileged = false;
     this.flags = 0;
+
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
+
     this._patch(data);
   }
 

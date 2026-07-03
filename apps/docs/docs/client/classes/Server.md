@@ -85,6 +85,18 @@ The base class for all structures.
 
 ***
 
+### createdAt
+
+> **createdAt**: `Date`
+
+***
+
+### createdTimestamp
+
+> **createdTimestamp**: `number`
+
+***
+
 ### defaultPermissions
 
 > **defaultPermissions**: `bigint`

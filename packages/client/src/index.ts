@@ -41,6 +41,7 @@ export * from "./utils/Collector";
 export * from "./utils/MessageCollector";
 export * from "./utils/ReactionCollector";
 export * from "./utils/BitField";
+export { decodeTime } from "ulid";
 
 // Voice
 export * from "./voice";

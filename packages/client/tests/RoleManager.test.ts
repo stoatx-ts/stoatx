@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createMockClient, MockData } from "./utils/mockClient";
+import { ulid } from "ulid";
 
 describe("RoleManager", () => {
   let client: ReturnType<typeof createMockClient>;
@@ -10,17 +11,19 @@ describe("RoleManager", () => {
   });
 
   it("should fetch a role and add it to the cache", async () => {
-    const fakeApiResponse = MockData.role("role_123", "Admin");
+    const roleId = ulid();
+    const fakeApiResponse = MockData.role(roleId, "Admin");
     vi.mocked(client.rest.get).mockResolvedValueOnce(fakeApiResponse as any);
 
-    const server = client.servers._add({ _id: "server_123", name: "Test Server" });
+    const serverId = ulid();
+    const server = client.servers._add({ _id: serverId, name: "Test Server" });
 
-    const role = await server.roles.fetch("role_123");
+    const role = await server.roles.fetch(roleId);
 
-    expect(client.rest.get).toHaveBeenCalledWith("/servers/server_123/roles/role_123");
+    expect(client.rest.get).toHaveBeenCalledWith(`/servers/${serverId}/roles/${roleId}`);
     expect(client.rest.get).toHaveBeenCalledTimes(1);
 
     expect(role.name).toBe("Admin");
-    expect(server.roles.cache.has("role_123")).toBe(true);
+    expect(server.roles.cache.has(roleId)).toBe(true);
   });
 });

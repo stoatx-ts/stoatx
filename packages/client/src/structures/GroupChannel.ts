@@ -5,6 +5,7 @@ import type { User } from "./User";
 import * as util from "node:util";
 import { PermissionResolvable } from "../utils/permissions";
 import type { Channel as RawChannel } from "stoat-api";
+import { decodeTime } from "ulid";
 
 export type RawGroupChannel = Extract<RawChannel, { channel_type: "Group" }>;
 
@@ -16,9 +17,16 @@ export class GroupChannel extends BaseChannel {
   public icon: Attachment | null = null;
   public lastMessageId?: string | null = null;
   public nsfw: boolean = false;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
 
   constructor(client: Client, data: RawGroupChannel) {
     super(client, data);
+
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
+
     this._patch(data);
   }
 

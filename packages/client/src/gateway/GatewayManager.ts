@@ -105,11 +105,10 @@ export class GatewayManager {
 
         if (payload.emojis) {
           for (const rawEmoji of payload.emojis) {
-            const emoji = this.client.emojis._add(rawEmoji);
             if (rawEmoji.parent && rawEmoji.parent.type === "Server") {
               const server = this.client.servers.cache.get(rawEmoji.parent.id);
               if (server) {
-                server.emojis._add(emoji);
+                server.emojis._add(rawEmoji);
               }
             }
           }
@@ -363,11 +362,10 @@ export class GatewayManager {
       }
 
       case "EmojiCreate": {
-        const emoji = this.client.emojis._add(payload);
         if (payload.parent?.type === "Server") {
           const server = this.client.servers.cache.get(payload.parent.id);
           if (server) {
-            server.emojis._add(emoji);
+            server.emojis._add(payload);
           }
         }
         break;
