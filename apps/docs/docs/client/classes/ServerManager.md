@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Server`](Server.md)\>
+- `BaseManager`\<`string`, [`Server`](Server.md), `RawServer`\>
 
 ## Constructors
 
@@ -23,7 +23,7 @@
 
 #### Overrides
 
-`BaseManager<string, Server>.constructor`
+`BaseManager<string, Server, RawServer>.constructor`
 
 ## Properties
 

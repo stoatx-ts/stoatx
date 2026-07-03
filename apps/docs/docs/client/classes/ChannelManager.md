@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`BaseChannel`](BaseChannel.md)\>
+- `BaseManager`\<`string`, [`BaseChannel`](BaseChannel.md), `RawChannel`\>
 
 ## Constructors
 
@@ -25,7 +25,7 @@ Manages API methods and caching for all channels globally.
 
 #### Overrides
 
-`BaseManager<string, BaseChannel>.constructor`
+`BaseManager<string, BaseChannel, RawChannel>.constructor`
 
 ## Properties
 

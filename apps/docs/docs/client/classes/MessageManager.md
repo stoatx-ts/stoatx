@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Message`](Message.md)\>
+- `BaseManager`\<`string`, [`Message`](Message.md), `RawMessage`\>
 
 ## Constructors
 
@@ -24,7 +24,7 @@
 
 #### Overrides
 
-`BaseManager<string, Message>.constructor`
+`BaseManager<string, Message, RawMessage>.constructor`
 
 ## Properties
 
