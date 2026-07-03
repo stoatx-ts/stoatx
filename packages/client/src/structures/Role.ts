@@ -7,6 +7,7 @@ import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleMan
 import { Attachment } from "./Attachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { Role as RawRole } from "stoat-api";
+import { decodeTime } from "ulid";
 
 export class Role extends Base {
   public serverId: string;
@@ -16,10 +17,17 @@ export class Role extends Base {
   public rank: number = 0;
   public icon: Attachment | null = null;
   private _permissions: bigint = 0n;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
 
   constructor(client: Client, data: RawRole, serverId: string) {
     super(client, data);
     this.serverId = serverId;
+
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
+
     this._patch(data);
   }
 

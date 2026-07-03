@@ -9,6 +9,7 @@ import { ServerBanManager } from "../managers/ServerBanManager";
 import { ServerEditOptions } from "../managers/ServerManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { Server as RawServer, Category as RawCategory } from "stoat-api";
+import { decodeTime } from "ulid";
 
 export class Server extends Base {
   public channelIds: string[] = [];
@@ -29,6 +30,8 @@ export class Server extends Base {
   public bans: ServerBanManager;
   public invites: ServerInviteManager;
   public emojis: EmojiManager;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
 
   constructor(client: Client, data: RawServer) {
     super(client, data);
@@ -38,6 +41,11 @@ export class Server extends Base {
     this.bans = new ServerBanManager(this.client, this);
     this.invites = new ServerInviteManager(this.client, this);
     this.emojis = new EmojiManager(this.client, this);
+
+    const timestamp = decodeTime(data._id);
+    this.createdAt = new Date(timestamp);
+    this.createdTimestamp = timestamp;
+
     this._patch(data);
   }
 

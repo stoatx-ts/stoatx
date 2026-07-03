@@ -4,6 +4,7 @@ import { Attachment } from "./Attachment";
 import { PermissionResolvable } from "../utils/permissions";
 import { ChannelRolePermissionOptions } from "../managers/ChannelManager";
 import type { Channel as RawChannel } from "stoat-api";
+import { decodeTime } from "ulid";
 
 export type RawTextChannel = Extract<RawChannel, { channel_type: "TextChannel" }>;
 
@@ -17,10 +18,17 @@ export class TextChannel extends BaseChannel {
   public nsfw?: boolean;
   public slowmode?: number;
   public voice?: any;
+  public createdAt!: Date;
+  public createdTimestamp!: number;
 
   constructor(client: Client, data: RawTextChannel) {
     super(client, data);
     this.serverId = data.server;
+
+    const timestamp = decodeTime(data._id);
+    this.createdTimestamp = timestamp;
+    this.createdAt = new Date(timestamp);
+
     this.defaultPermissions = data.default_permissions;
     this.description = data.description;
     if (data.icon !== undefined) {
