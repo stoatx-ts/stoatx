@@ -71,6 +71,9 @@ jobs:
           # Read the bumped version that release-please just put in package.json
           VERSION=$(node -p "require('./packages/client/package.json').version")
 
+          # Grab the branch name we extracted earlier
+          BRANCH_NAME="${{ steps.extract-branch.outputs.branch }}"
+            
           echo "Snapshotting docs for version: $VERSION"
           pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
 
@@ -83,10 +86,14 @@ jobs:
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then
             git commit -m "docs: snapshot api version v$VERSION"
-            git push origin HEAD
-          else
-            echo "Docs are already up to date for this PR."
-          fi
+
+            # Fetch, rebase, and explicitly push to the PR branch
+            git fetch origin "$BRANCH_NAME"
+            git pull --rebase origin "$BRANCH_NAME"
+            git push origin "HEAD:$BRANCH_NAME"
+            else
+              echo "Docs are already up to date for this PR."
+            fi
 
       - name: Checkout Repo (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
