@@ -101,8 +101,8 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       stoat-api:
-        specifier: ^0.13.7
-        version: 0.13.7
+        specifier: ^0.14.0
+        version: 0.14.0
       ulid:
         specifier: ^3.0.2
         version: 3.0.2
@@ -5875,8 +5875,8 @@ packages:
   std-env@4.1.0:
     resolution: {integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==}
 
-  stoat-api@0.13.7:
-    resolution: {integrity: sha512-wG2mBDBfV8UHCplxe2btRhI5WzdIhDFj3PonHtb5fh/AuC2nOCk5fvYsbACkvg7BlQp/KtJsVYREVCjCH+0iNA==}
+  stoat-api@0.14.0:
+    resolution: {integrity: sha512-Kg6PS8D6aKKhs6KALvdHe6ygtwCuiCyj9JDT/KDR0BRDzoP2W9LjAePYZZBoA9BITIeBU270ug/0qDpWMGYb/w==}
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -13909,7 +13909,7 @@ snapshots:
 
   std-env@4.1.0: {}
 
-  stoat-api@0.13.7:
+  stoat-api@0.14.0:
     dependencies:
       json-with-bigint: 3.5.8
 
