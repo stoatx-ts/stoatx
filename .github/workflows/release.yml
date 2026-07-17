@@ -86,7 +86,7 @@ jobs:
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then
             git commit -m "docs: snapshot api version v$VERSION"
-  
+
             # Fetch, rebase, and explicitly push to the PR branch
             git fetch origin "$BRANCH_NAME"
             git pull --rebase origin "$BRANCH_NAME"
