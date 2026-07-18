@@ -37,6 +37,8 @@ export class Member extends Base {
   public canRecieve: boolean = false;
   // Member roles manager
   public roles: MemberRoleManager;
+  // Member pronouns
+  public pronouns?: string | null = null;
 
   constructor(client: Client, data: RawMember, serverId?: string) {
     super(client, { _id: data._id?.user });
@@ -61,6 +63,7 @@ export class Member extends Base {
     if (data.timeout !== undefined) this.timeout = data.timeout ? new Date(data.timeout) : null;
     if (data.can_publish !== undefined) this.canPublish = data.can_publish;
     if (data.can_receive !== undefined) this.canRecieve = data.can_receive;
+    if (data.pronouns !== undefined) this.pronouns = data.pronouns;
   }
 
   /**
