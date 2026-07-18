@@ -89,7 +89,7 @@ jobs:
 
             # Fetch, rebase, and explicitly push to the PR branch
             git fetch origin "$BRANCH_NAME"
-            git pull --rebase origin "$BRANCH_NAME"
+            git pull --rebase --autostash origin "$BRANCH_NAME"
             git push origin "HEAD:$BRANCH_NAME"
             else
               echo "Docs are already up to date for this PR."
