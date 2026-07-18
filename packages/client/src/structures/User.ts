@@ -1,7 +1,7 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
-import type { User as RawUser } from "stoat-api";
+import type { User as RawUser, FieldsUser } from "stoat-api";
 import { decodeTime } from "ulid";
 
 export type UserRelationShip = "None" | "User" | "Friend" | "Outgoing" | "Incoming" | "Blocked" | "BlockedOther";
@@ -32,6 +32,7 @@ export class User extends Base {
   public status?: UserStatus | null;
   public createdAt!: Date;
   public createdTimestamp!: number;
+  public pronouns?: string | null = null;
 
   constructor(client: Client, data: RawUser) {
     super(client, data);
@@ -46,11 +47,12 @@ export class User extends Base {
     this._patch(data);
   }
 
-  public _patch(data: RawUser, clear?: string[]) {
+  public _patch(data: RawUser, clear?: FieldsUser[]): void {
     if (data.username !== undefined) this.username = data.username;
     if (data.discriminator !== undefined) this.discriminator = data.discriminator;
     if (data.online !== undefined) this.online = data.online;
     if (data.relationship !== undefined) this.relationship = data.relationship;
+    if (data.pronouns !== undefined) this.pronouns = data.pronouns;
 
     if (data.display_name !== undefined) this.displayName = data.display_name;
 
@@ -73,6 +75,7 @@ export class User extends Base {
         if (field === "Avatar") this.avatar = null;
         if (field === "StatusText" && this.status) this.status.text = null;
         if (field === "DisplayName") this.displayName = null;
+        if (field === "Pronouns") this.pronouns = null;
       }
     }
   }
