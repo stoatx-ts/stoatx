@@ -10,6 +10,24 @@ import { ServerEditOptions } from "../managers/ServerManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { Server as RawServer, Category as RawCategory, FieldsServer } from "stoat-api";
 import { decodeTime } from "ulid";
+import { RouteParams } from "../utils/schema";
+import { Collection } from "../utils/Collection";
+import { AuditLogEntry } from "./AuditLogEntry";
+
+export interface FetchAuditLogsOptions {
+  /* Filter by who ran the action */
+  user?: string;
+  /* Filter by who the action is targetting */
+  target?: string;
+  /* Filter by the action type */
+  type?: string[];
+  /* Entries before a certain entry id */
+  before?: string;
+  /* Entries after a certain entry id */
+  after?: string;
+  /* Maximum numbers of entries to fetch */
+  limit?: number;
+}
 
 export class Server extends Base {
   public channelIds: string[] = [];
@@ -115,6 +133,31 @@ export class Server extends Base {
    */
   public async leave() {
     return this.client.rest.delete(`/servers/${this.id}/leave`);
+  }
+
+  /**
+   * Fetch audit logs for this server
+   * @param options Query params
+   */
+  public async fetchAuditLogs(options?: FetchAuditLogsOptions): Promise<Collection<string, AuditLogEntry>> {
+    const query: RouteParams<"get", `/servers/${string}/audit_logs`> = {};
+    if (options?.user) query.user = options.user;
+    if (options?.target) query.target = options.target;
+    if (options?.type) query.type = options.type;
+    if (options?.before) query.before = options.before;
+    if (options?.after) query.after = options.after;
+    if (options?.limit) query.limit = options.limit;
+
+    const data = await this.client.rest.get(`/servers/${this.id}/audit_logs`, query);
+
+    for (const user of data.users) this.client.users._add(user);
+    for (const member of data.members) this.members._add(member);
+
+    const entries = new Collection<string, AuditLogEntry>();
+    for (const raw of data.audit_logs) {
+      entries.set(raw._id, new AuditLogEntry(this.client, raw));
+    }
+    return entries;
   }
 
   /**
