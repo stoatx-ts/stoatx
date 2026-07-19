@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.8.0...client-v0.9.0) (2026-07-19)
+
+
+### Features
+
+* add createdAt and createdTimestamp to structures ([#121](https://github.com/stoatx-ts/stoatx/issues/121)) ([bf2ce5a](https://github.com/stoatx-ts/stoatx/commit/bf2ce5af192c4c0cc278fc605cb2f630506ef687))
+* audit logs ([#129](https://github.com/stoatx-ts/stoatx/issues/129)) ([d8e7804](https://github.com/stoatx-ts/stoatx/commit/d8e780409ee0dd8701c5eabdcb635563ce36545c))
+* pronouns ([#126](https://github.com/stoatx-ts/stoatx/issues/126)) ([24a24dc](https://github.com/stoatx-ts/stoatx/commit/24a24dc6ec50545cbb6b6a4fd51aec15bfdcb72c))
+
+
+### Bug Fixes
+
+* add missing clears ([#128](https://github.com/stoatx-ts/stoatx/issues/128)) ([dca1ce6](https://github.com/stoatx-ts/stoatx/commit/dca1ce6ceaa6d4f719cf067fab1fed689e7d9154))
+
 ## [0.8.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.7.0...client-v0.8.0) (2026-06-27)
 
 
