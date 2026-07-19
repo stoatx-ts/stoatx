@@ -123,6 +123,12 @@ The base class for all structures.
 
 ***
 
+### pronouns?
+
+> `optional` **pronouns?**: `string` \| `null` = `null`
+
+***
+
 ### relationship
 
 > **relationship**: [`UserRelationShip`](../type-aliases/UserRelationShip.md)
@@ -180,7 +186,7 @@ Helper to quickly clone a structure
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | `string`[] |
+| `clear?` | (`"Avatar"` \| `"StatusText"` \| `"StatusPresence"` \| `"ProfileContent"` \| `"ProfileBackground"` \| `"DisplayName"` \| `"Pronouns"` \| `"Internal"`)[] |
 
 #### Returns
 

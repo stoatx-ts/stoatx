@@ -96,6 +96,12 @@ Represents a member of a server on Stoat
 
 ***
 
+### pronouns?
+
+> `optional` **pronouns?**: `string` \| `null` = `null`
+
+***
+
 ### roles
 
 > **roles**: `MemberRoleManager`
@@ -210,13 +216,14 @@ Helper to quickly clone a structure
 
 ### \_patch()
 
-> **\_patch**(`data`): `void`
+> **\_patch**(`data`, `clear?`): `void`
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
+| `clear?` | (`"Avatar"` \| `"Pronouns"` \| `"Nickname"` \| `"Roles"` \| `"Timeout"` \| `"CanReceive"` \| `"CanPublish"` \| `"JoinedAt"` \| `"VoiceChannel"`)[] |
 
 #### Returns
 

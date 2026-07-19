@@ -269,6 +269,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/FetchAuditLogsOptions",
+          label: "FetchAuditLogsOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/FetchMembersOptions",
           label: "FetchMembersOptions"
         },

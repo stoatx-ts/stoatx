@@ -159,6 +159,16 @@ Represents the authenticated bot's user object.
 
 ***
 
+### pronouns?
+
+> `optional` **pronouns?**: `string` \| `null` = `null`
+
+#### Inherited from
+
+[`User`](User.md).[`pronouns`](User.md#pronouns)
+
+***
+
 ### relationship
 
 > **relationship**: [`UserRelationShip`](../type-aliases/UserRelationShip.md)
@@ -232,7 +242,7 @@ Helper to quickly clone a structure
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | `string`[] |
+| `clear?` | (`"Avatar"` \| `"StatusText"` \| `"StatusPresence"` \| `"ProfileContent"` \| `"ProfileBackground"` \| `"DisplayName"` \| `"Pronouns"` \| `"Internal"`)[] |
 
 #### Returns
 
