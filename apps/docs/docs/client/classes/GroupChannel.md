@@ -186,7 +186,7 @@ Helper to quickly clone a structure
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | `string`[] |
+| `clear?` | (`"Description"` \| `"Icon"` \| `"DefaultPermissions"` \| `"Voice"` \| `"Slowmode"`)[] |
 
 #### Returns
 

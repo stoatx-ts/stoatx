@@ -56,6 +56,7 @@
 - [CollectorOptions](interfaces/CollectorOptions.md)
 - [EmojiCreateOptions](interfaces/EmojiCreateOptions.md)
 - [EmojiEditOptions](interfaces/EmojiEditOptions.md)
+- [FetchAuditLogsOptions](interfaces/FetchAuditLogsOptions.md)
 - [FetchMembersOptions](interfaces/FetchMembersOptions.md)
 - [Interaction](interfaces/Interaction.md)
 - [Masquerade](interfaces/Masquerade.md)

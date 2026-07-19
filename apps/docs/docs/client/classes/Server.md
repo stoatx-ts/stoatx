@@ -206,7 +206,7 @@ Updates the server instance with new data without losing the object reference.
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | `string`[] |
+| `clear?` | (`"Description"` \| `"Icon"` \| `"Categories"` \| `"SystemMessages"` \| `"Banner"`)[] |
 
 #### Returns
 
@@ -251,6 +251,24 @@ Compares this object with another to see if they represent the same entity.
 #### Inherited from
 
 [`Base`](Base.md).[`equals`](Base.md#equals)
+
+***
+
+### fetchAuditLogs()
+
+> **fetchAuditLogs**(`options?`): `Promise`\<[`Collection`](Collection.md)\<`string`, `AuditLogEntry`\>\>
+
+Fetch audit logs for this server
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options?` | [`FetchAuditLogsOptions`](../interfaces/FetchAuditLogsOptions.md) | Query params |
+
+#### Returns
+
+`Promise`\<[`Collection`](Collection.md)\<`string`, `AuditLogEntry`\>\>
 
 ***
 
