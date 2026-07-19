@@ -9,7 +9,7 @@ import { MemberRoleManager } from "../managers/MemberRoleManager";
 import { StoatCDN } from "../utils/Constants";
 import { Attachment } from "./Attachment";
 import { Message, MessageOptions } from "./Message";
-import { Member as RawMember } from "stoat-api";
+import { FieldsMember, Member as RawMember } from "stoat-api";
 
 /**
  * Represents a member of a server on Stoat
@@ -56,7 +56,7 @@ export class Member extends Base {
     this._patch(data);
   }
 
-  _patch(data: RawMember) {
+  _patch(data: RawMember, clear?: FieldsMember[]) {
     if (data.nickname !== undefined) this.nickname = data.nickname;
     if (data.avatar !== undefined) this.avatar = data.avatar ? new Attachment(this.client, data.avatar) : null;
     if (data.roles !== undefined) this._roles = data.roles;
@@ -64,6 +64,35 @@ export class Member extends Base {
     if (data.can_publish !== undefined) this.canPublish = data.can_publish;
     if (data.can_receive !== undefined) this.canRecieve = data.can_receive;
     if (data.pronouns !== undefined) this.pronouns = data.pronouns;
+
+    if (clear && Array.isArray(clear)) {
+      for (const field of clear) {
+        switch (field) {
+          case "Avatar":
+            this.avatar = null;
+            break;
+          case "Nickname":
+            this.nickname = null;
+            break;
+          case "Pronouns":
+            this.pronouns = null;
+            break;
+          case "CanPublish":
+            this.canPublish = false;
+            break;
+          case "Timeout":
+            this.timeout = null;
+            break;
+          case "Roles":
+            this._roles = [];
+            this.roles = new MemberRoleManager(this);
+            break;
+          case "CanReceive":
+            this.canRecieve = false;
+            break;
+        }
+      }
+    }
   }
 
   /**

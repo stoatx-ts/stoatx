@@ -6,7 +6,7 @@ import { Permissions } from "../utils/permissions";
 import type { RoleEditOptions, RolePermissionOptions } from "../managers/RoleManager";
 import { Attachment } from "./Attachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
-import { Role as RawRole } from "stoat-api";
+import { FieldsRole, Role as RawRole } from "stoat-api";
 import { decodeTime } from "ulid";
 
 export class Role extends Base {
@@ -35,7 +35,7 @@ export class Role extends Base {
    * Updates the role instance with new data without losing the object reference.
    * @internal
    */
-  public _patch(data: RawRole) {
+  public _patch(data: RawRole, clear?: FieldsRole[]) {
     if (data.name !== undefined) this.name = data.name;
     if (data.colour !== undefined) this.color = data.colour;
     if (data.hoist !== undefined) this.hoist = data.hoist;
@@ -51,6 +51,19 @@ export class Role extends Base {
         }
       } catch {
         this._permissions = 0n;
+      }
+    }
+
+    if (clear && Array.isArray(clear)) {
+      for (const field of clear) {
+        switch (field) {
+          case "Colour":
+            this.color = null;
+            break;
+          case "Icon":
+            this.icon = null;
+            break;
+        }
       }
     }
   }

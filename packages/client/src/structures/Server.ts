@@ -8,7 +8,7 @@ import { ServerInviteManager } from "../managers/ServerInviteManager";
 import { ServerBanManager } from "../managers/ServerBanManager";
 import { ServerEditOptions } from "../managers/ServerManager";
 import { EmojiManager } from "../managers/EmojiManager";
-import type { Server as RawServer, Category as RawCategory } from "stoat-api";
+import type { Server as RawServer, Category as RawCategory, FieldsServer } from "stoat-api";
 import { decodeTime } from "ulid";
 
 export class Server extends Base {
@@ -52,7 +52,7 @@ export class Server extends Base {
   /**
    * Updates the server instance with new data without losing the object reference.
    */
-  public _patch(data: RawServer, clear?: string[]) {
+  public _patch(data: RawServer, clear?: FieldsServer[]) {
     if (data.channels !== undefined) this.channelIds = data.channels;
     if (data.default_permissions !== undefined) {
       try {
@@ -89,6 +89,12 @@ export class Server extends Base {
             break;
           case "Icon":
             this.icon = null;
+            break;
+          case "Banner":
+            this.banner = null;
+            break;
+          case "Categories":
+            this.categories = null;
             break;
         }
       }

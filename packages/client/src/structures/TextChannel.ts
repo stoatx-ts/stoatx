@@ -3,7 +3,7 @@ import { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import { PermissionResolvable } from "../utils/permissions";
 import { ChannelRolePermissionOptions } from "../managers/ChannelManager";
-import type { Channel as RawChannel } from "stoat-api";
+import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
 import { decodeTime } from "ulid";
 
 export type RawTextChannel = Extract<RawChannel, { channel_type: "TextChannel" }>;
@@ -41,7 +41,7 @@ export class TextChannel extends BaseChannel {
     this._patch(data);
   }
 
-  public _patch(data: RawTextChannel, clear?: string[]) {
+  public _patch(data: RawTextChannel, clear?: FieldsChannel[]) {
     if (data.name !== undefined) this.name = data.name;
     if (data.description !== undefined) this.description = data.description;
 
@@ -55,10 +55,10 @@ export class TextChannel extends BaseChannel {
             this.icon = null;
             break;
           case "DefaultPermissions":
-            this.defaultPermissions = data.default_permissions;
+            this.defaultPermissions = null;
             break;
           case "Voice":
-            this.voice = data.voice;
+            this.voice = null;
             break;
         }
       }

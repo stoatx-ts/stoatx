@@ -4,7 +4,7 @@ import { BaseChannel } from "./BaseChannel";
 import type { User } from "./User";
 import * as util from "node:util";
 import { PermissionResolvable } from "../utils/permissions";
-import type { Channel as RawChannel } from "stoat-api";
+import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
 import { decodeTime } from "ulid";
 
 export type RawGroupChannel = Extract<RawChannel, { channel_type: "Group" }>;
@@ -30,7 +30,7 @@ export class GroupChannel extends BaseChannel {
     this._patch(data);
   }
 
-  public _patch(data: RawGroupChannel, clear?: string[]) {
+  public _patch(data: RawGroupChannel, clear?: FieldsChannel[]) {
     if (data.name !== undefined) this.name = data.name;
     if (data.owner !== undefined) this.ownerId = data.owner;
     if (data.recipients !== undefined) this.recipients = data.recipients;
@@ -45,9 +45,6 @@ export class GroupChannel extends BaseChannel {
     if (clear && Array.isArray(clear)) {
       for (const field of clear) {
         switch (field) {
-          case "Name":
-            this.name = "";
-            break;
           case "Description":
             this.description = null;
             break;
