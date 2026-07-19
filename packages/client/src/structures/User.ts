@@ -72,10 +72,23 @@ export class User extends Base {
     // Handle deletions gracefully
     if (clear && Array.isArray(clear)) {
       for (const field of clear) {
-        if (field === "Avatar") this.avatar = null;
-        if (field === "StatusText" && this.status) this.status.text = null;
-        if (field === "DisplayName") this.displayName = null;
-        if (field === "Pronouns") this.pronouns = null;
+        switch (field) {
+          case "Avatar":
+            this.avatar = null;
+            break;
+          case "DisplayName":
+            this.displayName = null;
+            break;
+          case "Pronouns":
+            this.pronouns = null;
+            break;
+          case "StatusText":
+            this.status!.text = null;
+            break;
+          case "StatusPresence":
+            this.status!.presence = null;
+            break;
+        }
       }
     }
   }
