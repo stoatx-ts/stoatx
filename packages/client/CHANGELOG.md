@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/stoatx-ts/stoatx/compare/client-v0.9.0...client-v0.9.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* correct crate to create typo in EmojiManager.create method ([#132](https://github.com/stoatx-ts/stoatx/issues/132)) ([d46c44d](https://github.com/stoatx-ts/stoatx/commit/d46c44dbe84e8aa2177ffe84bfa54c3122fb08dd))
+
 ## [0.9.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.8.0...client-v0.9.0) (2026-07-19)
 
 
