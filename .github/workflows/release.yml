@@ -65,6 +65,15 @@ jobs:
         if: ${{ steps.rp.outputs.prs_created == 'true' }}
         run: pnpm install --frozen-lockfile
 
+      - name: Build API Docs
+        if: ${{ steps.rp.outputs.prs_created == 'true' }}
+        run: |
+          # docusaurus-plugin-typedoc regenerates the API markdown as part of
+          # the Docusaurus build lifecycle, so running the real build here
+          # ensures docs/client is current even if it wasn't rebuilt locally
+          # before this PR was opened.
+          pnpm --filter @stoatx/docs run build
+
       - name: Generate Versioned Docs and Commit
         if: ${{ steps.rp.outputs.prs_created == 'true' }}
         run: |
@@ -73,7 +82,7 @@ jobs:
 
           # Grab the branch name we extracted earlier
           BRANCH_NAME="${{ steps.extract-branch.outputs.branch }}"
-            
+
           echo "Snapshotting docs for version: $VERSION"
           pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
 
@@ -81,7 +90,7 @@ jobs:
           git config user.name "stoatx-release[bot]"
           git config user.email "stoatx-release[bot]@users.noreply.github.com"
 
-          git add apps/docs/api_versioned_docs apps/docs/api_versioned_sidebars apps/docs/api_versions.json
+          git add apps/docs/api_versioned_docs apps/docs/api_versioned_sidebars apps/docs/api_versions.json apps/docs/docs/client
 
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then
