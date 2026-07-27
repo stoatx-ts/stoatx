@@ -105,7 +105,7 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    * @example
    * const emoji = await client.emojis.create(server, { emoji: "path/to/emoji.png", name: "myEmoji" });
    */
-  public async crate(options: EmojiCreateOptions): Promise<Emoji> {
+  public async create(options: EmojiCreateOptions): Promise<Emoji> {
     if (!this.server) throw new Error("No server registered in EmojiManager");
 
     const resolvedId = await resolveAttachment(this.client.rest, options.emoji, "emojis");
