@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.3](https://github.com/stoatx-ts/stoatx/compare/stoatx-v1.0.2...stoatx-v1.0.3) (2026-07-27)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 0.9.1
+  * peerDependencies
+    * @stoatx/client bumped from ^0.9.0 to ^0.9.1
+
 ## [1.0.2](https://github.com/stoatx-ts/stoatx/compare/stoatx-v1.0.1...stoatx-v1.0.2) (2026-07-19)
 
 
