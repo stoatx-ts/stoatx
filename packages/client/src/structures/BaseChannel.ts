@@ -10,6 +10,7 @@ import { Collection } from "../utils/Collection";
 import { MessageCollector, MessageCollectorOptions } from "../utils/MessageCollector";
 import { Channel as RawChannel } from "stoat-api";
 import type { VoiceChannel } from "./VoiceChannel";
+import { WebhookManager } from "../managers/WebhookManager";
 
 export type ChannelType = "SavedMessages" | "DirectMessage" | "Group" | "TextChannel";
 
@@ -26,12 +27,14 @@ export interface ChannelCreateOptions {
 export abstract class BaseChannel extends Base {
   public type: ChannelType;
   public messages: MessageManager;
+  public webhooks: WebhookManager;
 
   protected constructor(client: Client, data: RawChannel) {
     super(client, data);
     this.type = data.channel_type;
 
     this.messages = new MessageManager(this.client, this);
+    this.webhooks = new WebhookManager(this.client, this);
   }
 
   /**
