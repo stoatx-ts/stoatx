@@ -77,6 +77,16 @@ A fallback class for channel types that are not yet officially supported by the 
 
 [`BaseChannel`](BaseChannel.md).[`type`](BaseChannel.md#type)
 
+***
+
+### webhooks
+
+> **webhooks**: `WebhookManager`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`webhooks`](BaseChannel.md#webhooks)
+
 ## Methods
 
 ### \_clone()

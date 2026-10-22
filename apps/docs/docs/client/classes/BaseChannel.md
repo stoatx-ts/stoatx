@@ -76,6 +76,12 @@ The base class for all structures.
 
 > **type**: [`ChannelType`](../type-aliases/ChannelType.md)
 
+***
+
+### webhooks
+
+> **webhooks**: `WebhookManager`
+
 ## Methods
 
 ### \_clone()

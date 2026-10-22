@@ -205,6 +205,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/VoiceManager",
           label: "VoiceManager"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/Webhook",
+          label: "Webhook"
         }
       ]
     },
@@ -366,6 +371,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/VoiceConnectionEvents",
           label: "VoiceConnectionEvents"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/WebhookEditOptions",
+          label: "WebhookEditOptions"
         }
       ]
     },

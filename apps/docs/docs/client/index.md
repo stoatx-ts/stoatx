@@ -42,6 +42,7 @@
 - [UserManager](classes/UserManager.md)
 - [VoiceConnection](classes/VoiceConnection.md)
 - [VoiceManager](classes/VoiceManager.md)
+- [Webhook](classes/Webhook.md)
 
 ## Interfaces
 
@@ -76,6 +77,7 @@
 - [UserEditOptions](interfaces/UserEditOptions.md)
 - [UserProfile](interfaces/UserProfile.md)
 - [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
+- [WebhookEditOptions](interfaces/WebhookEditOptions.md)
 
 ## Type Aliases
 

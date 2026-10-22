@@ -86,9 +86,9 @@ Tell BaseManager how to build an Emoji
 
 ***
 
-### crate()
+### create()
 
-> **crate**(`options`): `Promise`\<[`Emoji`](Emoji.md)\>
+> **create**(`options`): `Promise`\<[`Emoji`](Emoji.md)\>
 
 Create a new emoji
 

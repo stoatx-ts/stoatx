@@ -29,6 +29,7 @@ export * from "./structures/ClientUser";
 export * from "./structures/Emoji";
 export * from "./structures/MessageReaction";
 export * from "./structures/GroupChannel";
+export * from "./structures/Webhook";
 
 // Builders
 export * from "./builders/EmbedBuilder";
