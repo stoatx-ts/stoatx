@@ -7,16 +7,26 @@ on:
     branches: ["main"]
 
 jobs:
-  validate-and-build:
-    name: Lint, Typecheck, and Build
+  ci:
+    name: ${{ matrix.task }}
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [build, build:check, format, test]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
 
-      - name: Setup mise
-        uses: jdx/mise-action@v2
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
-      - name: Run CI tasks
-        run: mise run ci
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+
+      - run: mise run ${{ matrix.task }}
