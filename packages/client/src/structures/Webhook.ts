@@ -1,6 +1,12 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
-import { DataEditWebhook, DataMessageSend, FieldsWebhook, Webhook as APIWebhook, Message as APIMessage } from "stoat-api";
+import {
+  DataEditWebhook,
+  DataMessageSend,
+  FieldsWebhook,
+  Webhook as APIWebhook,
+  Message as APIMessage,
+} from "stoat-api";
 import { Attachment } from "./Attachment";
 import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";

@@ -153,9 +153,7 @@ client.once("ready", async () => {
 
   // Reuse an existing webhook named "CI" or create one
   const webhooks = await channel.webhooks.fetchMany();
-  const webhook =
-    webhooks.find((w) => w.name === "CI") ??
-    (await channel.webhooks.create({ name: "CI" }));
+  const webhook = webhooks.find((w) => w.name === "CI") ?? (await channel.webhooks.create({ name: "CI" }));
 
   await webhook.send("Build #42 passed ✅");
 });
