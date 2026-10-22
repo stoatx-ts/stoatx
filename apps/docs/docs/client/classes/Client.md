@@ -4,10 +4,6 @@
 
 - `EventEmitter`
 
-## Extended by
-
-- [`WebhookClient`](WebhookClient.md)
-
 ## Constructors
 
 ### Constructor

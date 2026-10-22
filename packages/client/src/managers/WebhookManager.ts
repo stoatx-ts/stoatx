@@ -3,7 +3,7 @@ import type { Client } from "../client/Client";
 import type { BaseChannel } from "../structures/BaseChannel";
 import { BaseManager } from "./BaseManager";
 import { Webhook } from "../structures/Webhook";
-import type { Webhook as APIWebhook } from "stoat-api";
+import type { ResponseWebhook, Webhook as APIWebhook } from "stoat-api";
 import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 
@@ -38,6 +38,29 @@ export class WebhookManager extends BaseManager<string, Webhook, APIWebhook> {
   }
 
   /**
+   * Fetch a webhook using its ID and token
+   * @param id The ID of the webhook
+   * @param token The token of the webhook
+   */
+  public fetch(id: string, token: string): Promise<Webhook>;
+
+  /**
+   * Fetch a webhook using its ID
+   * @param id The ID of the webhook
+   */
+  public fetch(id: string): Promise<ResponseWebhook>;
+
+  public async fetch(id: string, token?: string): Promise<Webhook | ResponseWebhook> {
+    if (token) {
+      const data = await this.client.rest.get(`/webhooks/${id}/${token}`);
+      return this._add(data as APIWebhook);
+    }
+
+    const data = await this.client.rest.get(`/webhooks/${id}`);
+    return data as ResponseWebhook;
+  }
+
+  /**
    * Lists all webhooks for this channel (bot auth).
    */
   public async fetchMany(): Promise<Collection<string, Webhook>> {
@@ -59,7 +82,7 @@ export class WebhookManager extends BaseManager<string, Webhook, APIWebhook> {
   public async create(options: WebhookCreateOptions): Promise<Webhook> {
     const payload: Record<string, unknown> = { name: options.name };
 
-    if (options.avatar) {
+    if (options.avatar !== null) {
       const avatarId = await resolveAttachment(this.client.rest, options.avatar, "avatars" as any);
       if (avatarId) payload.avatar = avatarId;
     }

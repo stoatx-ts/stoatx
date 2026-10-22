@@ -173,6 +173,24 @@ Compares this object with another to see if they represent the same entity.
 
 ***
 
+### send()
+
+> **send**(`contentOrOptions`): `Promise`\<[`Message`](Message.md)\>
+
+Send a message through this webhook.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `contentOrOptions` | `string` \| [`MessageOptions`](../interfaces/MessageOptions.md) |
+
+#### Returns
+
+`Promise`\<[`Message`](Message.md)\>
+
+***
+
 ### toString()
 
 > **toString**(): `string`
