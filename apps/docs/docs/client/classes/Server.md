@@ -35,6 +35,12 @@ The base class for all structures.
 
 ***
 
+### approximateMemberCount?
+
+> `optional` **approximateMemberCount?**: `number`
+
+***
+
 ### banner
 
 > **banner**: [`Attachment`](Attachment.md) \| `null` = `null`

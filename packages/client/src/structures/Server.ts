@@ -50,6 +50,7 @@ export class Server extends Base {
   public emojis: EmojiManager;
   public createdAt!: Date;
   public createdTimestamp!: number;
+  public approximateMemberCount?: number;
 
   constructor(client: Client, data: RawServer) {
     super(client, data);
@@ -97,6 +98,9 @@ export class Server extends Base {
       for (const [id, roleData] of Object.entries(data.roles)) {
         this.roles._add({ id, ...(roleData as any) });
       }
+    }
+    if (data.approximate_member_count !== undefined) {
+      this.approximateMemberCount = data.approximate_member_count;
     }
 
     if (clear && Array.isArray(clear)) {

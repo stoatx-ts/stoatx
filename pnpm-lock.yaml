@@ -101,14 +101,14 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       stoat-api:
-        specifier: ^0.14.0
-        version: 0.14.0
+        specifier: ^0.16.0
+        version: 0.16.0
       ulid:
         specifier: ^3.0.2
         version: 3.0.2
       ws:
-        specifier: ^8.16.0
-        version: 8.20.1
+        specifier: 8.21.0
+        version: 8.21.0
     devDependencies:
       '@types/ws':
         specifier: ^8.5.0
@@ -5875,8 +5875,8 @@ packages:
   std-env@4.1.0:
     resolution: {integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==}
 
-  stoat-api@0.14.0:
-    resolution: {integrity: sha512-Kg6PS8D6aKKhs6KALvdHe6ygtwCuiCyj9JDT/KDR0BRDzoP2W9LjAePYZZBoA9BITIeBU270ug/0qDpWMGYb/w==}
+  stoat-api@0.16.0:
+    resolution: {integrity: sha512-HC5+UluvnmCPYacuJh3LUh6Lpfe0gLVpoEjRBpt4BzZUPlA7Pe5inuvEYo/a1MLwTmVpzxF4S9D+QFIADHroTg==}
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -6507,6 +6507,18 @@ packages:
 
   ws@8.20.1:
     resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -13909,7 +13921,7 @@ snapshots:
 
   std-env@4.1.0: {}
 
-  stoat-api@0.14.0:
+  stoat-api@0.16.0:
     dependencies:
       json-with-bigint: 3.5.8
 
@@ -14641,6 +14653,8 @@ snapshots:
   ws@7.5.11: {}
 
   ws@8.20.1: {}
+
+  ws@8.21.0: {}
 
   wsl-utils@0.1.0:
     dependencies:

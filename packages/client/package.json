@@ -36,9 +36,9 @@
   "dependencies": {
     "@livekit/rtc-node": "^0.13.29",
     "events": "^3.3.0",
-    "stoat-api": "^0.14.0",
+    "stoat-api": "^0.16.0",
     "ulid": "^3.0.2",
-    "ws": "^8.16.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@types/ws": "^8.5.0"
