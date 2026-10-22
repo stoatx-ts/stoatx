@@ -15,10 +15,6 @@
           "jsonpath": "$.peerDependencies['@stoatx/client']"
         }
       ]
-    },
-    "apps/bot": {
-      "release-type": "node",
-      "package-name": "@stoatx/bot"
     }
   },
   "plugins": ["node-workspace"]
