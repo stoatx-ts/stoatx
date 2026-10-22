@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.9.1...client-v0.10.0) (2026-10-22)
+
+
+### Features
+
+* approximate member count ([#139](https://github.com/stoatx-ts/stoatx/issues/139)) ([720f3ad](https://github.com/stoatx-ts/stoatx/commit/720f3ad5e41185607b87b9b848c586840309ac05))
+* webhooks  ([#135](https://github.com/stoatx-ts/stoatx/issues/135)) ([bbf64f0](https://github.com/stoatx-ts/stoatx/commit/bbf64f0228012390527383326ded796d9a89dfbc))
+
 ## [0.9.1](https://github.com/stoatx-ts/stoatx/compare/client-v0.9.0...client-v0.9.1) (2026-07-27)
 
 
