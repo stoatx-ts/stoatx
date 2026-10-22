@@ -4,10 +4,13 @@ import { DataEditWebhook, FieldsWebhook, Webhook as APIWebhook } from "stoat-api
 import { Attachment } from "./Attachment";
 import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
+import { PermissionResolvable } from "../utils/permissions";
 
 export interface WebhookEditOptions {
   name?: string;
   avatar?: string | AttachmentBuilder | null;
+  permissions?: PermissionResolvable;
+  remove?: FieldsWebhook[];
 }
 
 export class Webhook extends Base {
@@ -54,12 +57,12 @@ export class Webhook extends Base {
       if (data.avatar === null) {
         remove.push("Avatar");
       } else {
-      const resolvedAvatar = await resolveAttachment(this.client.rest, data.avatar, "avatars");
+        const resolvedAvatar = await resolveAttachment(this.client.rest, data.avatar, "avatars");
 
-      if (resolvedAvatar !== undefined) {
-        payload.avatar = resolvedAvatar;
+        if (resolvedAvatar !== undefined) {
+          payload.avatar = resolvedAvatar;
+        }
       }
-    }
     }
 
     if (remove.length > 0) payload.remove = remove;

@@ -1,7 +1,9 @@
 import { Client, ClientOptions } from "../client/Client";
-import { DataMessageSend, Webhook } from "stoat-api";
+import { DataEditWebhook, DataMessageSend, Webhook } from "stoat-api";
 import { Message, MessageOptions } from "./Message";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import { WebhookEditOptions } from "./Webhook";
+import { Permissions } from "../utils/permissions";
 
 export interface WebhookClientDataIdWithToken {
   id: string;
@@ -13,13 +15,6 @@ interface WebhookClientDataUrl {
 }
 
 export type WebhookClientData = WebhookClientDataIdWithToken | WebhookClientDataUrl;
-
-
-export interface WebhookEditOptions {
-  name?: string;
-  avatar?: string | null;
-}
-
 
 const WEBHOOK_URL_RE = /\/webhooks\/([A-Za-z0-9]+)\/([A-Za-z0-9._-]+)/;
 
@@ -35,7 +30,6 @@ function resolveIdToken(data: WebhookClientData): { id: string; token: string } 
       throw new Error(`Could not parse webhook URL: ${data.url}`);
     }
     return { id, token };
-
   }
   return { id: data.id, token: data.token };
 }
@@ -66,7 +60,25 @@ export class WebhookClient extends Client {
 
   /** Edit this webhook's name/avatar. */
   public async edit(data: WebhookEditOptions): Promise<Webhook> {
-    return (await this.rest.patch(`/webhooks/${this.id}/${this.token}`, data)) as Webhook;
+    const payload: DataEditWebhook = {};
+
+    if (data.name) {
+      payload.name = data.name;
+    }
+    if (data.avatar) {
+      const resolvedAvatar = await resolveAttachment(this.rest, data.avatar, "avatars");
+      if (resolvedAvatar) {
+        payload.avatar = resolvedAvatar;
+      }
+    }
+    if (data.permissions) {
+      payload.permissions = new Permissions(data.permissions).valueOf() as number;
+    }
+    if (data.remove) {
+      payload.remove = data.remove;
+    }
+
+    return (await this.rest.patch(`/webhooks/${this.id}/${this.token}`, payload)) as Webhook;
   }
 
   /** Delete this webhook. */
