@@ -109,6 +109,10 @@ const config: Config = {
               label: "GitHub",
               href: "https://github.com/stoatx-ts/stoatx",
             },
+            {
+              label: "Support",
+              href: "https://stt.gg/hREC9nfr",
+            },
           ],
         },
       ],
