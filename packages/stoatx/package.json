@@ -1,6 +1,6 @@
 {
   "name": "stoatx",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A high-performance, decorator-based command handler for the Stoat ecosystem.",
   "repository": {
     "type": "git",
@@ -38,7 +38,7 @@
   },
   "peerDependencies": {
     "reflect-metadata": "^0.2.0",
-    "@stoatx/client": "^0.9.1"
+    "@stoatx/client": "^0.10.0"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*"
