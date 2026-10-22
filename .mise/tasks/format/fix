@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 #MISE description="Format the codebase using Prettier"
+#MISE depends=["install:frozen"]
 
 pnpm exec prettier --write .

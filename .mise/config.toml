@@ -8,9 +8,4 @@ gh = "2.92.0"
 
 [tasks.ci]
 description = "Task group for CI checks"
-run = [
-    { task = "install:frozen" },
-    { task = "build" },
-    { tasks = ["build:check", "format"] },
-    { task = "test" }
-]
+depends = ["build", "build:check", "format", "test"]

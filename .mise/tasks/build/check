@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Check types are compiling"
+#MISE depends=["install:frozen", "build"]
 set -e
 
 pnpm -r exec tsc --noEmit
