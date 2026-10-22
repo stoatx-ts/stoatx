@@ -12,6 +12,7 @@ The base class for all structures.
 - [`Server`](Server.md)
 - [`User`](User.md)
 - [`Emoji`](Emoji.md)
+- [`Webhook`](Webhook.md)
 
 ## Constructors
 

@@ -205,6 +205,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/VoiceManager",
           label: "VoiceManager"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/Webhook",
+          label: "Webhook"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/WebhookClient",
+          label: "WebhookClient"
         }
       ]
     },
@@ -366,6 +376,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/VoiceConnectionEvents",
           label: "VoiceConnectionEvents"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/WebhookClientDataIdWithToken",
+          label: "WebhookClientDataIdWithToken"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/WebhookEditOptions",
+          label: "WebhookEditOptions"
         }
       ]
     },
@@ -482,6 +502,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/VoiceConnectionStatus",
           label: "VoiceConnectionStatus"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/WebhookClientData",
+          label: "WebhookClientData"
         }
       ]
     },

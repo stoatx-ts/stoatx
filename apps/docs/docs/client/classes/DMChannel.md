@@ -95,6 +95,16 @@ The base class for all structures.
 
 [`BaseChannel`](BaseChannel.md).[`type`](BaseChannel.md#type)
 
+***
+
+### webhooks
+
+> **webhooks**: `WebhookManager`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`webhooks`](BaseChannel.md#webhooks)
+
 ## Methods
 
 ### \_clone()

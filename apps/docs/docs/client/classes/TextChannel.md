@@ -143,6 +143,16 @@ The base class for all structures.
 
 > `optional` **voice?**: `any`
 
+***
+
+### webhooks
+
+> **webhooks**: `WebhookManager`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`webhooks`](BaseChannel.md#webhooks)
+
 ## Methods
 
 ### \_clone()

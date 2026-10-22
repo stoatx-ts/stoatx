@@ -42,6 +42,8 @@
 - [UserManager](classes/UserManager.md)
 - [VoiceConnection](classes/VoiceConnection.md)
 - [VoiceManager](classes/VoiceManager.md)
+- [Webhook](classes/Webhook.md)
+- [WebhookClient](classes/WebhookClient.md)
 
 ## Interfaces
 
@@ -76,6 +78,8 @@
 - [UserEditOptions](interfaces/UserEditOptions.md)
 - [UserProfile](interfaces/UserProfile.md)
 - [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
+- [WebhookClientDataIdWithToken](interfaces/WebhookClientDataIdWithToken.md)
+- [WebhookEditOptions](interfaces/WebhookEditOptions.md)
 
 ## Type Aliases
 
@@ -101,6 +105,7 @@
 - [UserResolvable](type-aliases/UserResolvable.md)
 - [UserStatus](type-aliases/UserStatus.md)
 - [VoiceConnectionStatus](type-aliases/VoiceConnectionStatus.md)
+- [WebhookClientData](type-aliases/WebhookClientData.md)
 
 ## Variables
 
