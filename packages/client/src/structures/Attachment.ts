@@ -1,6 +1,7 @@
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import { File } from "stoat-api";
+import { StoatCDN } from "../utils/Constants";
 
 export type AttachmentMetadata =
   | { type: "File" }
@@ -47,7 +48,7 @@ export class Attachment extends Base {
    */
   public get url(): string {
     // Standard Autumn CDN format: cdn.domain.com/tag/id/filename
-    return `https://cdn.stoatusercontent.com/${this.tag}/${this.id}/${this.filename}`;
+    return `${StoatCDN}/${this.tag}/${this.id}/${this.filename}`;
   }
 
   /**

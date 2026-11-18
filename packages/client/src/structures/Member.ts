@@ -142,7 +142,7 @@ export class Member extends Base {
    * @example
    * // Get a member's avatar URL
    * const avatarURL = member.avatarURL;
-   * console.log(avatarURL); // https://cdn.stoat.chat/attachments/avatars/1234567890/avatar.png
+   * console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/1234567890/avatar.png
    */
   public get avatarURL(): string | null {
     if (!this.avatar) return null;
