@@ -25,9 +25,9 @@ export class Client extends StoatClient {
     this.handler = new StoatxHandler({ ...options, client: this });
   }
 
-  override async login(token: string): Promise<string> {
+  override async login(token: string): Promise<void> {
     await this.handler.init();
-    return super.login(token);
+    await super.login(token);
   }
 
   async executeCommand(message: Message): Promise<void> {
