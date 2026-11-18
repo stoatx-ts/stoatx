@@ -34,8 +34,7 @@ function createEventDecorator(event: string, type: "on" | "once"): MethodDecorat
  *
  * @example
  * ```ts
- * import { Stoat, On } from 'stoatx';
- * import { Message, Client } from 'stoat.js';
+ * import { Stoat, On, Message, Client } from 'stoatx';
  *
  * @Stoat()
  * class BotEvents {
@@ -59,8 +58,7 @@ export function On(event: keyof ClientEvents): MethodDecorator {
  *
  * @example
  * ```ts
- * import { Stoat, Once } from 'stoatx';
- * import { Client } from 'stoat.js';
+ * import { Stoat, Once, Client } from 'stoatx';
  *
  * @Stoat()
  * class BotEvents {

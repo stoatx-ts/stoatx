@@ -1,5 +1,6 @@
 import type { CommandMetadata, ParamSchema, SimpleCommandOptions } from "../types";
 import { METADATA_KEYS } from "./keys";
+import type { SimpleCommandDefinition } from "./SimpleCommand";
 
 /**
  * Build CommandMetadata from SimpleCommandOptions
@@ -24,9 +25,9 @@ export function buildSimpleCommandMetadata(
   };
 }
 
-export function getSubCommands(target: Function): { methodName: string; options: any }[] {
+export function getSubCommands(target: Function): SimpleCommandDefinition[] {
   const methods = Object.getOwnPropertyNames(target.prototype);
-  const subCommands = [];
+  const subCommands: SimpleCommandDefinition[] = [];
 
   for (const method of methods) {
     const options = Reflect.getMetadata(METADATA_KEYS.SUBCOMMAND, target.prototype, method);

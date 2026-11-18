@@ -95,7 +95,11 @@ export interface CommandContext<TClient extends StoatClient = Client> {
 }
 
 /**
- * Optional lifecycle hooks for @Stoat() class instances
+ * Optional lifecycle hooks for @Stoat() class instances.
+ *
+ * @deprecated Implementing this interface has no effect: the handler detects each hook
+ * by name, and the index signature means any class satisfies it. Just define the
+ * methods you need. This interface will be removed in the next major version.
  */
 export interface StoatLifecycle {
   onError?(ctx: CommandContext, error: Error): Promise<void> | void;
@@ -120,10 +124,10 @@ export interface CooldownManager {
   clear?(): void | Promise<void>;
 }
 
-export interface StoatxGuard {
-  run(ctx: CommandContext): Promise<boolean> | boolean;
-  guardFail?(ctx: CommandContext): Promise<void> | void;
-}
+/**
+ * @deprecated Use {@link GuardInterface} instead. This alias will be removed in the next major version.
+ */
+export type StoatxGuard = GuardInterface;
 
 /**
  * Discovery options for automatic command module loading

@@ -5,17 +5,18 @@ import { glob } from "tinyglobby";
 import { buildSimpleCommandMetadata, getEventsMetadata, getSimpleCommands, METADATA_KEYS } from "./decorators";
 import { getArgs } from "./decorators/Arg";
 import { getOptions } from "./decorators/Option";
-import { decoratorStore } from "./decorators/store";
-import type { CommandMetadata, GuardInterface, ParamSchema } from "./types";
+import { stoatClasses } from "./decorators/store";
+import type {
+  CommandMetadata,
+  GroupOptions,
+  GuardInterface,
+  ParamSchema,
+  SimpleCommandOptions,
+  StoatxDiscoveryOptions,
+} from "./types";
 import { PARAM_TYPE_MAP } from "./types";
 import { StoatxContainer } from "./di/Container";
 import { getSubCommands } from "./decorators/utils";
-
-interface AutoDiscoveryOptions {
-  roots?: string[];
-  include?: string[];
-  ignore?: string[];
-}
 
 export interface RegisteredCommand {
   instance: object;
@@ -54,6 +55,7 @@ export class CommandRegistry {
     this.extensions = extensions;
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   get size(): number {
     return this.commands.size;
   }
@@ -76,7 +78,7 @@ export class CommandRegistry {
     this.logLoadSummary();
   }
 
-  async autoDiscover(options: AutoDiscoveryOptions = {}): Promise<void> {
+  async autoDiscover(options: StoatxDiscoveryOptions = {}): Promise<void> {
     this.failedFiles.length = 0;
     const roots = options.roots?.length ? options.roots : [process.cwd()];
     const includePatterns = options.include?.length ? options.include : this.getDefaultAutoDiscoveryPatterns();
@@ -164,6 +166,7 @@ export class CommandRegistry {
     return Array.from(this.commands.values());
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   getAllMetadata(): CommandMetadata[] {
     return this.getAll().map((c) => c.metadata);
   }
@@ -172,6 +175,7 @@ export class CommandRegistry {
     return this.registeredEvents;
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   getByCategory(): Map<string, RegisteredCommand[]> {
     const categories = new Map<string, RegisteredCommand[]>();
 
@@ -192,14 +196,17 @@ export class CommandRegistry {
     this.processedStoatClasses.clear();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   [Symbol.iterator](): IterableIterator<[string, RegisteredCommand]> {
     return this.commands.entries();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   values(): IterableIterator<RegisteredCommand> {
     return this.commands.values();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   keys(): IterableIterator<string> {
     return this.commands.keys();
   }
@@ -220,11 +227,11 @@ export class CommandRegistry {
 
   private async loadFile(filePath: string, baseDir: string): Promise<void> {
     try {
-      const knownStoatClasses = new Set(decoratorStore.getStoatClasses().keys());
+      const knownStoatClasses = new Set(stoatClasses);
       const fileUrl = pathToFileURL(filePath).href;
       await import(fileUrl);
 
-      for (const stoatClass of decoratorStore.getStoatClasses().keys()) {
+      for (const stoatClass of stoatClasses) {
         if (!knownStoatClasses.has(stoatClass) && !this.classSources.has(stoatClass)) {
           this.classSources.set(stoatClass, filePath);
         }
@@ -269,7 +276,14 @@ export class CommandRegistry {
     const events = getEventsMetadata(stoatClass);
     const category = this.getCategoryFromPath(filePath, baseDir);
 
-    const allCommands = [...simpleCommands, ...subCommands];
+    const groupOptions: GroupOptions | undefined = Reflect.getMetadata(METADATA_KEYS.COMMAND_GROUP, stoatClass);
+    const inherited = groupOptions ? this.getInheritedGroupOptions(groupOptions) : {};
+
+    const allCommands = [
+      ...simpleCommands,
+      // Subcommands use the group's settings unless they override them.
+      ...subCommands.map((def) => ({ ...def, options: { ...inherited, ...def.options } })),
+    ];
 
     if (allCommands.length === 0 && events.length === 0) {
       this.processedStoatClasses.add(stoatClass);
@@ -360,6 +374,15 @@ export class CommandRegistry {
     }
 
     return params;
+  }
+
+  private getInheritedGroupOptions(group: GroupOptions): SimpleCommandOptions {
+    const inherited: SimpleCommandOptions = {};
+    if (group.permissions !== undefined) inherited.permissions = group.permissions;
+    if (group.ownerOnly !== undefined) inherited.ownerOnly = group.ownerOnly;
+    if (group.cooldown !== undefined) inherited.cooldown = group.cooldown;
+    if (group.nsfw !== undefined) inherited.nsfw = group.nsfw;
+    return inherited;
   }
 
   private getCategoryFromPath(filePath: string, baseDir: string): string | undefined {

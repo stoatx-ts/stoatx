@@ -1,8 +1,8 @@
-import { type CommandContext, SimpleCommand, Stoat, StoatLifecycle, Arg, User } from "stoatx";
+import { type CommandContext, SimpleCommand, Stoat, Arg, User } from "stoatx";
 import { LoggerService } from "./services/LoggerService.js";
 
 @Stoat()
-export class PingCommand implements StoatLifecycle {
+export class PingCommand {
   constructor(private readonly logger: LoggerService) {}
 
   @SimpleCommand({
