@@ -112,9 +112,9 @@
 
 ### messageUpdate
 
-> **messageUpdate**: \[[`Message`](../classes/Message.md) \| `null`, [`Message`](../classes/Message.md)\]
+> **messageUpdate**: \[[`Message`](../classes/Message.md), [`Message`](../classes/Message.md)\]
 
-`oldMessage` is `null` only for uncached messages, which are emitted when `partials.messages` is enabled.
+For uncached messages (only with `partials.messages`), both messages are partial.
 
 ***
 

@@ -60,11 +60,6 @@ export class Message extends Base {
   public pinned: null | boolean = false;
   public reactions: Record<string, string[]> = {};
   public replies: string[] | null = [];
-  /**
-   * Whether this message was built from an update event for an uncached message,
-   * so it only has the fields that changed. Call {@link Message.fetch} to get the full message.
-   */
-  public partial: boolean = false;
 
   constructor(client: Client, data: RawMessage) {
     super(client, data);
@@ -76,16 +71,18 @@ export class Message extends Base {
     this.createdAt = new Date(timestamp);
     this.createdTimestamp = timestamp;
 
-    if (data.attachments) {
-      this.attachments = data.attachments.map((fileData: any) => new Attachment(this.client, fileData));
-    }
-
-    if (data.masquerade !== undefined) this.masquerade = data.masquerade;
-    if (data.replies !== undefined) this.replies = data.replies;
+    this.mentions = new MessageMentions(client, this, data.mentions ?? null, data.role_mentions ?? null);
 
     this._patch(data);
+  }
 
-    this.mentions = new MessageMentions(client, this, data.mentions ?? null, data.role_mentions ?? null);
+  /**
+   * Whether this message is partial: it was created from an update event for an
+   * uncached message and is missing data such as its author. Call {@link Message.fetch}
+   * to fill it in.
+   */
+  public get partial(): boolean {
+    return !this.authorId;
   }
 
   public async reply(contentOrOptions: string | MessageOptions): Promise<Message> {
@@ -110,11 +107,16 @@ export class Message extends Base {
   }
 
   /**
-   * Fetches this message from the API. The result is cached and returned as a new full
-   * Message, so use the returned value rather than this instance when it is partial.
+   * Fetches this message. A cached message, including a partial one, is updated in place
+   * and the same instance is returned.
+   * @param force Whether to skip the cache and request the message from the API. Defaults to true.
    */
-  public async fetch(): Promise<Message> {
+  public async fetch(force: boolean = true): Promise<Message> {
     const channel = await this.resolveChannel();
+    if (!force) {
+      const cached = channel.messages.cache.get(this.id);
+      if (cached) return cached;
+    }
     return channel.messages.fetch(this.id);
   }
 
@@ -275,7 +277,17 @@ export class Message extends Base {
     return this.client.servers.cache.get(serverId);
   }
 
-  public _patch(data: RawMessage) {
+  public _patch(data: Partial<RawMessage>) {
+    if (data.author !== undefined) this.authorId = data.author;
+    if (data.channel !== undefined) this.channelId = data.channel;
+    if (data.attachments !== undefined) {
+      this.attachments = (data.attachments ?? []).map((fileData: any) => new Attachment(this.client, fileData));
+    }
+    if (data.masquerade !== undefined) this.masquerade = data.masquerade;
+    if (data.replies !== undefined) this.replies = data.replies;
+    if (data.mentions !== undefined || data.role_mentions !== undefined) {
+      this.mentions = new MessageMentions(this.client, this, data.mentions ?? null, data.role_mentions ?? null);
+    }
     if (data.content !== undefined) this.content = data.content;
     if (data.edited !== undefined) this.editedAt = new Date(data.edited ?? 0);
     if (data.pinned !== undefined) this.pinned = data.pinned;

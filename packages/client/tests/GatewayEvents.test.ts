@@ -146,18 +146,44 @@ describe("Gateway events", () => {
     expect(onUpdate).not.toHaveBeenCalled();
   });
 
-  it("emits a partial message for uncached MessageUpdate when enabled", () => {
+  it("caches and emits partial messages for uncached MessageUpdate when enabled", async () => {
     client = new Client({ partials: { messages: true } });
+    const channelId = ulid();
+    const channel = client.channels._add({
+      _id: channelId,
+      channel_type: "TextChannel",
+      server: ulid(),
+      name: "general",
+    } as any);
     const onUpdate = listen("messageUpdate");
     const id = ulid();
 
-    dispatch({ type: "MessageUpdate", id, channel: ulid(), data: { content: "edited" } });
+    dispatch({ type: "MessageUpdate", id, channel: channelId, data: { content: "edited" } });
 
     const [oldMessage, newMessage] = onUpdate.mock.calls[0]!;
-    expect(oldMessage).toBeNull();
-    expect(newMessage.id).toBe(id);
-    expect(newMessage.content).toBe("edited");
+    expect(oldMessage.partial).toBe(true);
+    expect(oldMessage.content).toBeNull();
     expect(newMessage.partial).toBe(true);
+    expect(newMessage.content).toBe("edited");
+    expect(channel.messages.cache.get(id)).toBe(newMessage);
+
+    // fetch() fills the partial in place, like discord.js
+    const authorId = ulid();
+    client.rest.get = vi.fn().mockResolvedValue({ _id: id, channel: channelId, author: authorId, content: "edited" });
+    const fetched = await newMessage.fetch();
+
+    expect(fetched).toBe(newMessage);
+    expect(newMessage.partial).toBe(false);
+    expect(newMessage.authorId).toBe(authorId);
+  });
+
+  it("ignores uncached MessageUpdate in uncached channels even with partials", () => {
+    client = new Client({ partials: { messages: true } });
+    const onUpdate = listen("messageUpdate");
+
+    dispatch({ type: "MessageUpdate", id: ulid(), channel: ulid(), data: { content: "edited" } });
+
+    expect(onUpdate).not.toHaveBeenCalled();
   });
 
   it("does not emit update events for uncached channels or servers", () => {

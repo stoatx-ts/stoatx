@@ -180,17 +180,17 @@ export class GatewayManager {
 
       case "MessageUpdate": {
         const channel = this.client.channels.cache.get(payload.channel);
-        const existing = channel?.messages.cache.get(payload.id);
+        let message = channel?.messages.cache.get(payload.id);
 
-        if (existing) {
-          const oldMessage = existing._clone();
-          existing._patch(payload.data);
-          this.client.emit("messageUpdate", oldMessage, existing);
-        } else if (this.client.options.partials?.messages) {
-          // Only the changed fields are sent, so this message is partial (e.g. author may be missing).
-          const newMessage = new Message(this.client, { ...payload.data, _id: payload.id, channel: payload.channel });
-          newMessage.partial = true;
-          this.client.emit("messageUpdate", null, newMessage);
+        if (!message && channel && this.client.options.partials?.messages) {
+          // Only the changed fields are sent, so cache a partial message for the update to fill in.
+          message = channel.messages._add({ _id: payload.id, channel: payload.channel } as any);
+        }
+
+        if (message) {
+          const oldMessage = message._clone();
+          message._patch(payload.data);
+          this.client.emit("messageUpdate", oldMessage, message);
         } else {
           this.client.emit("debug", `Ignoring MessageUpdate for uncached message ${payload.id}`);
         }
