@@ -5,6 +5,13 @@ import { queryParams, RouteParams, RouteResponse, ValidPath } from "../utils/sch
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Abort a request that has not completed within this many milliseconds. */
+const REQUEST_TIMEOUT_MS = 15_000;
+/** File uploads get a longer budget than regular API calls. */
+const UPLOAD_TIMEOUT_MS = 120_000;
+/** Give up on a route after this many consecutive 429 responses. */
+const MAX_RATELIMIT_RETRIES = 5;
+
 /**
  * Represents an independent rate limit bucket queue
  */
@@ -81,9 +88,11 @@ export class RESTManager {
 
   private buckets = new Map<string, AsyncBucket>();
 
+  private bucketSweeper: NodeJS.Timeout;
+
   constructor(private client: Client) {
     // Sweep dead buckets every 5 minutes to prevent memory leaks
-    setInterval(() => {
+    this.bucketSweeper = setInterval(() => {
       const now = Date.now();
       for (const [key, bucket] of this.buckets.entries()) {
         // If the bucket has its full limits back, drop it from memory
@@ -92,6 +101,14 @@ export class RESTManager {
         }
       }
     }, 300000).unref();
+  }
+
+  /**
+   * Stops the internal bucket sweeper.
+   */
+  public destroy(): void {
+    clearInterval(this.bucketSweeper);
+    this.buckets.clear();
   }
 
   public setToken(token: string) {
@@ -161,7 +178,13 @@ export class RESTManager {
     });
   }
 
-  private async execute(method: string, endpoint: string, body: any, bucket: AsyncBucket): Promise<any> {
+  private async execute(
+    method: string,
+    endpoint: string,
+    body: any,
+    bucket: AsyncBucket,
+    attempt: number = 0,
+  ): Promise<any> {
     if (!this.token) {
       throw new Error("REST_NOT_READY: You must call client.login() before making API requests.");
     }
@@ -180,12 +203,13 @@ export class RESTManager {
         "Content-Type": "application/json",
       },
       ...(isBodyMethod ? { body: JSON.stringify(body ?? {}) } : {}),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
     const remainingHeader = response.headers.get("x-ratelimit-remaining");
     const resetAfterHeader = response.headers.get("x-ratelimit-reset-after");
 
-    if (remainingHeader !== undefined && resetAfterHeader !== undefined) {
+    if (remainingHeader !== null && resetAfterHeader !== null) {
       bucket.remaining = Number(remainingHeader);
       bucket.resetAt = Date.now() + Number(resetAfterHeader);
     }
@@ -200,6 +224,10 @@ export class RESTManager {
     }
 
     if (response.status === 429) {
+      if (attempt >= MAX_RATELIMIT_RETRIES) {
+        throw new StoatAPIError(response.status, data, method, endpoint);
+      }
+
       const retryMs =
         typeof data === "object" && data?.retry_after ? data.retry_after : Number(resetAfterHeader) || 5000;
 
@@ -210,7 +238,7 @@ export class RESTManager {
 
       await sleep(retryMs);
 
-      return this.execute(method, endpoint, body, bucket);
+      return this.execute(method, endpoint, body, bucket, attempt + 1);
     }
 
     if (response.status >= 400) {
@@ -237,6 +265,7 @@ export class RESTManager {
         "X-Bot-Token": this.token,
       },
       body: formData,
+      signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
     });
 
     if (!response.ok) {

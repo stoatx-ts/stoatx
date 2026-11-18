@@ -212,7 +212,7 @@ export class BitField {
    *
    * Resolution rules (in order):
    * - `undefined` → `DefaultBit`
-   * - A number or bigint matching `DefaultBit`'s type and >= 0 → returned as-is
+   * - A non-negative number or bigint → converted to `DefaultBit`'s type
    * - A `BitField` instance → its `.bitfield` value
    * - An array → each element resolved and OR'd together
    * - A numeric string → parsed as `BigInt` or `Number` depending on `DefaultBit`'s type
@@ -225,7 +225,14 @@ export class BitField {
   public static resolve(bit?: BitFieldResolvable): number | bigint {
     const { DefaultBit } = this;
     if (bit === undefined) return DefaultBit;
-    if (typeof DefaultBit === typeof bit && (bit as any) >= DefaultBit) return bit as number | bigint;
+    if (typeof bit === "bigint" || typeof bit === "number") {
+      const valid =
+        typeof bit === "number"
+          ? Number.isSafeInteger(bit) && bit >= 0
+          : bit >= 0n && (typeof DefaultBit === "bigint" || bit <= BigInt(Number.MAX_SAFE_INTEGER));
+      if (!valid) throw new RangeError(`Invalid bitfield flag or number: ${String(bit)}`);
+      return typeof DefaultBit === "bigint" ? BigInt(bit) : Number(bit);
+    }
     if (bit instanceof BitField) return bit.bitfield;
     if (Array.isArray(bit)) {
       return bit

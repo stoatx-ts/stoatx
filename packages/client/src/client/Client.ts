@@ -134,8 +134,21 @@ export class Client extends EventEmitter {
     }
   }
 
-  [Symbol.for("nodejs.rejection")](error: Error) {
-    this.emit("error", error);
+  [Symbol.for("nodejs.rejection")](error: unknown, event: string | symbol) {
+    this._reportError(new Error(`Unhandled rejection in a "${String(event)}" listener`, { cause: error }));
+  }
+
+  /**
+   * Emits `error` if a listener is attached, otherwise logs to stderr instead of
+   * letting the EventEmitter throw and crash the process.
+   * @internal
+   */
+  public _reportError(error: Error): void {
+    if (this.listenerCount("error") > 0) {
+      this.emit("error", error);
+    } else {
+      console.error("[Stoatx Client]", error);
+    }
   }
 
   public override on<K extends keyof ClientEvents>(event: K, listener: (...args: ClientEvents[K]) => void): this {

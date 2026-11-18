@@ -189,7 +189,9 @@ The base class for all structures.
 
 > **\_clone**(): `this`
 
-Helper to quickly clone a structure
+Creates a snapshot of this structure. Plain nested data (objects and arrays)
+is copied so later patches to the original do not leak into the snapshot;
+class instances (client, managers, other structures) are shared by reference.
 
 #### Returns
 
@@ -300,13 +302,16 @@ A Collection of the fetched members.
 
 ### leave()
 
-> **leave**(): `Promise`\<`never`\>
+> **leave**(): `Promise`\<`undefined`\>
 
-Leaves the server
+Leaves the server.
+
+Note: the API uses the same route to delete a server, so if the bot owns
+this server it will be deleted.
 
 #### Returns
 
-`Promise`\<`never`\>
+`Promise`\<`undefined`\>
 
 ***
 
