@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.0](https://github.com/stoatx-ts/stoatx/compare/stoatx-v1.0.4...stoatx-v1.1.0) (2026-11-18)
+
+
+### Features
+
+* stoatx api cleanup and command group inheritance ([#146](https://github.com/stoatx-ts/stoatx/issues/146)) ([2e0e0c6](https://github.com/stoatx-ts/stoatx/commit/2e0e0c6182fa77ec2bcdf4278a94d9ea59293e2e))
+
+
+### Bug Fixes
+
+* stoatx runtime bugs ([#143](https://github.com/stoatx-ts/stoatx/issues/143)) ([f93aba9](https://github.com/stoatx-ts/stoatx/commit/f93aba941a1883d6cc7eb9a9deedb5b3323fbfbf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 0.10.1
+  * peerDependencies
+    * @stoatx/client bumped from ^0.10.0 to ^0.10.1
+
 ## [1.0.4](https://github.com/stoatx-ts/stoatx/compare/stoatx-v1.0.3...stoatx-v1.0.4) (2026-10-22)
 
 
