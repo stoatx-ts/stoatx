@@ -49,6 +49,20 @@ Manages API methods and caching for all channels globally.
 
 ## Methods
 
+### \[custom\]()
+
+> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
+
+#### Returns
+
+[`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
+
+#### Inherited from
+
+`BaseManager.[custom]`
+
+***
+
 ### bulkDelete()
 
 > **bulkDelete**(`id`, `messages`): `Promise`\<`void`\>

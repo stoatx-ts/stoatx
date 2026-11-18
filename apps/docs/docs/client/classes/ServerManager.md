@@ -55,6 +55,10 @@
 
 [`Collection`](Collection.md)\<`string`, [`Server`](Server.md)\>
 
+#### Inherited from
+
+`BaseManager.[custom]`
+
 ***
 
 ### construct()
