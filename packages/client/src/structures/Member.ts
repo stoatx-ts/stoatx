@@ -108,6 +108,13 @@ export class Member extends Base {
     return this.client.users.cache.get(this.id);
   }
 
+  /**
+   * Returns the cached server, fetching it if it is not cached.
+   */
+  private async resolveServer(): Promise<Server> {
+    return this.server ?? (await this.client.servers.fetch(this.serverId));
+  }
+
   /** Gets the Server object this member belongs to */
   public get server(): Server | undefined {
     return this.client.servers.cache.get(this.serverId);
@@ -135,7 +142,7 @@ export class Member extends Base {
    * @example
    * // Get a member's avatar URL
    * const avatarURL = member.avatarURL;
-   * console.log(avatarURL); // https://cdn.stoat.chat/attachments/avatars/1234567890/avatar.png
+   * console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/1234567890/avatar.png
    */
   public get avatarURL(): string | null {
     if (!this.avatar) return null;
@@ -150,8 +157,7 @@ export class Member extends Base {
    * await member.ban({ reason: "Spamming", deleteMessageSeconds: 3600 });
    */
   public async ban(options?: MemberBanOptions): Promise<void> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     await server.members.ban(this.id, options);
   }
@@ -206,14 +212,13 @@ export class Member extends Base {
    * @returns A promise that resolves to the updated Member.
    */
   public async edit(options: MemberEditOptions): Promise<Member> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     return await server.members.edit(this.id, options);
   }
 
   /**
-   * When concatenated with a string, this automatically returns the user's mention instead of the GuildMember object.
+   * When concatenated with a string, this automatically returns the user's mention instead of the Member object.
    * @returns {string}
    * @example
    * // Logs: Hello from <@01JE2MM759J5D7CHJF084R7MJ2>!
@@ -227,8 +232,7 @@ export class Member extends Base {
    * Kick this member from the server.
    */
   public async kick(): Promise<void> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     await server.members.kick(this.id);
   }

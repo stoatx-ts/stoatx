@@ -2,13 +2,15 @@ import { Member } from "../structures/Member";
 import { Collection } from "../utils/Collection";
 import type { Client } from "../client/Client";
 import type { Server } from "../structures/Server";
-import * as util from "node:util";
 import { User } from "../structures/User";
 import { BaseManager } from "./BaseManager";
 import { DataMemberEdit, FieldsMember, Member as RawMember, DataBanCreate } from "stoat-api";
 import { RouteParams } from "../utils/schema";
+import { finalizeEdit, setOrRemove } from "../utils/editPayload";
 
 export type MemberResolvable = Member | User | string;
+
+const MEMBER_MENTION = /[<@>]/g;
 
 export interface MemberEditOptions {
   nickname?: string | null;
@@ -37,7 +39,7 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
   }
 
   /**
-   * Tell BaseManager how to handle Revolt's Member IDs
+   * Tell BaseManager how to extract a Member's ID (members are keyed by user ID)
    * @internal
    */
   protected extractId(data: RawMember): string {
@@ -58,10 +60,8 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
    * @returns The resolved Member or undefined if not found
    */
   public resolve(member: MemberResolvable): Member | undefined {
-    if (member instanceof Member) return member;
     if (member instanceof User) return this.cache.get(member.id);
-    if (typeof member === "string") return this.cache.get(member.replace(/[<@>]/g, ""));
-    return undefined;
+    return this.resolveFromCache(member, Member, MEMBER_MENTION);
   }
 
   /**
@@ -71,9 +71,8 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
    * @throws {TypeError} If the provided resolvable is invalid
    */
   public resolveId(member: MemberResolvable): string {
-    if (typeof member === "string") return member.replace(/[<@>]/g, "");
-    if ("id" in member) return member.id;
-    throw new TypeError("Invalid MemberResolvable provided.");
+    if (member instanceof User) return member.id;
+    return this.resolveIdFrom(member, Member, MEMBER_MENTION);
   }
 
   /**
@@ -90,15 +89,11 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
    * const member = await server.members.fetch("<@1234567890>", true);
    */
   public async fetch(member: MemberResolvable, force: boolean = false): Promise<Member> {
-    if (!force) {
-      const cached = this.resolve(member);
-      if (cached) return cached;
-    }
-
-    const id = this.resolveId(member);
-    const data = (await this.client.rest.get(`/servers/${this.server.id}/members/${id}`)) as RawMember;
-
-    return this._add(data);
+    return this.fetchWithCache(
+      member,
+      force,
+      (id) => this.client.rest.get(`/servers/${this.server.id}/members/${id}`) as Promise<RawMember>,
+    );
   }
 
   /**
@@ -111,7 +106,7 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
    * const allMembers = await server.members.fetchMany();
    *
    * // Fetch only online members to save bandwidth
-   * const onlineMembers = await server.members.fetchMany({ exclude_offline: true });
+   * const onlineMembers = await server.members.fetchMany({ excludeOffline: true });
    */
   public async fetchMany(options: FetchMembersOptions = {}): Promise<Collection<string, Member>> {
     const query: RouteParams<"get", `/servers/${string}/members`> = {};
@@ -158,24 +153,12 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
     const payload: DataMemberEdit = {};
     const remove: FieldsMember[] = [];
 
-    if (options.nickname !== undefined) {
-      if (options.nickname === null) remove.push("Nickname");
-      else payload.nickname = options.nickname;
-    }
-
-    if (options.avatar !== undefined) {
-      if (options.avatar === null) remove.push("Avatar");
-      else payload.avatar = options.avatar;
-    }
-
+    setOrRemove(payload, remove, "nickname", options.nickname, "Nickname");
+    setOrRemove(payload, remove, "avatar", options.avatar, "Avatar");
+    setOrRemove(payload, remove, "timeout", options.timeout, "Timeout");
     if (options.roles !== undefined) payload.roles = options.roles;
-    if (options.timeout !== undefined) {
-      if (options.timeout === null) remove.push("Timeout");
-      else payload.timeout = options.timeout;
-    }
 
-    if (remove.length > 0) payload.remove = remove;
-    if (Object.keys(payload).length === 0) return this.fetch(id);
+    if (!finalizeEdit(payload, remove)) return this.fetch(id);
 
     const data = await this.client.rest.patch(`/servers/${this.server.id}/members/${id}`, payload);
     return this._add(data);
@@ -223,9 +206,5 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
   public async unban(member: MemberResolvable): Promise<void> {
     const id = this.resolveId(member);
     await this.client.rest.delete(`/servers/${this.server.id}/bans/${id}`);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

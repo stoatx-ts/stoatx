@@ -464,7 +464,7 @@ Remove a reaction from this message
 
 #### Throws
 
-If both userId and removeAll are provided, or if the API request fails.
+If the API request fails. If both userId and removeAll are provided, userId takes precedence.
 
 #### Example
 

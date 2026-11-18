@@ -47,6 +47,20 @@
 
 ## Methods
 
+### \[custom\]()
+
+> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+#### Returns
+
+[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+#### Inherited from
+
+`BaseManager.[custom]`
+
+***
+
 ### construct()
 
 > `protected` **construct**(`data`): [`User`](User.md)

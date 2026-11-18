@@ -62,6 +62,10 @@
 
 [`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>
 
+#### Inherited from
+
+`BaseManager.[custom]`
+
 ***
 
 ### construct()
@@ -227,8 +231,8 @@ If the API request fails.
 #### Example
 
 ```ts
-// Fetch a channel, bypassing cache
-const channel = await client.channels.fetch("01H...", true);
+// Fetch an emoji, bypassing cache
+const emoji = await client.emojis.fetch("01H...", true);
 ```
 
 ***

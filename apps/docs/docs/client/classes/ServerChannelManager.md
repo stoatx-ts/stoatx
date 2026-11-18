@@ -43,16 +43,6 @@
 
 ## Methods
 
-### \[custom\]()
-
-> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
-
-***
-
 ### create()
 
 > **create**(`options`): `Promise`\<[`BaseChannel`](BaseChannel.md)\>

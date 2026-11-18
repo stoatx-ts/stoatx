@@ -3,6 +3,7 @@ import { Client } from "../client/Client";
 import { Message } from "../structures/Message";
 import { TextChannel } from "../structures/TextChannel";
 import { ClientUser } from "../structures/ClientUser";
+import { StoatGateway } from "../utils/Constants";
 
 export class GatewayManager {
   private ws: WebSocket | null = null;
@@ -28,7 +29,7 @@ export class GatewayManager {
       this.ws = null;
     }
 
-    const baseUrl = this.wsURL || "wss://events.stoat.chat";
+    const baseUrl = this.wsURL || StoatGateway;
     const url = `${baseUrl}?version=1&format=json&token=${this.token}`;
 
     this.ws = new WebSocket(url);

@@ -8,7 +8,6 @@ import { Permissions, type PermissionResolvable } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
 import { MessageResolvable } from "./MessageManager";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
-import { resolveAttachment } from "../utils/resolveAttachment";
 import {
   Channel as RawChannel,
   DataEditChannel,
@@ -16,8 +15,11 @@ import {
   DataSetRolePermissions,
   DataDefaultChannelPermissions,
 } from "stoat-api";
+import { buildPermissionPayload, finalizeEdit, setOrRemove, setOrRemoveAttachment } from "../utils/editPayload";
 
 export type ChannelResolvable = BaseChannel | string;
+
+const CHANNEL_MENTION = /[<#>]/g;
 
 export interface ChannelEditOptions {
   name?: string;
@@ -59,14 +61,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
    * @returns The resolved BaseChannel, or undefined if not cached.
    */
   public resolve(channel: ChannelResolvable): BaseChannel | undefined {
-    if (channel instanceof BaseChannel) return channel;
-
-    if (typeof channel === "string") {
-      const id = channel.replace(/[<#>]/g, "");
-      return this.cache.get(id);
-    }
-
-    return undefined;
+    return this.resolveFromCache(channel, BaseChannel, CHANNEL_MENTION);
   }
 
   public resolveText(channel: ChannelResolvable): TextChannel | undefined {
@@ -91,15 +86,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
    * @throws {TypeError} If an invalid type is provided.
    */
   public resolveId(channel: ChannelResolvable): string {
-    if (channel instanceof BaseChannel) {
-      return channel.id;
-    }
-
-    if (typeof channel === "string") {
-      return channel.replace(/[<#>]/g, "");
-    }
-
-    throw new TypeError("Invalid ChannelResolvable provided. Expected a BaseChannel object or a string ID/Mention.");
+    return this.resolveIdFrom(channel, BaseChannel, CHANNEL_MENTION);
   }
 
   /**
@@ -114,15 +101,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
    * const channel = await client.channels.fetch("01H...");
    */
   public async fetch(channel: ChannelResolvable, force: boolean = false): Promise<BaseChannel> {
-    if (!force) {
-      const cached = this.resolve(channel);
-      if (cached) return cached;
-    }
-
-    const id = this.resolveId(channel);
-    const data = (await this.client.rest.get(`/channels/${id}`)) as RawChannel;
-
-    return this._add(data);
+    return this.fetchWithCache(channel, force, (id) => this.client.rest.get(`/channels/${id}`) as Promise<RawChannel>);
   }
 
   /**
@@ -151,25 +130,10 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
     if (options.voice !== undefined) payload.voice = options.voice;
     if (options.slowmode !== undefined) payload.slowmode = options.slowmode;
 
-    if (options.description !== undefined) {
-      if (options.description === null) remove.push("Description");
-      else payload.description = options.description;
-    }
+    setOrRemove(payload, remove, "description", options.description, "Description");
+    await setOrRemoveAttachment(this.client.rest, payload, remove, "icon", options.icon, "Icon", "icons");
 
-    if (options.icon !== undefined) {
-      if (options.icon === null) {
-        remove.push("Icon");
-      } else {
-        const resolvedIcon = await resolveAttachment(this.client.rest, options.icon, "icons");
-
-        if (resolvedIcon !== undefined) {
-          payload.icon = resolvedIcon;
-        }
-      }
-    }
-
-    if (remove.length > 0) payload.remove = remove;
-    if (Object.keys(payload).length === 0) return this.fetch(channel);
+    if (!finalizeEdit(payload, remove)) return this.fetch(channel);
 
     const data = (await this.client.rest.patch(`/channels/${this.resolveId(channel)}`, payload)) as RawChannel;
     return this._add(data);
@@ -202,14 +166,8 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
     }
 
     const id = this.resolveId(channel);
-    const allowBigInt = options.allow !== undefined ? Permissions.resolve(options.allow) : 0n;
-    const denyBigInt = options.deny !== undefined ? Permissions.resolve(options.deny) : 0n;
-
     const payload: DataSetRolePermissions = {
-      permissions: {
-        allow: Number(allowBigInt),
-        deny: Number(denyBigInt),
-      },
+      permissions: buildPermissionPayload(options),
     };
 
     const data = await this.client.rest.put(`/channels/${id}/permissions/${roleId}`, payload);

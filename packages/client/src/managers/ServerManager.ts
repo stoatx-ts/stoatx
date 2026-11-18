@@ -1,8 +1,8 @@
 import { BaseManager } from "./BaseManager";
 import { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
-import * as util from "node:util";
 import { Server as RawServer, DataEditServer, FieldsServer } from "stoat-api";
+import { finalizeEdit, setOrRemove } from "../utils/editPayload";
 
 export interface ServerEditOptions {
   name?: string;
@@ -63,19 +63,9 @@ export class ServerManager extends BaseManager<string, Server, RawServer> {
     const remove: FieldsServer[] = [];
 
     if (options.name !== undefined) payload.name = options.name;
-    if (options.description !== undefined) {
-      if (options.description === null) remove.push("Description");
-      else payload.description = options.description;
-    }
-
-    if (options.icon !== undefined) {
-      if (options.icon === null) remove.push("Icon");
-      else payload.icon = options.icon;
-    }
-    if (options.banner !== undefined) {
-      if (options.banner === null) remove.push("Banner");
-      else payload.banner = options.banner;
-    }
+    setOrRemove(payload, remove, "description", options.description, "Description");
+    setOrRemove(payload, remove, "icon", options.icon, "Icon");
+    setOrRemove(payload, remove, "banner", options.banner, "Banner");
 
     // System Messages
     if (options.systemMessages) {
@@ -105,14 +95,10 @@ export class ServerManager extends BaseManager<string, Server, RawServer> {
     if (options.analytics !== undefined) payload.analytics = options.analytics;
     if (options.owner !== undefined) payload.owner = options.owner;
 
-    if (remove.length > 0) payload.remove = remove;
+    finalizeEdit(payload, remove);
 
     const data = (await this.client.rest.patch(`/servers/${serverId}`, payload)) as RawServer;
 
     return this._add(data);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

@@ -2,7 +2,6 @@ import { Collection } from "../utils/Collection";
 import type { BaseChannel } from "../structures/BaseChannel";
 import { Message, MessageOptions } from "../structures/Message";
 import type { Client } from "../client/Client";
-import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
 import { resolveAttachment } from "../utils/resolveAttachment";
@@ -246,7 +245,7 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
    * @param message The MessageResolvable to remove the reaction from.
    * @param userId The ID of the user whose reaction to remove. If not provided, removes the current user's reaction.
    * @param removeAll Remove all reactions of this type.
-   * @throws {Error} If both userId and removeAll are provided, or if the API request fails.
+   * @throws {Error} If the API request fails. If both userId and removeAll are provided, userId takes precedence.
    * @example
    * // Remove the current user's reaction
    * await channel.messages.removeReaction(messageId, "👍");
@@ -288,9 +287,5 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
   public async clearReactions(message: MessageResolvable): Promise<void> {
     const id = this.resolveId(message);
     await this.client.rest.delete(`/channels/${this.channel.id}/messages/${id}/reactions`);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

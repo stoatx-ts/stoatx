@@ -2,7 +2,7 @@
   "name": "@stoatx/client",
   "version": "0.10.0",
   "type": "module",
-  "description": "A client library for the Stoatx command handler, providing utilities and integrations for building command-based applications within the Stoat ecosystem.",
+  "description": "A typed client library for the Stoat API.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stoatx-ts/stoatx.git"

@@ -62,6 +62,10 @@
 
 [`Collection`](Collection.md)\<`string`, [`Member`](Member.md)\>
 
+#### Inherited from
+
+`BaseManager.[custom]`
+
 ***
 
 ### ban()
@@ -189,7 +193,7 @@ If the API request fails.
 const allMembers = await server.members.fetchMany();
 
 // Fetch only online members to save bandwidth
-const onlineMembers = await server.members.fetchMany({ exclude_offline: true });
+const onlineMembers = await server.members.fetchMany({ excludeOffline: true });
 ```
 
 ***

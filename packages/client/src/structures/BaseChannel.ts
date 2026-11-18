@@ -78,7 +78,7 @@ export abstract class BaseChannel extends Base {
    * const messages = await channel.fetchMessages({ after: "MESSAGE_ID" });
    * console.log(`Fetched ${messages.size} messages sent after the specified message`);
    * // Fetch messages around a specific message ID
-   * const messages = await channel.fetchMessages({ around: "MESSAGE_ID", limit: 10 });
+   * const messages = await channel.fetchMessages({ nearby: "MESSAGE_ID", limit: 10 });
    * console.log(`Fetched ${messages.size} messages sent around the specified message`);
    */
   public async fetchMessages(options?: MessageFetchOptions): Promise<Collection<string, Message>> {

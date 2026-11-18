@@ -14,6 +14,7 @@ import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { RevoltConfig } from "stoat-api";
 import { VoiceManager } from "../voice";
+import { StoatAPI } from "../utils/Constants";
 
 export interface ClientEvents {
   ready: [data: any];
@@ -91,7 +92,7 @@ export class Client extends EventEmitter {
   public async login(token: string): Promise<any> {
     if (!token) throw new Error("A valid token must be provided.");
 
-    const rootApiUrl = this.options.apiURL ?? "https://api.stoat.chat";
+    const rootApiUrl = this.options.apiURL ?? StoatAPI;
 
     this.rest.setBaseURL(rootApiUrl);
     this.rest.setToken(token);

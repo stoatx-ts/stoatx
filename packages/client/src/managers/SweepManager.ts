@@ -1,4 +1,3 @@
-// src/managers/SweeperManager.ts
 import type { Client } from "../client/Client";
 import type { TextChannel } from "../structures/TextChannel";
 

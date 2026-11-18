@@ -2,7 +2,6 @@ import { Collection } from "../utils/Collection";
 import type { BaseChannel, ChannelCreateOptions } from "../structures/BaseChannel";
 import type { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
-import * as util from "node:util";
 import { DataCreateServerChannel } from "stoat-api";
 
 export class ServerChannelManager {
@@ -49,9 +48,5 @@ export class ServerChannelManager {
     const data = await this.client.rest.post(`/servers/${this.server.id}/channels`, payload);
 
     return this.client.channels._add(data);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

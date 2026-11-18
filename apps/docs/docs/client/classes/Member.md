@@ -133,7 +133,7 @@ Get avatar URL for this member, or null if they don't have one.
 ```ts
 // Get a member's avatar URL
 const avatarURL = member.avatarURL;
-console.log(avatarURL); // https://cdn.stoat.chat/attachments/avatars/1234567890/avatar.png
+console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/1234567890/avatar.png
 ```
 
 ##### Returns
@@ -421,7 +421,7 @@ await member.setTimeout(600000);
 
 > **toString**(): `string`
 
-When concatenated with a string, this automatically returns the user's mention instead of the GuildMember object.
+When concatenated with a string, this automatically returns the user's mention instead of the Member object.
 
 #### Returns
 

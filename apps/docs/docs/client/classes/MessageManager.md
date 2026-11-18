@@ -62,6 +62,10 @@
 
 [`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>
 
+#### Inherited from
+
+`BaseManager.[custom]`
+
 ***
 
 ### clearReactions()
@@ -296,7 +300,7 @@ Requires ManageMessages if changing others' reactions.
 
 #### Throws
 
-If both userId and removeAll are provided, or if the API request fails.
+If the API request fails. If both userId and removeAll are provided, userId takes precedence.
 
 #### Example
 

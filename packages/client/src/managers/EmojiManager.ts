@@ -2,7 +2,6 @@ import { BaseManager } from "./BaseManager";
 import type { Client } from "../client/Client";
 import { Emoji } from "../structures/Emoji";
 import { Server } from "../structures/Server";
-import * as util from "node:util";
 import { DataCreateEmoji, DataEditEmoji, Emoji as RawEmoji } from "stoat-api";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
@@ -19,6 +18,8 @@ export interface EmojiEditOptions {
 }
 
 export type EmojiResolvable = string | Emoji;
+
+const EMOJI_MENTION = /[<:>]/g;
 
 export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
   constructor(
@@ -51,18 +52,11 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    * @throws {TypeError} If an invalid {@link EmojiResolvable} is provided.
    * @throws {Error} If the API request fails.
    * @example
-   * // Fetch a channel, bypassing cache
-   * const channel = await client.channels.fetch("01H...", true);
+   * // Fetch an emoji, bypassing cache
+   * const emoji = await client.emojis.fetch("01H...", true);
    */
   public async fetch(emoji: EmojiResolvable, force: boolean = false): Promise<Emoji> {
-    if (!force) {
-      const cached = this.resolve(emoji);
-      if (cached) return cached;
-    }
-
-    const id = this.resolveId(emoji);
-    const data = await this.client.rest.get(`/custom/emoji/${id}`);
-    return this._add(data);
+    return this.fetchWithCache(emoji, force, (id) => this.client.rest.get(`/custom/emoji/${id}`));
   }
 
   /**
@@ -71,14 +65,7 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    * @returns The resolved {@link Emoji} object, or undefined if not found.
    */
   public resolve(emoji: EmojiResolvable): Emoji | undefined {
-    if (emoji instanceof Emoji) return emoji;
-
-    if (typeof emoji === "string") {
-      const id = emoji.replace(/[<:>]/g, "");
-      return this.cache.get(id);
-    }
-
-    return undefined;
+    return this.resolveFromCache(emoji, Emoji, EMOJI_MENTION);
   }
 
   /**
@@ -88,13 +75,7 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    * @throws {TypeError} If an invalid type is provided.
    */
   public resolveId(emoji: EmojiResolvable): string {
-    if (emoji instanceof Emoji) return emoji.id;
-
-    if (typeof emoji === "string") {
-      return emoji.replace(/:/g, "");
-    }
-
-    throw new Error("Invalid EmojiResolvable");
+    return this.resolveIdFrom(emoji, Emoji, EMOJI_MENTION);
   }
 
   /**
@@ -159,9 +140,5 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
     const data = await this.client.rest.patch(`/custom/emoji/${id}`, payload);
 
     return this._add(data);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

@@ -84,8 +84,7 @@ export class Message extends Base {
   }
 
   public async reply(contentOrOptions: string | MessageOptions): Promise<Message> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     const options: MessageOptions =
       typeof contentOrOptions === "string" ? { content: contentOrOptions } : { ...contentOrOptions };
@@ -110,8 +109,7 @@ export class Message extends Base {
    * @param contentOrOptions The new content or options for the message.
    */
   public async edit(contentOrOptions: string | MessageOptions): Promise<this> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     return (await channel.messages.edit(this.id, contentOrOptions)) as this;
   }
@@ -120,8 +118,7 @@ export class Message extends Base {
    * Deletes this message.
    */
   public async delete(): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.delete(this.id);
   }
@@ -130,8 +127,7 @@ export class Message extends Base {
    * Pins this message.
    */
   public async pin(): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.pin(this.id);
   }
@@ -140,8 +136,7 @@ export class Message extends Base {
    * Unpins this message.
    */
   public async unpin(): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.unpin(this.id);
   }
@@ -155,8 +150,7 @@ export class Message extends Base {
    * await message.react("customEmojiId");
    */
   public async react(reaction: string): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.react(this.id, reaction);
   }
@@ -166,7 +160,7 @@ export class Message extends Base {
    * @param reaction The emoji to remove. Can be a Unicode emoji or a custom emoji ID.
    * @param userId The ID of the user whose reaction to remove. If not provided, removes the current user's reaction.
    * @param removeAll Remove all reactions of this type.
-   * @throws {Error} If both userId and removeAll are provided, or if the API request fails.
+   * @throws {Error} If the API request fails. If both userId and removeAll are provided, userId takes precedence.
    * @example
    * // Remove the current user's reaction
    * await message.removeReaction("👍");
@@ -176,8 +170,7 @@ export class Message extends Base {
    * await message.removeReaction("👍", undefined, true);
    */
   public async removeReaction(reaction: string, userId?: UserResolvable, removeAll?: boolean): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.removeReaction(this.id, reaction, userId, removeAll);
   }
@@ -189,8 +182,7 @@ export class Message extends Base {
    * await message.clearReactions();
    */
   public async clearReactions(): Promise<void> {
-    let channel = this.channel;
-    if (!channel) channel = await this.client.channels.fetch(this.channelId);
+    const channel = await this.resolveChannel();
 
     await channel.messages.clearReactions(this.id);
   }
@@ -224,6 +216,13 @@ export class Message extends Base {
       const collector = this.createReactionCollector(options);
       collector.once("end", (collected) => resolve(collected));
     });
+  }
+
+  /**
+   * Returns the cached channel, fetching it if it is not cached.
+   */
+  private async resolveChannel(): Promise<BaseChannel> {
+    return this.channel ?? (await this.client.channels.fetch(this.channelId));
   }
 
   /** Gets the Channel object from cache */
