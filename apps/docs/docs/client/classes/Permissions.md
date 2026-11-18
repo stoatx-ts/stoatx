@@ -394,7 +394,7 @@ Resolves a [BitFieldResolvable](../type-aliases/BitFieldResolvable.md) into a ra
 
 Resolution rules (in order):
 - `undefined` → `DefaultBit`
-- A number or bigint matching `DefaultBit`'s type and >= 0 → returned as-is
+- A non-negative number or bigint → converted to `DefaultBit`'s type
 - A `BitField` instance → its `.bitfield` value
 - An array → each element resolved and OR'd together
 - A numeric string → parsed as `BigInt` or `Number` depending on `DefaultBit`'s type
