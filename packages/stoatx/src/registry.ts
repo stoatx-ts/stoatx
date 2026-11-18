@@ -55,6 +55,7 @@ export class CommandRegistry {
     this.extensions = extensions;
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   get size(): number {
     return this.commands.size;
   }
@@ -165,6 +166,7 @@ export class CommandRegistry {
     return Array.from(this.commands.values());
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   getAllMetadata(): CommandMetadata[] {
     return this.getAll().map((c) => c.metadata);
   }
@@ -173,6 +175,7 @@ export class CommandRegistry {
     return this.registeredEvents;
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   getByCategory(): Map<string, RegisteredCommand[]> {
     const categories = new Map<string, RegisteredCommand[]>();
 
@@ -193,14 +196,17 @@ export class CommandRegistry {
     this.processedStoatClasses.clear();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   [Symbol.iterator](): IterableIterator<[string, RegisteredCommand]> {
     return this.commands.entries();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   values(): IterableIterator<RegisteredCommand> {
     return this.commands.values();
   }
 
+  /** @deprecated Unused by stoatx; use {@link CommandRegistry.getAll} instead. Will be removed in the next major version. */
   keys(): IterableIterator<string> {
     return this.commands.keys();
   }
