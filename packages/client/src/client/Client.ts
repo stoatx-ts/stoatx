@@ -23,6 +23,7 @@ import { StoatAPI } from "../utils/Constants";
 export interface ClientEvents {
   ready: [data: any];
   messageCreate: [message: Message];
+  /** `oldMessage` is `null` only for uncached messages, which are emitted when `partials.messages` is enabled. */
   messageUpdate: [oldMessage: null | Message, newMessage: Message];
   messageDelete: [message: Message | { id: string; channelId: string }];
   messageReact: [message: Message | { id: string; channelId: string }, emojiId: string, userId: string];
@@ -32,10 +33,10 @@ export interface ClientEvents {
   debug: [message: string];
   raw: [data: any];
   channelCreate: [channel: BaseChannel];
-  channelUpdate: [oldChannel: BaseChannel | null, newChannel: BaseChannel];
+  channelUpdate: [oldChannel: BaseChannel, newChannel: BaseChannel];
   channelDelete: [channel: BaseChannel | string];
   serverCreate: [server: Server];
-  serverUpdate: [oldServer: Server | null, newServer: Server];
+  serverUpdate: [oldServer: Server, newServer: Server];
   serverDelete: [server: Server | string];
   userUpdate: [oldUser: User, newUser: User];
   serverMemberJoin: [member: Member];
@@ -66,6 +67,14 @@ export interface ClientEvents {
 
 export interface ClientOptions {
   sweepers?: SweeperOptions;
+  /**
+   * Emit events for data that is not in the cache, using partial structures.
+   * Partial structures have `partial: true` and only contain the fields the event carried.
+   */
+  partials?: {
+    /** Emit `messageUpdate` for uncached messages with a partial `Message` (old value is `null`). */
+    messages?: boolean;
+  };
   cacheLimits?: {
     users?: number;
     servers?: number;

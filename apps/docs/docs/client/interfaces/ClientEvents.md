@@ -34,7 +34,7 @@
 
 ### channelUpdate
 
-> **channelUpdate**: \[[`BaseChannel`](../classes/BaseChannel.md) \| `null`, [`BaseChannel`](../classes/BaseChannel.md)\]
+> **channelUpdate**: \[[`BaseChannel`](../classes/BaseChannel.md), [`BaseChannel`](../classes/BaseChannel.md)\]
 
 ***
 
@@ -113,6 +113,8 @@
 ### messageUpdate
 
 > **messageUpdate**: \[[`Message`](../classes/Message.md) \| `null`, [`Message`](../classes/Message.md)\]
+
+`oldMessage` is `null` only for uncached messages, which are emitted when `partials.messages` is enabled.
 
 ***
 
@@ -196,7 +198,7 @@
 
 ### serverUpdate
 
-> **serverUpdate**: \[[`Server`](../classes/Server.md) \| `null`, [`Server`](../classes/Server.md)\]
+> **serverUpdate**: \[[`Server`](../classes/Server.md), [`Server`](../classes/Server.md)\]
 
 ***
 

@@ -60,6 +60,11 @@ export class Message extends Base {
   public pinned: null | boolean = false;
   public reactions: Record<string, string[]> = {};
   public replies: string[] | null = [];
+  /**
+   * Whether this message was built from an update event for an uncached message,
+   * so it only has the fields that changed. Call {@link Message.fetch} to get the full message.
+   */
+  public partial: boolean = false;
 
   constructor(client: Client, data: RawMessage) {
     super(client, data);
@@ -102,6 +107,15 @@ export class Message extends Base {
     options.replies = repliesArray;
 
     return channel.messages.send(options);
+  }
+
+  /**
+   * Fetches this message from the API. The result is cached and returned as a new full
+   * Message, so use the returned value rather than this instance when it is partial.
+   */
+  public async fetch(): Promise<Message> {
+    const channel = await this.resolveChannel();
+    return channel.messages.fetch(this.id);
   }
 
   /**

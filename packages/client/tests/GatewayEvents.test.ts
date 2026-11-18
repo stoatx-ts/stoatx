@@ -138,15 +138,39 @@ describe("Gateway events", () => {
     expect(deleted.get(missingId)).toEqual({ id: missingId, channelId });
   });
 
-  it("builds a partial message for uncached MessageUpdate instead of throwing", () => {
+  it("ignores uncached MessageUpdate unless partial messages are enabled", () => {
+    const onUpdate = listen("messageUpdate");
+
+    dispatch({ type: "MessageUpdate", id: ulid(), channel: ulid(), data: { content: "edited" } });
+
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it("emits a partial message for uncached MessageUpdate when enabled", () => {
+    client = new Client({ partials: { messages: true } });
     const onUpdate = listen("messageUpdate");
     const id = ulid();
 
     dispatch({ type: "MessageUpdate", id, channel: ulid(), data: { content: "edited" } });
 
-    expect(onUpdate.mock.calls[0]![0]).toBeNull();
-    expect(onUpdate.mock.calls[0]![1].id).toBe(id);
-    expect(onUpdate.mock.calls[0]![1].content).toBe("edited");
+    const [oldMessage, newMessage] = onUpdate.mock.calls[0]!;
+    expect(oldMessage).toBeNull();
+    expect(newMessage.id).toBe(id);
+    expect(newMessage.content).toBe("edited");
+    expect(newMessage.partial).toBe(true);
+  });
+
+  it("does not emit update events for uncached channels or servers", () => {
+    const onChannel = listen("channelUpdate");
+    const onServer = listen("serverUpdate");
+
+    dispatch({ type: "ChannelUpdate", id: ulid(), data: { name: "x" }, clear: [] });
+    dispatch({ type: "ServerUpdate", id: ulid(), data: { name: "x" }, clear: [] });
+
+    expect(onChannel).not.toHaveBeenCalled();
+    expect(onServer).not.toHaveBeenCalled();
+    expect(client.channels.cache.size).toBe(0);
+    expect(client.servers.cache.size).toBe(0);
   });
 
   it("updates group recipients", () => {

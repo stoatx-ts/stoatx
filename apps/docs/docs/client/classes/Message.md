@@ -131,6 +131,15 @@ The base class for all structures.
 
 ***
 
+### partial
+
+> **partial**: `boolean` = `false`
+
+Whether this message was built from an update event for an uncached message,
+so it only has the fields that changed. Call [Message.fetch](#fetch) to get the full message.
+
+***
+
 ### pinned
 
 > **pinned**: `boolean` \| `null` = `false`
@@ -400,6 +409,19 @@ Compares this object with another to see if they represent the same entity.
 #### Inherited from
 
 [`Base`](Base.md).[`equals`](Base.md#equals)
+
+***
+
+### fetch()
+
+> **fetch**(): `Promise`\<`Message`\>
+
+Fetches this message from the API. The result is cached and returned as a new full
+Message, so use the returned value rather than this instance when it is partial.
+
+#### Returns
+
+`Promise`\<`Message`\>
 
 ***
 
