@@ -207,17 +207,9 @@ export class CommandRegistry {
       const guardInstance = this.container.resolve<GuardInterface>(GuardClass);
 
       if (typeof guardInstance.run !== "function") {
-        console.error(
-          `[Stoatx] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a run() method.`,
+        throw new Error(
+          `[Stoatx] Guard "${GuardClass.name}" on command "${commandName}" does not have a run() method.`,
         );
-        process.exit(1);
-      }
-
-      if (typeof guardInstance.guardFail !== "function") {
-        console.error(
-          `[Stoatx] FATAL: Guard "${GuardClass.name}" on command "${commandName}" does not have a guardFail() method.`,
-        );
-        process.exit(1);
       }
     }
   }
