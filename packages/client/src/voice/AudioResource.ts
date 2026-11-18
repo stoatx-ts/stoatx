@@ -1,5 +1,5 @@
 import { Readable } from "node:stream";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { PassThrough } from "node:stream";
 import { existsSync } from "node:fs";
 
@@ -12,9 +12,26 @@ export type AudioSource = string | Readable;
 
 export class AudioResource {
   readonly stream: Readable;
+  private process: ChildProcess | null;
+  private readonly source: Readable | null;
 
-  private constructor(stream: Readable) {
+  private constructor(stream: Readable, process: ChildProcess, source: Readable | null) {
     this.stream = stream;
+    this.process = process;
+    this.source = source;
+  }
+
+  /**
+   * Stops decoding: destroys the output stream and kills the ffmpeg process.
+   * Safe to call more than once.
+   */
+  destroy(): void {
+    if (this.source && this.process?.stdin) this.source.unpipe(this.process.stdin);
+    if (!this.stream.destroyed) this.stream.destroy();
+    if (this.process && this.process.exitCode === null && this.process.signalCode === null) {
+      this.process.kill();
+    }
+    this.process = null;
   }
 
   static from(source: AudioSource, options: AudioResourceOptions = {}): AudioResource {
@@ -58,6 +75,6 @@ export class AudioResource {
       }
     });
 
-    return new AudioResource(pass);
+    return new AudioResource(pass, ffmpeg, source instanceof Readable ? source : null);
   }
 }

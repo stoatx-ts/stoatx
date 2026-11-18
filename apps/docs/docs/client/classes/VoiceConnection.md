@@ -63,22 +63,6 @@
 
 ## Methods
 
-### \_feedStream()
-
-> **\_feedStream**(`stream`): `Promise`\<`void`\>
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `stream` | `Readable` |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
 ### disconnect()
 
 > **disconnect**(): `Promise`\<`void`\>
