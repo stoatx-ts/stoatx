@@ -2,6 +2,7 @@ import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import type { User } from "./User";
 import type { Server } from "./Server";
+import type { DMChannel } from "./DMChannel";
 import { Permissions, PermissionFlags } from "../utils/permissions";
 import * as util from "node:util";
 import { MemberBanOptions, MemberEditOptions } from "../managers/MemberManager";
@@ -165,8 +166,8 @@ export class Member extends Base {
    * const dm = await member.createDM();
    * console.log(`DM channel ID: ${dm.id}`);
    */
-  public async createDM(force: boolean = false): Promise<void> {
-    await this.client.users.createDM(this.id, { force });
+  public async createDM(force: boolean = false): Promise<DMChannel> {
+    return this.client.users.createDM(this.id, { force });
   }
 
   /**
