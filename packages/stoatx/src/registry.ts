@@ -45,6 +45,8 @@ export class CommandRegistry {
   private readonly registeredEvents: RegisteredEvent[] = [];
   private readonly extensions: string[];
   private readonly processedStoatClasses: Set<Function> = new Set();
+  private readonly classSources: Map<Function, string> = new Map();
+  private readonly failedFiles: string[] = [];
   private readonly container: StoatxContainer;
 
   constructor(container: StoatxContainer, extensions: string[] = [".js", ".mjs", ".cjs"]) {
@@ -57,6 +59,7 @@ export class CommandRegistry {
   }
 
   async loadFromDirectory(directory: string): Promise<void> {
+    this.failedFiles.length = 0;
     const patterns = this.extensions.map((ext) => path.join(directory, "**", `*${ext}`).replace(/\\/g, "/"));
 
     for (const pattern of patterns) {
@@ -70,10 +73,11 @@ export class CommandRegistry {
       }
     }
 
-    console.log(`[Stoatx] Loaded ${this.commands.size} command(s) and ${this.registeredEvents.length} event(s)`);
+    this.logLoadSummary();
   }
 
   async autoDiscover(options: AutoDiscoveryOptions = {}): Promise<void> {
+    this.failedFiles.length = 0;
     const roots = options.roots?.length ? options.roots : [process.cwd()];
     const includePatterns = options.include?.length ? options.include : this.getDefaultAutoDiscoveryPatterns();
 
@@ -100,7 +104,7 @@ export class CommandRegistry {
       await this.loadFile(file, baseDir);
     }
 
-    console.log(`[Stoatx] Loaded ${this.commands.size} command(s) and ${this.registeredEvents.length} event(s)`);
+    this.logLoadSummary();
   }
 
   private getDefaultAutoDiscoveryPatterns(): string[] {
@@ -220,16 +224,41 @@ export class CommandRegistry {
       const fileUrl = pathToFileURL(filePath).href;
       await import(fileUrl);
 
-      const allStoatClasses = decoratorStore.getStoatClasses();
-      for (const [stoatClass] of allStoatClasses.entries()) {
-        if (knownStoatClasses.has(stoatClass) || this.processedStoatClasses.has(stoatClass)) {
-          continue;
+      for (const stoatClass of decoratorStore.getStoatClasses().keys()) {
+        if (!knownStoatClasses.has(stoatClass) && !this.classSources.has(stoatClass)) {
+          this.classSources.set(stoatClass, filePath);
         }
+      }
+
+      // Modules are cached after the first import, so look classes up by their
+      // source file instead of relying on the import to register them again.
+      for (const [stoatClass, source] of this.classSources) {
+        if (source !== filePath || this.processedStoatClasses.has(stoatClass)) continue;
         this.registerStoatClassCommands(stoatClass, filePath, baseDir);
       }
     } catch (error) {
+      this.failedFiles.push(filePath);
       console.error(`[Stoatx] Failed to load command file: ${filePath}`, error);
     }
+  }
+
+  private logLoadSummary(): void {
+    const summary = `[Stoatx] Loaded ${this.commands.size} command(s) and ${this.registeredEvents.length} event(s)`;
+    if (this.failedFiles.length === 0) {
+      console.log(summary);
+      return;
+    }
+    console.warn(
+      `${summary}; ${this.failedFiles.length} file(s) failed to load:\n` +
+        this.failedFiles.map((file) => `  - ${file}`).join("\n"),
+    );
+  }
+
+  /**
+   * Files that threw while loading during the last discovery run.
+   */
+  getFailedFiles(): readonly string[] {
+    return this.failedFiles;
   }
 
   private registerStoatClassCommands(stoatClass: Function, filePath: string, baseDir: string): void {
