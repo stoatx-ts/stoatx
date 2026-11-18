@@ -21,6 +21,7 @@ export class SweeperManager {
 
   public start() {
     if (this.options.messages) {
+      if (this.messageInterval) clearInterval(this.messageInterval);
       this.client.emit("debug", "Starting Message Cache Sweeper...");
 
       this.messageInterval = setInterval(() => {
@@ -55,7 +56,9 @@ export class SweeperManager {
   }
 
   public stop() {
-    if (this.messageInterval) clearInterval(this.messageInterval);
+    if (!this.messageInterval) return;
+    clearInterval(this.messageInterval);
+    this.messageInterval = null;
     this.client.emit("debug", "Sweepers stopped.");
   }
 }

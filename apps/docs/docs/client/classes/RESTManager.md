@@ -41,6 +41,18 @@
 
 ***
 
+### destroy()
+
+> **destroy**(): `void`
+
+Stops the internal bucket sweeper.
+
+#### Returns
+
+`void`
+
+***
+
 ### get()
 
 > **get**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"get"`, `P`\>\>

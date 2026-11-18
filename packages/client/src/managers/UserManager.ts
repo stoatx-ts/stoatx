@@ -132,6 +132,11 @@ export class UserManager extends BaseManager<string, User, RawUser> {
       throw new TypeError("UserEditOptions must be a valid object.");
     }
 
+    const selfId = this.client.user?.id;
+    if (!selfId) {
+      throw new Error("CLIENT_USER_NOT_READY: editMe() requires the client to be logged in and ready.");
+    }
+
     const payload: DataEditUser = {};
     const remove: FieldsUser[] = [];
 
@@ -179,7 +184,7 @@ export class UserManager extends BaseManager<string, User, RawUser> {
       return this.fetch("@me");
     }
 
-    const data = await this.client.rest.patch(`/users/${this.client.user?.id}`, payload);
+    const data = await this.client.rest.patch(`/users/${selfId}`, payload);
 
     return this._add(data);
   }

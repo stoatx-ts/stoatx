@@ -202,7 +202,9 @@ Gets the global User object for this member
 
 > **\_clone**(): `this`
 
-Helper to quickly clone a structure
+Creates a snapshot of this structure. Plain nested data (objects and arrays)
+is copied so later patches to the original do not leak into the snapshot;
+class instances (client, managers, other structures) are shared by reference.
 
 #### Returns
 
@@ -258,7 +260,7 @@ await member.ban({ reason: "Spamming", deleteMessageSeconds: 3600 });
 
 ### createDM()
 
-> **createDM**(`force?`): `Promise`\<`void`\>
+> **createDM**(`force?`): `Promise`\<[`DMChannel`](DMChannel.md)\>
 
 Creates a DM channel between the client's user and this member.
 
@@ -270,7 +272,7 @@ Creates a DM channel between the client's user and this member.
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\<[`DMChannel`](DMChannel.md)\>
 
 A promise that resolves to the created DMChannel object.
 
