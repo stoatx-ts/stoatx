@@ -490,67 +490,83 @@ export class StoatxHandler {
         return rawValue === "false" ? false : Boolean(rawValue);
 
       case "user": {
-        const match = rawValue.match(/^(?:<@!?)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-        if (!match) {
+        const userId = this.parseMention(rawValue, "<@!?");
+        if (!userId) {
           return this.reportValidationError(instance, ctx, new InvalidMentionError(paramName, kind, "user", rawValue));
         }
-        const userId = match[1]!;
-        if (param.fetch) {
-          try {
-            return await this.client.users.fetch(userId);
-          } catch {
-            return this.reportValidationError(instance, ctx, new FetchFailedError(paramName, kind, "user", userId));
-          }
-        }
-        return this.client.users.cache.get(userId) ?? userId;
+        if (!param.fetch) return this.client.users.cache.get(userId) ?? userId;
+        return this.fetchOrReport(
+          () => this.client.users.fetch(userId),
+          instance,
+          ctx,
+          paramName,
+          kind,
+          "user",
+          userId,
+        );
       }
 
       case "channel": {
-        const match = rawValue.match(/^(?:<#)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-        if (!match) {
+        const channelId = this.parseMention(rawValue, "<#");
+        if (!channelId) {
           return this.reportValidationError(
             instance,
             ctx,
             new InvalidMentionError(paramName, kind, "channel", rawValue),
           );
         }
-        const channelId = match[1]!;
-        if (param.fetch) {
-          try {
-            return await this.client.channels.fetch(channelId);
-          } catch {
-            return this.reportValidationError(
-              instance,
-              ctx,
-              new FetchFailedError(paramName, kind, "channel", channelId),
-            );
-          }
-        }
-        return this.client.channels.cache.get(channelId) ?? channelId;
+        if (!param.fetch) return this.client.channels.cache.get(channelId) ?? channelId;
+        return this.fetchOrReport(
+          () => this.client.channels.fetch(channelId),
+          instance,
+          ctx,
+          paramName,
+          kind,
+          "channel",
+          channelId,
+        );
       }
 
       case "role": {
-        const match = rawValue.match(/^(?:<@&)?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$/i);
-        if (!match) {
+        const roleId = this.parseMention(rawValue, "<@&");
+        if (!roleId) {
           return this.reportValidationError(instance, ctx, new InvalidMentionError(paramName, kind, "role", rawValue));
         }
-        const roleId = match[1]!;
-        if (param.fetch) {
-          const server = ctx.message.server;
-          if (!server) {
-            return this.reportValidationError(instance, ctx, new NoServerContextError(paramName, kind));
-          }
-          try {
-            return await server.roles.fetch(roleId);
-          } catch {
-            return this.reportValidationError(instance, ctx, new FetchFailedError(paramName, kind, "role", roleId));
-          }
+        const server = ctx.message.server;
+        if (!param.fetch) return server?.roles.cache.get(roleId) ?? roleId;
+        if (!server) {
+          return this.reportValidationError(instance, ctx, new NoServerContextError(paramName, kind));
         }
-        return ctx.message.server?.roles.cache.get(roleId) ?? roleId;
+        return this.fetchOrReport(() => server.roles.fetch(roleId), instance, ctx, paramName, kind, "role", roleId);
       }
 
       default:
         return rawValue;
+    }
+  }
+
+  /**
+   * Extracts a ULID from a raw ID or a mention such as `<@ID>`, `<#ID>` or `<@&ID>`.
+   * @param prefix Regex source for the mention's opening characters.
+   */
+  private parseMention(raw: string, prefix: string): string | null {
+    const match = raw.match(new RegExp(`^(?:${prefix})?([0-7][0-9A-HJKMNP-TV-Z]{25})>?$`, "i"));
+    return match ? match[1]! : null;
+  }
+
+  private async fetchOrReport<T>(
+    fetch: () => Promise<T>,
+    instance: object,
+    ctx: CommandContext,
+    paramName: string,
+    kind: "arg" | "option",
+    type: "user" | "channel" | "role",
+    id: string,
+  ): Promise<T | null> {
+    try {
+      return await fetch();
+    } catch {
+      return this.reportValidationError(instance, ctx, new FetchFailedError(paramName, kind, type, id));
     }
   }
 
