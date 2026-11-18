@@ -69,6 +69,13 @@ export class Role extends Base {
   }
 
   /**
+   * Returns the cached server, fetching it if it is not cached.
+   */
+  private async resolveServer(): Promise<Server> {
+    return this.server ?? (await this.client.servers.fetch(this.serverId));
+  }
+
+  /**
    * The server this role belongs to.
    * Pulls dynamically from the cache to prevent massive memory duplication.
    */
@@ -95,11 +102,7 @@ export class Role extends Base {
    * console.log(`Role updated, current name: ${role.name}`);
    */
   public async fetch(force: boolean = true): Promise<Role> {
-    let server = this.server;
-
-    if (!server) {
-      server = await this.client.servers.fetch(this.serverId);
-    }
+    const server = await this.resolveServer();
 
     return (await server.roles.fetch(this.id, force)) as this;
   }
@@ -118,8 +121,7 @@ export class Role extends Base {
    * await role.edit({ color: null });
    */
   public async edit(options: RoleEditOptions): Promise<Role> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     return (await server.roles.edit(this.id, options)) as this;
   }
@@ -132,11 +134,7 @@ export class Role extends Base {
    * await role.delete();
    */
   public async delete(): Promise<void> {
-    let server = this.server;
-
-    if (!server) {
-      server = await this.client.servers.fetch(this.serverId);
-    }
+    const server = await this.resolveServer();
 
     await server.roles.delete(this.id);
   }
@@ -154,8 +152,7 @@ export class Role extends Base {
    * });
    */
   public async setPermissions(options: RolePermissionOptions): Promise<Role> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     return (await server.roles.setPermissions(this.id, options)) as this;
   }
@@ -172,8 +169,7 @@ export class Role extends Base {
    * console.log(`Role moved to rank: ${role.rank}`);
    */
   public async setPosition(newPosition: number): Promise<Role> {
-    let server = this.server;
-    if (!server) server = await this.client.servers.fetch(this.serverId);
+    const server = await this.resolveServer();
 
     const sortedRoles = Array.from(server.roles.cache.values()).sort((a, b) => a.rank - b.rank);
 

@@ -106,34 +106,19 @@ export class TextChannel extends BaseChannel {
    * await channel.setCategory("default");
    */
   public async setCategory(category: string): Promise<TextChannel> {
-    const serverId = this.serverId as string;
-    const server = await this.client.servers.fetch(serverId);
-
-    if (!server.categories || server.categories.length === 0) {
-      throw new Error("This server has no categories to move the channel into.");
-    }
-
-    const categories = server.categories.map((c) => ({
-      id: c.id,
-      title: c.title,
-      channels: [...c.channels],
-    }));
-
-    for (const cat of categories) {
-      cat.channels = cat.channels.filter((id) => id !== this.id);
-    }
-
-    if (category !== "default") {
-      const targetCategory = categories.find((c) => c.id === category);
-      if (!targetCategory) {
-        throw new Error(`Category ${category} not found in server.`);
+    return this.mutateCategories((categories) => {
+      for (const cat of categories) {
+        cat.channels = cat.channels.filter((id) => id !== this.id);
       }
-      targetCategory.channels.push(this.id);
-    }
 
-    await this.client.servers.edit(serverId, { categories });
-
-    return this;
+      if (category !== "default") {
+        const targetCategory = categories.find((c) => c.id === category);
+        if (!targetCategory) {
+          throw new Error(`Category ${category} not found in server.`);
+        }
+        targetCategory.channels.push(this.id);
+      }
+    });
   }
 
   /**
@@ -146,6 +131,26 @@ export class TextChannel extends BaseChannel {
    * await channel.setPosition(0);
    */
   public async setPosition(position: number): Promise<TextChannel> {
+    return this.mutateCategories((categories) => {
+      const currentCategory = categories.find((c) => c.channels.includes(this.id));
+
+      if (!currentCategory) {
+        throw new Error("This channel is not currently inside any category.");
+      }
+
+      currentCategory.channels = currentCategory.channels.filter((id) => id !== this.id);
+
+      const safePosition = Math.max(0, Math.min(position, currentCategory.channels.length));
+      currentCategory.channels.splice(safePosition, 0, this.id);
+    });
+  }
+
+  /**
+   * Fetches the server's categories, lets `mutate` edit a copy of them, and saves the result.
+   */
+  private async mutateCategories(
+    mutate: (categories: { id: string; title: string; channels: string[] }[]) => void,
+  ): Promise<TextChannel> {
     const serverId = this.serverId as string;
     const server = await this.client.servers.fetch(serverId);
 
@@ -159,16 +164,7 @@ export class TextChannel extends BaseChannel {
       channels: [...c.channels],
     }));
 
-    const currentCategory = categories.find((c) => c.channels.includes(this.id));
-
-    if (!currentCategory) {
-      throw new Error("This channel is not currently inside any category.");
-    }
-
-    currentCategory.channels = currentCategory.channels.filter((id) => id !== this.id);
-
-    const safePosition = Math.max(0, Math.min(position, currentCategory.channels.length));
-    currentCategory.channels.splice(safePosition, 0, this.id);
+    mutate(categories);
 
     await this.client.servers.edit(serverId, { categories });
 
