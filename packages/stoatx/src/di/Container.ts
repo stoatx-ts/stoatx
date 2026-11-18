@@ -14,10 +14,11 @@ export class StoatxContainer {
 
     const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
 
-    const injections = paramTypes.map((param: any) => {
+    const injections = paramTypes.map((param: any, index: number) => {
       if (!param) {
         throw new Error(
-          `[Stoatx DI] Cannot resolve dependency for ${target.name}. Ensure all injected services are decorated with @Injectable().`,
+          `[Stoatx DI] Cannot resolve constructor parameter #${index} of ${target.name}: its type was erased at compile time. ` +
+            `Type it as a concrete class (not an interface, union or type-only import) and enable "emitDecoratorMetadata".`,
         );
       }
       return this.resolve(param);

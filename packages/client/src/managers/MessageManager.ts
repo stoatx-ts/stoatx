@@ -158,7 +158,7 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
 
     const data = await this.client.rest.post(`/channels/${this.channel.id}/messages`, payload);
 
-    return new Message(this.client, data);
+    return this._add(data);
   }
 
   /**

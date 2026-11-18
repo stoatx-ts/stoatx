@@ -8,6 +8,7 @@ export class GatewayManager {
   private ws: WebSocket | null = null;
   private wsURL: string = "";
   private pingInterval: NodeJS.Timeout | null = null;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
   private token: string | null = null;
 
   private reconnectAttempts: number = 0;
@@ -19,6 +20,7 @@ export class GatewayManager {
   public async connect(token: string): Promise<void> {
     this.token = token;
     this.isIntentionalClose = false;
+    this.clearReconnectTimeout();
     this.client.emit("debug", "Connecting to Stoat Gateway...");
 
     if (this.ws) {
@@ -26,7 +28,7 @@ export class GatewayManager {
       this.ws = null;
     }
 
-    const baseUrl = this.wsURL ?? "wss://events.stoat.chat";
+    const baseUrl = this.wsURL || "wss://events.stoat.chat";
     const url = `${baseUrl}?version=1&format=json&token=${this.token}`;
 
     this.ws = new WebSocket(url);
@@ -48,7 +50,7 @@ export class GatewayManager {
     });
 
     this.ws.on("error", (error) => {
-      this.client.emit("error", error);
+      this.client._reportError(error);
     });
   }
 
@@ -57,14 +59,29 @@ export class GatewayManager {
   }
 
   private handleMessage(rawData: WebSocket.RawData) {
-    const payload = JSON.parse(rawData.toString());
+    let payload: any;
+    try {
+      payload = JSON.parse(rawData.toString());
+    } catch (error) {
+      this.client.emit("debug", `Dropped malformed gateway frame: ${(error as Error).message}`);
+      return;
+    }
+
+    try {
+      this.dispatch(payload);
+    } catch (error) {
+      this.client._reportError(new Error(`Failed to handle gateway event "${payload?.type}"`, { cause: error }));
+    }
+  }
+
+  private dispatch(payload: any) {
     const eventType = payload.type;
 
     this.client.emit("raw", payload);
 
     switch (eventType) {
       case "Error":
-        this.client.emit("error", new Error(`Gateway Error: ${payload.error || JSON.stringify(payload)}`));
+        this.client._reportError(new Error(`Gateway Error: ${payload.error || JSON.stringify(payload)}`));
         break;
 
       case "Authenticated":
@@ -435,7 +452,7 @@ export class GatewayManager {
 
   private reconnect(): void {
     if (!this.token) {
-      this.client.emit("error", new Error("RECONNECT_FAILED: No token available."));
+      this.client._reportError(new Error("RECONNECT_FAILED: No token available."));
       return;
     }
 
@@ -451,13 +468,24 @@ export class GatewayManager {
       `Attempting to reconnect in ${Math.round(waitTime / 1000)}s... (Attempt ${this.reconnectAttempts})`,
     );
 
-    setTimeout(() => {
+    this.clearReconnectTimeout();
+    this.reconnectTimeout = setTimeout(() => {
+      this.reconnectTimeout = null;
       void this.connect(this.token!);
     }, waitTime);
   }
 
+  private clearReconnectTimeout() {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+  }
+
   public disconnect() {
     this.isIntentionalClose = true;
+    this.clearReconnectTimeout();
+    this.client.sweepers.stop();
     if (this.pingInterval) clearInterval(this.pingInterval);
     if (this.ws) {
       this.ws.close(1000, "Client disconnected gracefully");

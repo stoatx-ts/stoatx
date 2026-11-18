@@ -141,7 +141,9 @@ Pulls dynamically from the cache to prevent massive memory duplication.
 
 > **\_clone**(): `this`
 
-Helper to quickly clone a structure
+Creates a snapshot of this structure. Plain nested data (objects and arrays)
+is copied so later patches to the original do not leak into the snapshot;
+class instances (client, managers, other structures) are shared by reference.
 
 #### Returns
 
