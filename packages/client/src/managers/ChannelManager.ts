@@ -282,7 +282,7 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
    * await client.channels.unpin("CHANNEL_ID", "MESSAGE_ID");
    */
   public async unpin(id: string, messageId: string): Promise<void> {
-    await this.client.rest.delete(`/channels/${id}/pins/${messageId}`);
+    await this.client.rest.delete(`/channels/${id}/messages/${messageId}/pin`);
   }
 
   /**

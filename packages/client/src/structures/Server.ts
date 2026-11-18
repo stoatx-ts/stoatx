@@ -133,10 +133,13 @@ export class Server extends Base {
   }
 
   /**
-   * Leaves the server
+   * Leaves the server.
+   *
+   * Note: the API uses the same route to delete a server, so if the bot owns
+   * this server it will be deleted.
    */
   public async leave() {
-    return this.client.rest.delete(`/servers/${this.id}/leave`);
+    return this.client.rest.delete(`/servers/${this.id}`);
   }
 
   /**
