@@ -39,7 +39,7 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
   }
 
   /**
-   * Tell BaseManager how to handle Revolt's Member IDs
+   * Tell BaseManager how to extract a Member's ID (members are keyed by user ID)
    * @internal
    */
   protected extractId(data: RawMember): string {
@@ -106,7 +106,7 @@ export class MemberManager extends BaseManager<string, Member, RawMember> {
    * const allMembers = await server.members.fetchMany();
    *
    * // Fetch only online members to save bandwidth
-   * const onlineMembers = await server.members.fetchMany({ exclude_offline: true });
+   * const onlineMembers = await server.members.fetchMany({ excludeOffline: true });
    */
   public async fetchMany(options: FetchMembersOptions = {}): Promise<Collection<string, Member>> {
     const query: RouteParams<"get", `/servers/${string}/members`> = {};

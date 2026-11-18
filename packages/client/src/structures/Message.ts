@@ -160,7 +160,7 @@ export class Message extends Base {
    * @param reaction The emoji to remove. Can be a Unicode emoji or a custom emoji ID.
    * @param userId The ID of the user whose reaction to remove. If not provided, removes the current user's reaction.
    * @param removeAll Remove all reactions of this type.
-   * @throws {Error} If both userId and removeAll are provided, or if the API request fails.
+   * @throws {Error} If the API request fails. If both userId and removeAll are provided, userId takes precedence.
    * @example
    * // Remove the current user's reaction
    * await message.removeReaction("👍");

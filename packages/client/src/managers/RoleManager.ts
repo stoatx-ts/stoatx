@@ -106,13 +106,13 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
 
   /**
    * Creates a new role in this server.
-   * @param options The name and optional rank of the new role
+   * @param options The name of the new role
    * @returns Role The role that was created
    * @throws {Error} If the role cannot be created (e.g., lack of permissions, invalid options).
    * @throws {TypeError} If invalid options are provided.
    * @example
-   * // Create a new role named "Moderator" with rank 1
-   * const moderatorRole = await server.roles.create({ name: "Moderator", rank: 1 });
+   * // Create a new role named "Moderator"
+   * const moderatorRole = await server.roles.create({ name: "Moderator" });
    * console.log(`Created role: ${moderatorRole.name} with ID: ${moderatorRole.id}`);
    */
   public async create(options: RoleCreateOptions): Promise<Role> {
@@ -146,7 +146,7 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
    * console.log(`Fetched role: ${role.name} with ID: ${role.id}`);
    *
    * // Fetch a role by mention
-   * const role = await.server.roles.fetch("<%01JE2MM759J5D7CHJF084R7MJ2>");
+   * const role = await server.roles.fetch("<%01JE2MM759J5D7CHJF084R7MJ2>");
    * console.log(`Fetched role: ${role.name} with ID: ${role.id}`);
    *
    * // Force fetch a role, bypassing the cache
@@ -166,10 +166,10 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
    * @throws {Error} If the API request fails (e.g., lack of permissions).
    * @example
    * // Rename a role and give it a red color
-   * await server.roles.edit("01H...", { name: "Super Admin", colour: "#FF0000" });
+   * await server.roles.edit("01H...", { name: "Super Admin", color: "#FF0000" });
    *
    * // Remove the custom color from a role
-   * await server.roles.edit(role, { colour: null });
+   * await server.roles.edit(role, { color: null });
    */
   public async edit(role: RoleResolvable, options: RoleEditOptions): Promise<Role> {
     if (!options || typeof options !== "object") {

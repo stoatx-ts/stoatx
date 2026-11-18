@@ -218,7 +218,7 @@ export class Member extends Base {
   }
 
   /**
-   * When concatenated with a string, this automatically returns the user's mention instead of the GuildMember object.
+   * When concatenated with a string, this automatically returns the user's mention instead of the Member object.
    * @returns {string}
    * @example
    * // Logs: Hello from <@01JE2MM759J5D7CHJF084R7MJ2>!

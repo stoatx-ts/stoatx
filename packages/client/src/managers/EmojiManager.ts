@@ -52,8 +52,8 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    * @throws {TypeError} If an invalid {@link EmojiResolvable} is provided.
    * @throws {Error} If the API request fails.
    * @example
-   * // Fetch a channel, bypassing cache
-   * const channel = await client.channels.fetch("01H...", true);
+   * // Fetch an emoji, bypassing cache
+   * const emoji = await client.emojis.fetch("01H...", true);
    */
   public async fetch(emoji: EmojiResolvable, force: boolean = false): Promise<Emoji> {
     return this.fetchWithCache(emoji, force, (id) => this.client.rest.get(`/custom/emoji/${id}`));
