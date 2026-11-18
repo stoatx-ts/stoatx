@@ -174,6 +174,6 @@ export abstract class BaseChannel extends Base {
   }
 
   public isVoice(): this is VoiceChannel {
-    return this.isText() && (this as TextChannel).voice !== null;
+    return this.isText() && !!(this as TextChannel).voice;
   }
 }
