@@ -9,10 +9,10 @@ import { METADATA_KEYS } from "./keys";
  *
  * @example
  * ```ts
- * import { Guard, Stoat, SimpleCommand, CommandContext } from 'stoatx';
+ * import { Guard, GuardInterface, Stoat, SimpleCommand, CommandContext } from 'stoatx';
  *
  * // Define a guard
- * class NotBot implements StoatxGuard {
+ * class NotBot implements GuardInterface {
  *   run(ctx: CommandContext): boolean {
  *     return !ctx.message.author.bot;
  *   }
