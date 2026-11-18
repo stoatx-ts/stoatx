@@ -10,6 +10,10 @@ import { UserManager } from "../managers/UserManager";
 import { User } from "../structures/User";
 import { ClientUser } from "../structures/ClientUser";
 import { Member } from "../structures/Member";
+import { Role } from "../structures/Role";
+import { Emoji } from "../structures/Emoji";
+import { Webhook } from "../structures/Webhook";
+import { Collection } from "../utils/Collection";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { RevoltConfig } from "stoat-api";
@@ -38,6 +42,26 @@ export interface ClientEvents {
   serverMemberLeave: [member: Member | { serverId: string; userId: string }];
   serverBanAdd: [member: Member | { serverId: string; userId: string }];
   serverMemberKick: [member: Member | { serverId: string; userId: string }];
+  serverMemberUpdate: [oldMember: Member, newMember: Member];
+  serverRoleCreate: [role: Role];
+  serverRoleUpdate: [oldRole: Role, newRole: Role];
+  serverRoleDelete: [role: Role | { id: string; serverId: string }];
+  serverRoleRanksUpdate: [server: Server];
+  messageDeleteBulk: [messages: Collection<string, Message | { id: string; channelId: string }>, channelId: string];
+  emojiCreate: [emoji: Emoji];
+  emojiUpdate: [oldEmoji: Emoji, newEmoji: Emoji];
+  emojiDelete: [emoji: Emoji | string];
+  channelGroupJoin: [channel: BaseChannel | { id: string }, userId: string];
+  channelGroupLeave: [channel: BaseChannel | { id: string }, userId: string];
+  typingStart: [channelId: string, userId: string];
+  typingStop: [channelId: string, userId: string];
+  channelAck: [channelId: string, userId: string, messageId: string];
+  webhookCreate: [webhook: Webhook];
+  webhookUpdate: [oldWebhook: Webhook, newWebhook: Webhook];
+  webhookDelete: [webhook: Webhook | { id: string; channelId: string }];
+  userRelationship: [user: User];
+  userPlatformWipe: [userId: string, flags: number];
+  logout: [];
 }
 
 export interface ClientOptions {

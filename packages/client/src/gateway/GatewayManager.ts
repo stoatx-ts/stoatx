@@ -3,6 +3,9 @@ import { Client } from "../client/Client";
 import { Message } from "../structures/Message";
 import { TextChannel } from "../structures/TextChannel";
 import { ClientUser } from "../structures/ClientUser";
+import { Emoji } from "../structures/Emoji";
+import { Webhook } from "../structures/Webhook";
+import { Collection } from "../utils/Collection";
 import { StoatGateway } from "../utils/Constants";
 
 export class GatewayManager {
@@ -68,6 +71,10 @@ export class GatewayManager {
       return;
     }
 
+    this.safeDispatch(payload);
+  }
+
+  private safeDispatch(payload: any) {
     try {
       this.dispatch(payload);
     } catch (error) {
@@ -85,8 +92,19 @@ export class GatewayManager {
         this.client._reportError(new Error(`Gateway Error: ${payload.error || JSON.stringify(payload)}`));
         break;
 
+      case "Bulk": {
+        for (const event of payload.v ?? []) {
+          this.safeDispatch(event);
+        }
+        break;
+      }
+
       case "Authenticated":
         this.client.emit("debug", "Successfully authenticated with Stoat.");
+        break;
+
+      case "Logout":
+        this.client.emit("logout");
         break;
 
       case "Ready": {
@@ -169,7 +187,8 @@ export class GatewayManager {
           existing._patch(payload.data);
           this.client.emit("messageUpdate", oldMessage, existing);
         } else {
-          const newMessage = new Message(this.client, { id: payload.id, channelId: payload.channel, ...payload.data });
+          // Only the changed fields are sent, so this message is partial (e.g. author may be missing).
+          const newMessage = new Message(this.client, { ...payload.data, _id: payload.id, channel: payload.channel });
           this.client.emit("messageUpdate", null, newMessage);
         }
         break;
@@ -203,6 +222,20 @@ export class GatewayManager {
           this.client.emit("messageDelete", { id: payload.id, channelId: payload.channel });
         }
 
+        break;
+      }
+
+      case "BulkMessageDelete": {
+        const channel = this.client.channels.cache.get(payload.channel);
+        const messages = new Collection<string, Message | { id: string; channelId: string }>();
+
+        for (const id of payload.ids ?? []) {
+          const cached = channel?.messages.cache.get(id);
+          channel?.messages.cache.delete(id);
+          messages.set(id, cached ?? { id, channelId: payload.channel });
+        }
+
+        this.client.emit("messageDeleteBulk", messages, payload.channel);
         break;
       }
 
@@ -293,8 +326,8 @@ export class GatewayManager {
 
           this.client.emit("channelUpdate", oldChannel, existing);
         } else {
-          const newChannel = this.client.channels._add({ id: payload.id, ...payload.data });
-          this.client.emit("channelUpdate", null, newChannel);
+          // Updates only carry the changed fields, which is not enough to build an uncached channel.
+          this.client.emit("debug", `Ignoring ChannelUpdate for uncached channel ${payload.id}`);
         }
         break;
       }
@@ -309,7 +342,13 @@ export class GatewayManager {
       }
 
       case "ServerCreate": {
-        const server = this.client.servers._add(payload);
+        const server = this.client.servers._add(payload.server);
+        for (const rawChannel of payload.channels ?? []) {
+          this.client.channels._add(rawChannel);
+        }
+        for (const rawEmoji of payload.emojis ?? []) {
+          server.emojis._add(rawEmoji);
+        }
         this.client.emit("serverCreate", server);
         break;
       }
@@ -324,8 +363,8 @@ export class GatewayManager {
 
           this.client.emit("serverUpdate", oldServer, existing);
         } else {
-          const newServer = this.client.servers._add({ id: payload.id, ...payload.data });
-          this.client.emit("serverUpdate", null, newServer);
+          // Updates only carry the changed fields, which is not enough to build an uncached server.
+          this.client.emit("debug", `Ignoring ServerUpdate for uncached server ${payload.id}`);
         }
         break;
       }
@@ -338,6 +377,64 @@ export class GatewayManager {
         } else {
           this.client.emit("serverDelete", payload.id);
         }
+        break;
+      }
+
+      case "ServerMemberUpdate": {
+        const server = this.client.servers.cache.get(payload.id.server);
+        const existing = server?.members.cache.get(payload.id.user);
+
+        if (existing) {
+          const oldMember = existing._clone();
+          existing._patch(payload.data, payload.clear);
+          this.client.emit("serverMemberUpdate", oldMember, existing);
+        }
+        break;
+      }
+
+      case "ServerRoleUpdate": {
+        const server = this.client.servers.cache.get(payload.id);
+        if (!server) break;
+
+        const existing = server.roles.cache.get(payload.role_id);
+        if (existing) {
+          const oldRole = existing._clone();
+          existing._patch(payload.data, payload.clear);
+          this.client.emit("serverRoleUpdate", oldRole, existing);
+        } else {
+          const role = server.roles._add({ ...payload.data, _id: payload.role_id });
+          this.client.emit("serverRoleCreate", role);
+        }
+        break;
+      }
+
+      case "ServerRoleDelete": {
+        const server = this.client.servers.cache.get(payload.id);
+        if (!server) break;
+
+        const role = server.roles.cache.get(payload.role_id);
+        server.roles.cache.delete(payload.role_id);
+
+        // The role is gone from every member, so drop it from cached role lists too.
+        for (const member of server.members.cache.values()) {
+          if (member.roleIds.includes(payload.role_id)) {
+            member._patch({ roles: member.roleIds.filter((id) => id !== payload.role_id) } as any);
+          }
+        }
+
+        this.client.emit("serverRoleDelete", role ?? { id: payload.role_id, serverId: payload.id });
+        break;
+      }
+
+      case "ServerRoleRanksUpdate": {
+        const server = this.client.servers.cache.get(payload.id);
+        if (!server) break;
+
+        (payload.ranks as string[]).forEach((roleId, rank) => {
+          server.roles.cache.get(roleId)?._patch({ rank } as any);
+        });
+
+        this.client.emit("serverRoleRanksUpdate", server);
         break;
       }
 
@@ -380,26 +477,92 @@ export class GatewayManager {
       }
 
       case "EmojiCreate": {
+        let emoji;
         if (payload.parent?.type === "Server") {
           const server = this.client.servers.cache.get(payload.parent.id);
           if (server) {
-            server.emojis._add(payload);
+            emoji = server.emojis._add(payload);
           }
+        }
+        this.client.emit("emojiCreate", emoji ?? new Emoji(this.client, payload));
+        break;
+      }
+
+      case "EmojiUpdate": {
+        const existing = this.findEmoji(payload.id);
+        if (existing) {
+          const oldEmoji = existing._clone();
+          existing._patch(payload.data);
+          this.client.emit("emojiUpdate", oldEmoji, existing);
         }
         break;
       }
 
       case "EmojiDelete": {
+        const emoji = this.findEmoji(payload.id);
         this.client.emojis.cache.delete(payload.id);
 
-        // Find which server has this emoji
         for (const server of this.client.servers.cache.values()) {
-          const emoji = server.emojis.cache.get(payload.id);
-          if (emoji) {
-            server.emojis.cache.delete(payload.id);
-            break;
-          }
+          if (server.emojis.cache.delete(payload.id)) break;
         }
+
+        this.client.emit("emojiDelete", emoji ?? payload.id);
+        break;
+      }
+
+      case "ChannelGroupJoin":
+      case "ChannelGroupLeave": {
+        const channel = this.client.channels.cache.get(payload.id);
+        const joined = payload.type === "ChannelGroupJoin";
+
+        if (channel?.isGroup()) {
+          const recipients = channel.recipients.filter((id) => id !== payload.user);
+          channel._patch({ recipients: joined ? [...recipients, payload.user] : recipients } as any);
+        }
+
+        this.client.emit(
+          joined ? "channelGroupJoin" : "channelGroupLeave",
+          channel ?? { id: payload.id },
+          payload.user,
+        );
+        break;
+      }
+
+      case "ChannelStartTyping":
+        this.client.emit("typingStart", payload.id, payload.user);
+        break;
+
+      case "ChannelStopTyping":
+        this.client.emit("typingStop", payload.id, payload.user);
+        break;
+
+      case "ChannelAck":
+        this.client.emit("channelAck", payload.id, payload.user, payload.message_id);
+        break;
+
+      case "WebhookCreate": {
+        const channel = this.client.channels.cache.get(payload.channel_id);
+        const webhook = channel ? channel.webhooks._add(payload) : new Webhook(this.client, payload);
+        this.client.emit("webhookCreate", webhook);
+        break;
+      }
+
+      case "WebhookUpdate": {
+        const existing = this.client.channels.cache.get(payload.channel_id)?.webhooks.cache.get(payload.id);
+        if (existing) {
+          const oldWebhook = existing._clone();
+          existing._patch(payload.data);
+          if (payload.remove?.includes("Avatar")) existing.avatar = null;
+          this.client.emit("webhookUpdate", oldWebhook, existing);
+        }
+        break;
+      }
+
+      case "WebhookDelete": {
+        const webhooks = this.client.channels.cache.get(payload.channel_id)?.webhooks;
+        const webhook = webhooks?.cache.get(payload.id);
+        webhooks?.cache.delete(payload.id);
+        this.client.emit("webhookDelete", webhook ?? { id: payload.id, channelId: payload.channel_id });
         break;
       }
 
@@ -430,10 +593,54 @@ export class GatewayManager {
         break;
       }
 
+      case "UserRelationship": {
+        const user = this.client.users._add(payload.user);
+        this.client.emit("userRelationship", user);
+        break;
+      }
+
+      case "UserPlatformWipe": {
+        this.wipeUser(payload.user_id);
+        this.client.emit("userPlatformWipe", payload.user_id, payload.flags);
+        break;
+      }
+
       default:
         this.client.emit("debug", `Unhandled Gateway Event Type: ${eventType}`);
         break;
     }
+  }
+
+  private findEmoji(id: string): Emoji | undefined {
+    const global = this.client.emojis.cache.get(id);
+    if (global) return global;
+    for (const server of this.client.servers.cache.values()) {
+      const emoji = server.emojis.cache.get(id);
+      if (emoji) return emoji;
+    }
+    return undefined;
+  }
+
+  /**
+   * Removes a banned or deleted user's messages, DMs and server memberships from the cache,
+   * as the API asks clients to do on UserPlatformWipe.
+   */
+  private wipeUser(userId: string) {
+    for (const channel of this.client.channels.cache.values()) {
+      if (channel.isDM() && channel.recipients.includes(userId)) {
+        this.client.channels.cache.delete(channel.id);
+        continue;
+      }
+      for (const [id, message] of channel.messages.cache) {
+        if (message.authorId === userId) channel.messages.cache.delete(id);
+      }
+    }
+
+    for (const server of this.client.servers.cache.values()) {
+      server.members.cache.delete(userId);
+    }
+
+    this.client.users.cache.get(userId)?._patch({ relationship: "None" } as any);
   }
 
   private startPingLoop() {

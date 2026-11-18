@@ -2,6 +2,12 @@
 
 ## Properties
 
+### channelAck
+
+> **channelAck**: \[`string`, `string`, `string`\]
+
+***
+
 ### channelCreate
 
 > **channelCreate**: \[[`BaseChannel`](../classes/BaseChannel.md)\]
@@ -11,6 +17,18 @@
 ### channelDelete
 
 > **channelDelete**: \[`string` \| [`BaseChannel`](../classes/BaseChannel.md)\]
+
+***
+
+### channelGroupJoin
+
+> **channelGroupJoin**: \[[`BaseChannel`](../classes/BaseChannel.md) \| \{ `id`: `string`; \}, `string`\]
+
+***
+
+### channelGroupLeave
+
+> **channelGroupLeave**: \[[`BaseChannel`](../classes/BaseChannel.md) \| \{ `id`: `string`; \}, `string`\]
 
 ***
 
@@ -26,9 +44,33 @@
 
 ***
 
+### emojiCreate
+
+> **emojiCreate**: \[[`Emoji`](../classes/Emoji.md)\]
+
+***
+
+### emojiDelete
+
+> **emojiDelete**: \[`string` \| [`Emoji`](../classes/Emoji.md)\]
+
+***
+
+### emojiUpdate
+
+> **emojiUpdate**: \[[`Emoji`](../classes/Emoji.md), [`Emoji`](../classes/Emoji.md)\]
+
+***
+
 ### error
 
 > **error**: \[`Error`\]
+
+***
+
+### logout
+
+> **logout**: \[\]
 
 ***
 
@@ -41,6 +83,12 @@
 ### messageDelete
 
 > **messageDelete**: \[[`Message`](../classes/Message.md) \| \{ `channelId`: `string`; `id`: `string`; \}\]
+
+***
+
+### messageDeleteBulk
+
+> **messageDeleteBulk**: \[[`Collection`](../classes/Collection.md)\<`string`, [`Message`](../classes/Message.md) \| \{ `channelId`: `string`; `id`: `string`; \}\>, `string`\]
 
 ***
 
@@ -116,12 +164,84 @@
 
 ***
 
+### serverMemberUpdate
+
+> **serverMemberUpdate**: \[[`Member`](../classes/Member.md), [`Member`](../classes/Member.md)\]
+
+***
+
+### serverRoleCreate
+
+> **serverRoleCreate**: \[[`Role`](../classes/Role.md)\]
+
+***
+
+### serverRoleDelete
+
+> **serverRoleDelete**: \[[`Role`](../classes/Role.md) \| \{ `id`: `string`; `serverId`: `string`; \}\]
+
+***
+
+### serverRoleRanksUpdate
+
+> **serverRoleRanksUpdate**: \[[`Server`](../classes/Server.md)\]
+
+***
+
+### serverRoleUpdate
+
+> **serverRoleUpdate**: \[[`Role`](../classes/Role.md), [`Role`](../classes/Role.md)\]
+
+***
+
 ### serverUpdate
 
 > **serverUpdate**: \[[`Server`](../classes/Server.md) \| `null`, [`Server`](../classes/Server.md)\]
 
 ***
 
+### typingStart
+
+> **typingStart**: \[`string`, `string`\]
+
+***
+
+### typingStop
+
+> **typingStop**: \[`string`, `string`\]
+
+***
+
+### userPlatformWipe
+
+> **userPlatformWipe**: \[`string`, `number`\]
+
+***
+
+### userRelationship
+
+> **userRelationship**: \[[`User`](../classes/User.md)\]
+
+***
+
 ### userUpdate
 
 > **userUpdate**: \[[`User`](../classes/User.md), [`User`](../classes/User.md)\]
+
+***
+
+### webhookCreate
+
+> **webhookCreate**: \[[`Webhook`](../classes/Webhook.md)\]
+
+***
+
+### webhookDelete
+
+> **webhookDelete**: \[[`Webhook`](../classes/Webhook.md) \| \{ `channelId`: `string`; `id`: `string`; \}\]
+
+***
+
+### webhookUpdate
+
+> **webhookUpdate**: \[[`Webhook`](../classes/Webhook.md), [`Webhook`](../classes/Webhook.md)\]
