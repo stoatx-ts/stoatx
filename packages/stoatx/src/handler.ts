@@ -89,7 +89,6 @@ export class DefaultCooldownManager implements CooldownManager {
 export class StoatxHandler {
   private readonly commandsDir: string | undefined;
   private readonly discoveryOptions: StoatxDiscoveryOptions | undefined;
-  // After
   private readonly prefixResolver:
     | string
     | string[]

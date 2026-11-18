@@ -14,7 +14,8 @@ import { StoatxHandler } from "./handler";
  *   owners: ['owner-user-id'],
  * });
  *
- * await client.initCommands();
+ * // Discovers commands and events, then connects to the gateway
+ * await client.login(process.env.TOKEN!);
  * ```
  */
 export class Client extends StoatClient {
