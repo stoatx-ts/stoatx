@@ -2,7 +2,6 @@ import { Collection } from "../utils/Collection";
 import type { BaseChannel } from "../structures/BaseChannel";
 import { Message, MessageOptions } from "../structures/Message";
 import type { Client } from "../client/Client";
-import * as util from "node:util";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
 import { resolveAttachment } from "../utils/resolveAttachment";
@@ -288,9 +287,5 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
   public async clearReactions(message: MessageResolvable): Promise<void> {
     const id = this.resolveId(message);
     await this.client.rest.delete(`/channels/${this.channel.id}/messages/${id}/reactions`);
-  }
-
-  [util.inspect.custom]() {
-    return this.cache;
   }
 }

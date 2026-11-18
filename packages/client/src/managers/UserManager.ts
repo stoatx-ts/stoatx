@@ -3,8 +3,11 @@ import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
 import { User as RawUser, DataEditUser, FieldsUser } from "stoat-api";
+import { finalizeEdit, setOrRemove } from "../utils/editPayload";
 
 export type UserResolvable = User | string;
+
+const USER_MENTION = /[<@>]/g;
 
 export interface UserEditOptions {
   avatar?: string | null;
@@ -36,14 +39,7 @@ export class UserManager extends BaseManager<string, User, RawUser> {
    * Resolves a UserResolvable to a User object from the cache.
    */
   public resolve(user: UserResolvable): User | undefined {
-    if (user instanceof User) return user;
-
-    if (typeof user === "string") {
-      const id = user.replace(/[<@>]/g, "");
-      return this.cache.get(id);
-    }
-
-    return undefined;
+    return this.resolveFromCache(user, User, USER_MENTION);
   }
 
   /**
@@ -53,15 +49,7 @@ export class UserManager extends BaseManager<string, User, RawUser> {
    * @throws TypeError if an invalid type is provided.
    */
   public resolveId(user: UserResolvable): string {
-    if (user instanceof User) {
-      return user.id;
-    }
-
-    if (typeof user === "string") {
-      return user.replace(/[<@>]/g, "");
-    }
-
-    throw new TypeError("Invalid UserResolvable provided. Expected a User object or a string ID/Mention.");
+    return this.resolveIdFrom(user, User, USER_MENTION);
   }
 
   /**
@@ -85,16 +73,7 @@ export class UserManager extends BaseManager<string, User, RawUser> {
    * console.log(user.username);
    */
   public async fetch(user: UserResolvable, force: boolean = false): Promise<User> {
-    if (!force) {
-      const cached = this.resolve(user);
-      if (cached) return cached;
-    }
-
-    const id = this.resolveId(user);
-
-    const data = (await this.client.rest.get(`/users/${id}`)) as RawUser;
-
-    return this._add(data);
+    return this.fetchWithCache(user, force, (id) => this.client.rest.get(`/users/${id}`) as Promise<RawUser>);
   }
 
   /**
@@ -140,47 +119,24 @@ export class UserManager extends BaseManager<string, User, RawUser> {
     const payload: DataEditUser = {};
     const remove: FieldsUser[] = [];
 
-    if (options.displayName !== undefined) {
-      if (options.displayName === null) remove.push("DisplayName");
-      else payload.display_name = options.displayName;
-    }
-
-    if (options.avatar !== undefined) {
-      if (options.avatar === null) remove.push("Avatar");
-      else payload.avatar = options.avatar;
-    }
+    setOrRemove(payload, remove, "display_name", options.displayName, "DisplayName");
+    setOrRemove(payload, remove, "avatar", options.avatar, "Avatar");
 
     if (options.profile !== undefined) {
-      payload.profile = {};
-      if (options.profile.content !== undefined) {
-        if (options.profile.content === null) remove.push("ProfileContent");
-        else payload.profile.content = options.profile.content;
-      }
-      if (options.profile.background !== undefined) {
-        if (options.profile.background === null) remove.push("ProfileBackground");
-        else payload.profile.background = options.profile.background;
-      }
-      if (Object.keys(payload.profile).length === 0) delete payload.profile;
+      const profile: NonNullable<DataEditUser["profile"]> = {};
+      setOrRemove(profile, remove, "content", options.profile.content, "ProfileContent");
+      setOrRemove(profile, remove, "background", options.profile.background, "ProfileBackground");
+      if (Object.keys(profile).length > 0) payload.profile = profile;
     }
 
     if (options.status !== undefined) {
-      payload.status = {};
-      if (options.status.text !== undefined) {
-        if (options.status.text === null) remove.push("StatusText");
-        else payload.status.text = options.status.text;
-      }
-      if (options.status.presence !== undefined) {
-        if (options.status.presence === null) remove.push("StatusPresence");
-        else payload.status.presence = options.status.presence;
-      }
-      if (Object.keys(payload.status).length === 0) delete payload.status;
+      const status: NonNullable<DataEditUser["status"]> = {};
+      setOrRemove(status, remove, "text", options.status.text, "StatusText");
+      setOrRemove(status, remove, "presence", options.status.presence, "StatusPresence");
+      if (Object.keys(status).length > 0) payload.status = status;
     }
 
-    if (remove.length > 0) {
-      payload.remove = remove;
-    }
-
-    if (Object.keys(payload).length === 0) {
+    if (!finalizeEdit(payload, remove)) {
       return this.fetch("@me");
     }
 

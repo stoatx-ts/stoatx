@@ -1,11 +1,10 @@
 import { Role } from "../structures/Role";
 import type { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
-import * as util from "node:util";
-import { PermissionResolvable, Permissions } from "../utils/permissions";
+import type { PermissionResolvable } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
-import { resolveAttachment } from "../utils/resolveAttachment";
+import { buildPermissionPayload, finalizeEdit, setOrRemove, setOrRemoveAttachment } from "../utils/editPayload";
 import {
   Role as RawRole,
   DataCreateRole,
@@ -36,6 +35,8 @@ export interface RolePermissionOptions {
 }
 
 export type RoleResolvable = Role | string;
+
+const ROLE_MENTION = /[<%>]/g;
 
 export class RoleManager extends BaseManager<string, Role, RawRole> {
   /**
@@ -84,24 +85,13 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
     return role;
   }
 
-  [util.inspect.custom]() {
-    return this.cache;
-  }
-
   /**
    * Resolves a RoleResolvable to a Role object from the cache.
    * @param role The RoleResolvable to resolve.
    * @returns The resolved Role object, or undefined if not found.
    */
   public resolve(role: RoleResolvable): Role | undefined {
-    if (role instanceof Role) return role;
-
-    if (typeof role === "string") {
-      const id = role.replace(/[<%>]/g, "");
-      return this.cache.get(id);
-    }
-
-    return undefined;
+    return this.resolveFromCache(role, Role, ROLE_MENTION);
   }
 
   /**
@@ -111,15 +101,7 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
    * @throws TypeError if an invalid type is provided.
    */
   public resolveId(role: RoleResolvable): string {
-    if (role instanceof Role) {
-      return role.id;
-    }
-
-    if (typeof role === "string") {
-      return role.replace(/[<%>]/g, "");
-    }
-
-    throw new TypeError("Invalid RoleResolvable provided. Expected a Role object or a string ID/Mention.");
+    return this.resolveIdFrom(role, Role, ROLE_MENTION);
   }
 
   /**
@@ -172,16 +154,7 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
    * console.log(`Fetched role: ${role.name} with ID: ${role.id}`);
    */
   public async fetch(role: RoleResolvable, force: boolean = false): Promise<Role> {
-    if (!force) {
-      const cached = this.resolve(role);
-      if (cached) return cached;
-    }
-
-    const id = this.resolveId(role);
-
-    const data = await this.client.rest.get(`/servers/${this.server.id}/roles/${id}`);
-
-    return this._add(data);
+    return this.fetchWithCache(role, force, (id) => this.client.rest.get(`/servers/${this.server.id}/roles/${id}`));
   }
 
   /**
@@ -210,29 +183,10 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
     if (options.name !== undefined) payload.name = options.name;
     if (options.hoist !== undefined) payload.hoist = options.hoist;
 
-    if (options.color !== undefined) {
-      if (options.color === null) {
-        remove.push("Colour");
-      } else {
-        payload.colour = options.color;
-      }
-    }
-    if (options.icon !== undefined) {
-      if (options.icon === null) {
-        remove.push("Icon");
-      } else {
-        const resolvedIcon = await resolveAttachment(this.client.rest, options.icon, "icons");
-        if (resolvedIcon !== undefined) {
-          payload.icon = resolvedIcon;
-        }
-      }
-    }
+    setOrRemove(payload, remove, "colour", options.color, "Colour");
+    await setOrRemoveAttachment(this.client.rest, payload, remove, "icon", options.icon, "Icon", "icons");
 
-    if (remove.length > 0) {
-      payload.remove = remove;
-    }
-
-    if (Object.keys(payload).length === 0) {
+    if (!finalizeEdit(payload, remove)) {
       return this.fetch(id);
     }
     const endpoint = `/servers/${this.server.id}/roles/${id}` as const;
@@ -291,14 +245,8 @@ export class RoleManager extends BaseManager<string, Role, RawRole> {
 
     const id = this.resolveId(role);
 
-    const allowBigInt = options.allow !== undefined ? Permissions.resolve(options.allow) : 0n;
-    const denyBigInt = options.deny !== undefined ? Permissions.resolve(options.deny) : 0n;
-
     const payload: DataSetServerRolePermission = {
-      permissions: {
-        allow: Number(allowBigInt),
-        deny: Number(denyBigInt),
-      },
+      permissions: buildPermissionPayload(options),
     };
 
     const data = await this.client.rest.put(`/servers/${this.server.id}/permissions/${id}`, payload);
