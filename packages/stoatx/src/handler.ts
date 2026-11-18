@@ -303,6 +303,13 @@ export class StoatxHandler {
       return false;
     }
 
+    // NSFW check
+    // Text and group channels carry an `nsfw` flag; DMs and unknown channels do not.
+    if (metadata.nsfw && !(ctx.message.channel as { nsfw?: boolean } | undefined)?.nsfw) {
+      await ctx.reply("This command can only be used in NSFW channels.");
+      return false;
+    }
+
     // Permissions check
     if (metadata.permissions.length > 0) {
       const server = ctx.message.server;

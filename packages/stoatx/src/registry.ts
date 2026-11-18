@@ -6,7 +6,14 @@ import { buildSimpleCommandMetadata, getEventsMetadata, getSimpleCommands, METAD
 import { getArgs } from "./decorators/Arg";
 import { getOptions } from "./decorators/Option";
 import { stoatClasses } from "./decorators/store";
-import type { CommandMetadata, GuardInterface, ParamSchema, StoatxDiscoveryOptions } from "./types";
+import type {
+  CommandMetadata,
+  GroupOptions,
+  GuardInterface,
+  ParamSchema,
+  SimpleCommandOptions,
+  StoatxDiscoveryOptions,
+} from "./types";
 import { PARAM_TYPE_MAP } from "./types";
 import { StoatxContainer } from "./di/Container";
 import { getSubCommands } from "./decorators/utils";
@@ -263,7 +270,14 @@ export class CommandRegistry {
     const events = getEventsMetadata(stoatClass);
     const category = this.getCategoryFromPath(filePath, baseDir);
 
-    const allCommands = [...simpleCommands, ...subCommands];
+    const groupOptions: GroupOptions | undefined = Reflect.getMetadata(METADATA_KEYS.COMMAND_GROUP, stoatClass);
+    const inherited = groupOptions ? this.getInheritedGroupOptions(groupOptions) : {};
+
+    const allCommands = [
+      ...simpleCommands,
+      // Subcommands use the group's settings unless they override them.
+      ...subCommands.map((def) => ({ ...def, options: { ...inherited, ...def.options } })),
+    ];
 
     if (allCommands.length === 0 && events.length === 0) {
       this.processedStoatClasses.add(stoatClass);
@@ -354,6 +368,15 @@ export class CommandRegistry {
     }
 
     return params;
+  }
+
+  private getInheritedGroupOptions(group: GroupOptions): SimpleCommandOptions {
+    const inherited: SimpleCommandOptions = {};
+    if (group.permissions !== undefined) inherited.permissions = group.permissions;
+    if (group.ownerOnly !== undefined) inherited.ownerOnly = group.ownerOnly;
+    if (group.cooldown !== undefined) inherited.cooldown = group.cooldown;
+    if (group.nsfw !== undefined) inherited.nsfw = group.nsfw;
+    return inherited;
   }
 
   private getCategoryFromPath(filePath: string, baseDir: string): string | undefined {
