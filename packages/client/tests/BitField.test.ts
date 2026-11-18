@@ -238,3 +238,16 @@ describe("BitField Utility", () => {
     });
   });
 });
+
+describe("Permissions.resolve with plain numbers", () => {
+  it("accepts a number for a bigint-backed bitfield", async () => {
+    const { Permissions } = await import("../src");
+    expect(Permissions.resolve(4194304)).toBe(4194304n);
+  });
+
+  it("rejects negative or unsafe numbers", async () => {
+    const { Permissions } = await import("../src");
+    expect(() => Permissions.resolve(-1)).toThrow(RangeError);
+    expect(() => Permissions.resolve(1.5)).toThrow(RangeError);
+  });
+});
