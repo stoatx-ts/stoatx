@@ -8,6 +8,19 @@
 
 ## Methods
 
+### destroy()
+
+> **destroy**(): `void`
+
+Stops decoding: destroys the output stream and kills the ffmpeg process.
+Safe to call more than once.
+
+#### Returns
+
+`void`
+
+***
+
 ### from()
 
 > `static` **from**(`source`, `options?`): `AudioResource`
