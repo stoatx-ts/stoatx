@@ -27,7 +27,9 @@ import { StoatxContainer } from "./di/Container";
  * Default in-memory cooldown manager
  */
 export class DefaultCooldownManager implements CooldownManager {
+  private static readonly SWEEP_INTERVAL_MS = 60_000;
   private readonly cooldowns: Map<string, Map<string, number>> = new Map();
+  private lastSweep = Date.now();
 
   check(ctx: CommandContext, metadata: CommandMetadata): boolean {
     if (metadata.cooldown <= 0) return true;
@@ -51,6 +53,7 @@ export class DefaultCooldownManager implements CooldownManager {
   }
 
   set(ctx: CommandContext, metadata: CommandMetadata): void {
+    this.sweepExpired();
     if (!this.cooldowns.has(metadata.name)) {
       this.cooldowns.set(metadata.name, new Map());
     }
@@ -60,6 +63,22 @@ export class DefaultCooldownManager implements CooldownManager {
 
   clear(): void {
     this.cooldowns.clear();
+  }
+
+  /**
+   * Drops expired entries so users who never run a command again do not stay in memory.
+   */
+  private sweepExpired(): void {
+    const now = Date.now();
+    if (now - this.lastSweep < DefaultCooldownManager.SWEEP_INTERVAL_MS) return;
+    this.lastSweep = now;
+
+    for (const [command, users] of this.cooldowns) {
+      for (const [userId, expiresAt] of users) {
+        if (now > expiresAt) users.delete(userId);
+      }
+      if (users.size === 0) this.cooldowns.delete(command);
+    }
   }
 }
 
@@ -82,6 +101,9 @@ export class StoatxHandler {
   private readonly client: Client;
   private readonly flagPrefix: string;
   private readonly globalGuards: Function[];
+  private readonly attachedListeners: Array<{ event: keyof ClientEvents; listener: (...args: any[]) => void }> = [];
+  private readonly inFlightCooldowns: WeakMap<RegisteredCommand, Set<string>> = new WeakMap();
+  private initialized = false;
   public readonly container = new StoatxContainer();
 
   constructor(options: StoatxHandlerOptions) {
@@ -97,16 +119,34 @@ export class StoatxHandler {
     this.globalGuards = options.globalGuards ?? [];
   }
 
+  /**
+   * Discovers commands and attaches event listeners. Calling it again (e.g. on
+   * re-login) is a no-op; use {@link reload} to rediscover.
+   */
   async init(): Promise<void> {
+    if (this.initialized) return;
+    await this.discover();
+    this.attachEvents();
+    this.initialized = true;
+  }
+
+  private async discover(): Promise<void> {
     if (this.commandsDir) {
       await this.registry.loadFromDirectory(this.commandsDir);
     } else {
       await this.registry.autoDiscover(this.discoveryOptions);
     }
-    this.attachEvents();
+  }
+
+  private detachEvents(): void {
+    for (const { event, listener } of this.attachedListeners) {
+      this.client.removeListener(event, listener);
+    }
+    this.attachedListeners.length = 0;
   }
 
   private attachEvents(): void {
+    this.detachEvents();
     const events = this.registry.getEvents();
     for (const eventDef of events) {
       const handler = async (...args: any[]) => {
@@ -125,6 +165,7 @@ export class StoatxHandler {
       } else {
         this.client.on(eventName, handler);
       }
+      this.attachedListeners.push({ event: eventName, listener: handler });
     }
   }
 
@@ -302,35 +343,56 @@ export class StoatxHandler {
       }
     }
 
-    // Cooldown check
-    if (!(await this.cooldownManager.check(ctx, metadata))) {
-      const remaining = await this.cooldownManager.getRemaining(ctx, metadata);
-      if (typeof (instance as any).onCooldown === "function") {
-        await (instance as any).onCooldown(ctx, remaining);
-      } else {
-        await ctx.reply(`Please wait ${(remaining / 1000).toFixed(1)} seconds before using this command again.`);
+    // Reserve the cooldown slot synchronously so concurrent invocations by the
+    // same user cannot both pass the check before either one sets the cooldown.
+    let inFlight: Set<string> | null = null;
+    if (metadata.cooldown > 0) {
+      inFlight = this.inFlightCooldowns.get(registered) ?? new Set();
+      this.inFlightCooldowns.set(registered, inFlight);
+      if (inFlight.has(ctx.authorId)) {
+        await this.replyOnCooldown(instance, ctx, metadata.cooldown);
+        return false;
       }
-      return false;
+      inFlight.add(ctx.authorId);
     }
 
-    // Resolve parameters
-    const resolvedParams = await this.resolveParams(metadata.params, ctx, instance);
-    if (resolvedParams === null) return false;
-
     try {
-      if (metadata.cooldown > 0) {
-        await this.cooldownManager.set(ctx, metadata);
+      // Cooldown check
+      if (!(await this.cooldownManager.check(ctx, metadata))) {
+        const remaining = await this.cooldownManager.getRemaining(ctx, metadata);
+        await this.replyOnCooldown(instance, ctx, remaining);
+        return false;
       }
-      await (instance as any)[methodName](...resolvedParams);
-      return true;
-    } catch (error) {
-      if (typeof (instance as any).onError === "function") {
-        await (instance as any).onError(ctx, error as Error);
-      } else {
-        console.error(`[Stoatx] Error in command ${metadata.name}:`, error);
-        await ctx.reply("Something went wrong. Please try again later.");
+
+      // Resolve parameters
+      const resolvedParams = await this.resolveParams(metadata.params, ctx, instance);
+      if (resolvedParams === null) return false;
+
+      try {
+        if (metadata.cooldown > 0) {
+          await this.cooldownManager.set(ctx, metadata);
+        }
+        await (instance as any)[methodName](...resolvedParams);
+        return true;
+      } catch (error) {
+        if (typeof (instance as any).onError === "function") {
+          await (instance as any).onError(ctx, error as Error);
+        } else {
+          console.error(`[Stoatx] Error in command ${metadata.name}:`, error);
+          await ctx.reply("Something went wrong. Please try again later.");
+        }
+        return false;
       }
-      return false;
+    } finally {
+      inFlight?.delete(ctx.authorId);
+    }
+  }
+
+  private async replyOnCooldown(instance: object, ctx: CommandContext, remaining: number): Promise<void> {
+    if (typeof (instance as any).onCooldown === "function") {
+      await (instance as any).onCooldown(ctx, remaining);
+    } else {
+      await ctx.reply(`Please wait ${(remaining / 1000).toFixed(1)} seconds before using this command again.`);
     }
   }
 
@@ -506,15 +568,14 @@ export class StoatxHandler {
   }
 
   async reload(): Promise<void> {
+    this.detachEvents();
     this.registry.clear();
     if (this.cooldownManager.clear) {
       await this.cooldownManager.clear();
     }
-    if (this.commandsDir) {
-      await this.registry.loadFromDirectory(this.commandsDir);
-      return;
-    }
-    await this.registry.autoDiscover(this.discoveryOptions);
+    await this.discover();
+    this.attachEvents();
+    this.initialized = true;
   }
 
   isOwner(userId: string): boolean {
