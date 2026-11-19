@@ -14,6 +14,7 @@ export * from "./managers/SweepManager";
 export * from "./managers/UserManager";
 export * from "./managers/EmojiManager";
 export * from "./managers/AuthManager";
+export * from "./managers/UnreadManager";
 
 // Structures
 export * from "./structures/Attachment";

@@ -78,9 +78,46 @@ The base class for all structures.
 
 ***
 
+### typingUserIds
+
+> `readonly` **typingUserIds**: `Set`\<`string`\>
+
+IDs of the users currently typing in this channel, kept up to date from gateway events.
+Cleared when a user sends a message or stops typing, and on reconnect.
+
+***
+
 ### webhooks
 
 > **webhooks**: `WebhookManager`
+
+## Accessors
+
+### mentionCount
+
+#### Get Signature
+
+> **get** **mentionCount**(): `number`
+
+How many unread messages in this channel mention the logged-in user. Always `0` for bots.
+
+##### Returns
+
+`number`
+
+***
+
+### unread
+
+#### Get Signature
+
+> **get** **unread**(): `boolean`
+
+Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
+
+##### Returns
+
+`boolean`
 
 ## Methods
 
@@ -99,6 +136,24 @@ class instances (client, managers, other structures) are shared by reference.
 #### Inherited from
 
 [`Base`](Base.md).[`_clone`](Base.md#_clone)
+
+***
+
+### ack()
+
+> **ack**(`message?`): `Promise`\<`void`\>
+
+Marks this channel as read (user sessions only).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `message?` | [`MessageResolvable`](../type-aliases/MessageResolvable.md) | The last message read. Defaults to the latest message in the channel. |
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 
@@ -401,6 +456,37 @@ A promise that resolves to the sent Message.
 await channel.send("Hello world!");
 await channel.send({ content: "Here is an embed", embeds: [myEmbed] });
 ```
+
+***
+
+### startTyping()
+
+> **startTyping**(): `boolean`
+
+Shows the logged-in user as typing in this channel. Safe to call on every keystroke:
+it sends at most once every 2.5 seconds, and other clients drop the indicator after
+4 seconds without a refresh. Call [stopTyping](#stoptyping) when the user stops, or just send
+the message: sending ends the indicator.
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected.
+
+***
+
+### stopTyping()
+
+> **stopTyping**(): `boolean`
+
+Stops showing the logged-in user as typing in this channel.
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected.
 
 ***
 

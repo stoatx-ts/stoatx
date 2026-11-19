@@ -183,6 +183,34 @@ The base class for all structures.
 
 > **roles**: [`RoleManager`](RoleManager.md)
 
+## Accessors
+
+### mentionCount
+
+#### Get Signature
+
+> **get** **mentionCount**(): `number`
+
+How many unread messages across this server's channels mention the logged-in user. Always `0` for bots.
+
+##### Returns
+
+`number`
+
+***
+
+### unread
+
+#### Get Signature
+
+> **get** **unread**(): `boolean`
+
+Whether any channel in this server has messages the logged-in user hasn't read. Always `false` for bots.
+
+##### Returns
+
+`boolean`
+
 ## Methods
 
 ### \_clone()
@@ -219,6 +247,18 @@ Updates the server instance with new data without losing the object reference.
 #### Returns
 
 `void`
+
+***
+
+### ack()
+
+> **ack**(): `Promise`\<`void`\>
+
+Marks every channel in this server as read (user sessions only).
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 
@@ -312,6 +352,24 @@ this server it will be deleted.
 #### Returns
 
 `Promise`\<`undefined`\>
+
+***
+
+### subscribe()
+
+> **subscribe**(): `boolean`
+
+Asks the gateway for presence and member updates from this server (user sessions only; the
+server ignores it for bots, which receive these updates anyway).
+
+A subscription lasts 15 minutes, so call this again while the server stays on screen.
+Each connection keeps at most 5 subscriptions; subscribing to a 6th drops the least recently used.
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected.
 
 ***
 

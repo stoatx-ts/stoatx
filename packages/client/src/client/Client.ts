@@ -22,6 +22,7 @@ import {
   type CredentialLoginOptions,
   type LoginResult,
 } from "../managers/AuthManager";
+import { UnreadManager } from "../managers/UnreadManager";
 import type {
   RevoltConfig,
   User as RawUser,
@@ -156,6 +157,8 @@ export class Client extends EventEmitter {
   public emojis: EmojiManager;
   /** Sessions, logout and onboarding for user accounts. */
   public auth: AuthManager;
+  /** Which channels the logged-in user has read (user sessions only). Most code uses `channel.unread` and `channel.ack()` instead. */
+  public unreads: UnreadManager;
   public user: ClientUser | null = null;
   public options: ClientOptions;
   readonly voice: VoiceManager;
@@ -171,6 +174,7 @@ export class Client extends EventEmitter {
     this.emojis = new EmojiManager(this, undefined, options.cacheLimits?.emojis);
     this.voice = new VoiceManager(this);
     this.auth = new AuthManager(this);
+    this.unreads = new UnreadManager(this);
     // Set up front so requests that need no token (credential login) work before login().
     this.rest.setBaseURL(options.apiURL ?? StoatAPI);
 
@@ -279,6 +283,7 @@ export class Client extends EventEmitter {
     this.servers.cache.clear();
     this.users.cache.clear();
     this.emojis.cache.clear();
+    this.unreads.cache.clear();
     this.emit("logout");
   }
 

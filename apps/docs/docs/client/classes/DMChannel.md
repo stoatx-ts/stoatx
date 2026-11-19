@@ -97,6 +97,19 @@ The base class for all structures.
 
 ***
 
+### typingUserIds
+
+> `readonly` **typingUserIds**: `Set`\<`string`\>
+
+IDs of the users currently typing in this channel, kept up to date from gateway events.
+Cleared when a user sends a message or stops typing, and on reconnect.
+
+#### Inherited from
+
+[`TextChannel`](TextChannel.md).[`typingUserIds`](TextChannel.md#typinguserids)
+
+***
+
 ### webhooks
 
 > **webhooks**: `WebhookManager`
@@ -104,6 +117,42 @@ The base class for all structures.
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`webhooks`](BaseChannel.md#webhooks)
+
+## Accessors
+
+### mentionCount
+
+#### Get Signature
+
+> **get** **mentionCount**(): `number`
+
+How many unread messages in this channel mention the logged-in user. Always `0` for bots.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`mentionCount`](BaseChannel.md#mentioncount)
+
+***
+
+### unread
+
+#### Get Signature
+
+> **get** **unread**(): `boolean`
+
+Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
+
+##### Returns
+
+`boolean`
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`unread`](BaseChannel.md#unread)
 
 ## Methods
 
@@ -138,6 +187,28 @@ class instances (client, managers, other structures) are shared by reference.
 #### Returns
 
 `void`
+
+***
+
+### ack()
+
+> **ack**(`message?`): `Promise`\<`void`\>
+
+Marks this channel as read (user sessions only).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `message?` | [`MessageResolvable`](../type-aliases/MessageResolvable.md) | The last message read. Defaults to the latest message in the channel. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`ack`](BaseChannel.md#ack)
 
 ***
 
@@ -488,6 +559,45 @@ await channel.send({ content: "Here is an embed", embeds: [myEmbed] });
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`send`](BaseChannel.md#send)
+
+***
+
+### startTyping()
+
+> **startTyping**(): `boolean`
+
+Shows the logged-in user as typing in this channel. Safe to call on every keystroke:
+it sends at most once every 2.5 seconds, and other clients drop the indicator after
+4 seconds without a refresh. Call [stopTyping](BaseChannel.md#stoptyping) when the user stops, or just send
+the message: sending ends the indicator.
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected.
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`startTyping`](BaseChannel.md#starttyping)
+
+***
+
+### stopTyping()
+
+> **stopTyping**(): `boolean`
+
+Stops showing the logged-in user as typing in this channel.
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected.
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`stopTyping`](BaseChannel.md#stoptyping)
 
 ***
 

@@ -7,8 +7,23 @@ import { Webhook } from "../structures/Webhook";
 import { Collection } from "../utils/Collection";
 import { StoatGateway } from "../utils/Constants";
 
+/** Messages the client can send to the gateway. */
+export type GatewayClientMessage =
+  | { type: "Ping"; data: number }
+  /** Shows the user as typing in a channel. */
+  | { type: "BeginTyping"; channel: string }
+  /** Stops showing the user as typing in a channel. */
+  | { type: "EndTyping"; channel: string }
+  /** Asks for presence and member updates from a server (user sessions only). */
+  | { type: "Subscribe"; server_id: string };
+
+/** How long a typing indicator lasts without being refreshed. Matches the official client. */
+const TYPING_TIMEOUT_MS = 4000;
+
 export class GatewayManager {
   private ws: WebSocket | null = null;
+  /** Expiry timers for typing indicators, keyed by `channelId:userId`. */
+  private readonly typingTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private wsURL: string = "";
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -168,6 +183,11 @@ export class GatewayManager {
           }
         }
 
+        this.client.unreads._setAll(payload.channel_unreads ?? []);
+
+        // Typing state from before a reconnect is stale: nobody re-sends a stop event for it.
+        this.clearTyping();
+
         this.client.emit("ready", payload);
         break;
       }
@@ -178,8 +198,14 @@ export class GatewayManager {
         const channel = this.client.channels.cache.get(payload.channel);
         let message;
 
+        // Runs before lastMessageId changes: it needs to know whether the channel was fully read.
+        this.client.unreads._onMessage(payload);
+
         if (channel) {
           message = channel.messages._add(payload);
+          if (channel.isText() || channel.isDM() || channel.isGroup()) channel.lastMessageId = payload._id;
+          // Sending a message ends the author's typing indicator.
+          this.stopTyping(payload.channel, payload.author);
 
           if ("serverId" in channel) {
             const serverId = (channel as TextChannel).serverId;
@@ -236,6 +262,7 @@ export class GatewayManager {
           message = channel.messages.cache.get(payload.id);
           channel.messages.cache.delete(payload.id);
         }
+        this.client.unreads._onMessageDelete(payload.channel, payload.id);
 
         if (message) {
           this.client.emit("messageDelete", message);
@@ -549,15 +576,27 @@ export class GatewayManager {
         break;
       }
 
-      case "ChannelStartTyping":
+      case "ChannelStartTyping": {
+        this.client.channels.cache.get(payload.id)?.typingUserIds.add(payload.user);
+        // The server never expires typing, so a client that vanishes would stay "typing" forever.
+        // Like the official client, drop the indicator unless it's refreshed within TYPING_TIMEOUT_MS.
+        const key = `${payload.id}:${payload.user}`;
+        clearTimeout(this.typingTimers.get(key));
+        this.typingTimers.set(
+          key,
+          setTimeout(() => this.stopTyping(payload.id, payload.user), TYPING_TIMEOUT_MS),
+        );
         this.client.emit("typingStart", payload.id, payload.user);
         break;
+      }
 
       case "ChannelStopTyping":
-        this.client.emit("typingStop", payload.id, payload.user);
+        this.stopTyping(payload.id, payload.user);
         break;
 
       case "ChannelAck":
+        // Acks from this account's other devices (and this one) move the read marker.
+        if (payload.user === this.client.user?.id) this.client.unreads._markRead(payload.id, payload.message_id);
         this.client.emit("channelAck", payload.id, payload.user, payload.message_id);
         break;
 
@@ -673,10 +712,36 @@ export class GatewayManager {
     }, 20000);
   }
 
-  private send(payload: any) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(payload));
-    }
+  /**
+   * Removes a user's typing indicator and emits `typingStop` if they were typing.
+   * Stops for users that aren't typing (or already timed out) are ignored, so `typingStop` never fires twice.
+   * @param channelId The channel they were typing in.
+   * @param userId The user.
+   */
+  private stopTyping(channelId: string, userId: string) {
+    const key = `${channelId}:${userId}`;
+    clearTimeout(this.typingTimers.get(key));
+    const wasTracked = this.typingTimers.delete(key);
+    this.client.channels.cache.get(channelId)?.typingUserIds.delete(userId);
+    if (wasTracked) this.client.emit("typingStop", channelId, userId);
+  }
+
+  /** Forgets every typing indicator without emitting events, e.g. on reconnect or disconnect. */
+  private clearTyping() {
+    for (const timer of this.typingTimers.values()) clearTimeout(timer);
+    this.typingTimers.clear();
+    for (const channel of this.client.channels.cache.values()) channel.typingUserIds.clear();
+  }
+
+  /**
+   * Sends a message to the gateway. Usually you'd use a helper such as `channel.startTyping()` instead.
+   * @param payload The message to send.
+   * @returns `false` if the gateway isn't connected, so nothing was sent.
+   */
+  public send(payload: GatewayClientMessage): boolean {
+    if (this.ws?.readyState !== WebSocket.OPEN) return false;
+    this.ws.send(JSON.stringify(payload));
+    return true;
   }
 
   private reconnect(): void {
@@ -715,6 +780,7 @@ export class GatewayManager {
     this.isIntentionalClose = true;
     this.clearReconnectTimeout();
     this.client.sweepers.stop();
+    this.clearTyping();
     if (this.pingInterval) clearInterval(this.pingInterval);
     if (this.ws) {
       this.ws.close(1000, "Client disconnected gracefully");
