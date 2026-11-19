@@ -8,7 +8,8 @@ import {
   AudioSource,
 } from "@livekit/rtc-node";
 import { EventEmitter } from "node:events";
-import { AudioPlayer } from "./AudioPlayer";
+import { _registerVoiceConnection } from "./VoiceManager";
+import type { AudioPlayer } from "./AudioPlayer";
 
 export interface VoiceConnectionEvents {
   ready: [];
@@ -147,3 +148,5 @@ export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
     await this.room.disconnect();
   }
 }
+
+_registerVoiceConnection((channelId, guildId) => new VoiceConnection(channelId, guildId));

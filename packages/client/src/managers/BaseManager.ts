@@ -1,4 +1,4 @@
-import * as util from "node:util";
+import { inspectCustom } from "../utils/inspect";
 import { Collection } from "../utils/Collection";
 import type { Client } from "../client/Client";
 
@@ -67,6 +67,8 @@ export abstract class BaseManager<K, Holds, RawData = unknown> {
 
   /**
    * Resolves a structure instance, or an ID/mention string, to a cached structure.
+   * @param value The structure instance, ID or mention to resolve.
+   * @param holds The structure class this manager holds, used for the `instanceof` check.
    * @param mention Characters to strip from mention strings (e.g. `/[<@>]/g`).
    * @internal
    */
@@ -78,6 +80,8 @@ export abstract class BaseManager<K, Holds, RawData = unknown> {
 
   /**
    * Extracts the ID from a structure instance, or an ID/mention string.
+   * @param value The structure instance, ID or mention to read the ID from.
+   * @param holds The structure class to accept instances of.
    * @param mention Characters to strip from mention strings (e.g. `/[<@>]/g`).
    * @throws {TypeError} If the value is neither.
    * @internal
@@ -105,7 +109,12 @@ export abstract class BaseManager<K, Holds, RawData = unknown> {
     return this._add(await request(this.resolveId(resolvable)));
   }
 
-  [util.inspect.custom]() {
+  /**
+   * Customizes how Node.js prints this manager with `console.log` and `util.inspect`:
+   * it prints the cached structures instead of the manager itself. Ignored in browsers.
+   * @internal
+   */
+  [inspectCustom]() {
     return this.cache;
   }
 

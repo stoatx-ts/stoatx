@@ -2,7 +2,7 @@ import { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import { BaseChannel } from "./BaseChannel";
 import type { User } from "./User";
-import * as util from "node:util";
+import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import { PermissionResolvable } from "../utils/permissions";
 import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
 import { decodeTime } from "ulid";
@@ -82,7 +82,15 @@ export class GroupChannel extends BaseChannel {
     return (await this.client.channels.setDefaultPermissions(this.id, permissions)) as this;
   }
 
-  [util.inspect.custom](_depth: number, options: util.InspectOptions, inspect: typeof util.inspect) {
+  /**
+   * Customizes how Node.js prints this object with `console.log` and `util.inspect`,
+   * hiding the circular client reference. Ignored in browsers.
+   * @param _depth How many levels deep Node.js is still allowed to print (unused).
+   * @param options The inspect options Node.js is printing with.
+   * @param inspect Node's `util.inspect`, passed in so this file does not import `node:util`.
+   * @internal
+   */
+  [inspectCustom](_depth: number, options: InspectOptions, inspect: InspectFn) {
     const { client, ...props } = this;
     return `${this.constructor.name} ${inspect(
       {

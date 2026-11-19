@@ -81,6 +81,7 @@
 
 ## Type Aliases
 
+- [AttachmentData](type-aliases/AttachmentData.md)
 - [AttachmentMetadata](type-aliases/AttachmentMetadata.md)
 - [AudioPlayerStatus](type-aliases/AudioPlayerStatus.md)
 - [AudioSource](type-aliases/AudioSource.md)

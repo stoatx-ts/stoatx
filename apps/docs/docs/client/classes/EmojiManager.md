@@ -54,9 +54,9 @@
 
 ## Methods
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>
+> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>
 
 #### Returns
 
@@ -64,7 +64,7 @@
 
 #### Inherited from
 
-`BaseManager.[custom]`
+`BaseManager.[inspectCustom]`
 
 ***
 

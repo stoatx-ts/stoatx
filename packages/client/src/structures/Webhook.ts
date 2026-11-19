@@ -12,7 +12,6 @@ import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { PermissionResolvable, Permissions } from "../utils/permissions";
 import { Message, MessageOptions } from "./Message";
-import * as console from "node:console";
 
 export interface WebhookEditOptions {
   name?: string;
@@ -79,14 +78,12 @@ export class Webhook extends Base {
     if (remove.length > 0) payload.remove = remove;
 
     const raw = await this.client.rest.patch(`/webhooks/${this.id}`, payload);
-    console.log("Webhook edited:", raw);
     this._patch(raw as any);
     return this;
   }
 
   /** Delete this webhook. */
   async delete(): Promise<void> {
-    console.log("Deleting webhook:", this.id);
     await this.client.rest.delete(`/webhooks/${this.id}`);
   }
 

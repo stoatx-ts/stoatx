@@ -1,5 +1,5 @@
 import { Client } from "../client/Client";
-import { CDNTag } from "../builders/AttachmentBuilder";
+import type { AttachmentData, CDNTag } from "../builders/AttachmentBuilder";
 import type { APIRoutes } from "stoat-api";
 import { queryParams, RouteParams, RouteResponse, ValidPath } from "../utils/schema";
 
@@ -88,7 +88,7 @@ export class RESTManager {
 
   private buckets = new Map<string, AsyncBucket>();
 
-  private bucketSweeper: NodeJS.Timeout;
+  private bucketSweeper: ReturnType<typeof setInterval>;
 
   constructor(private client: Client) {
     // Sweep dead buckets every 5 minutes to prevent memory leaks
@@ -100,7 +100,9 @@ export class RESTManager {
           this.buckets.delete(key);
         }
       }
-    }, 300000).unref();
+    }, 300000);
+    // Don't keep a Node process alive just for this sweeper (browsers return a number here).
+    (this.bucketSweeper as { unref?: () => void }).unref?.();
   }
 
   /**
@@ -250,14 +252,22 @@ export class RESTManager {
 
   /**
    * Uploads a file to Stoat's CDN and returns the File ID
+   * @param tag The CDN bucket to upload to, e.g. `"attachments"` or `"avatars"`.
+   * @param file The file contents. A Node.js `Buffer` or a browser `File` both work.
+   * @param filename The name the CDN stores the file under.
+   * @returns The ID of the uploaded file.
    */
-  public async uploadFile(tag: CDNTag, fileBuffer: Buffer | Blob, filename?: string): Promise<string> {
+  public async uploadFile(tag: CDNTag, file: AttachmentData, filename?: string): Promise<string> {
     if (!this.token) throw new Error("REST_NOT_READY: No token available.");
 
     const url = `${this.cdnURL}/${tag}`;
 
     const formData = new FormData();
-    formData.append("file", new Blob([fileBuffer as Uint8Array<ArrayBuffer>]), filename);
+    formData.append(
+      "file",
+      file instanceof Blob ? file : new Blob([file] as NonNullable<ConstructorParameters<typeof Blob>[0]>),
+      filename,
+    );
 
     const response = await fetch(url, {
       method: "POST",

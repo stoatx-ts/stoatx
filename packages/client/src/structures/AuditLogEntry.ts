@@ -3,7 +3,7 @@ import type { Client } from "../client/Client";
 import type { Server } from "./Server";
 import type { User } from "./User";
 import type { Member } from "./Member";
-import * as util from "node:util";
+import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import type { AuditLogEntry as RawAuditLogEntry, AuditLogEntryAction } from "stoat-api";
 
 /**
@@ -108,17 +108,23 @@ export class AuditLogEntry extends Base {
   }
 
   /**
-   * Customizer for Node.js `console.log` and `util.inspect`.
-   * Hides the cyclic client reference for a cleaner output.
+   * Customizes how Node.js prints this object with `console.log` and `util.inspect`,
+   * hiding the circular client reference. Ignored in browsers.
+   * @param _depth How many levels deep Node.js is still allowed to print (unused).
+   * @param options The inspect options Node.js is printing with.
+   * @param inspect Node's `util.inspect`, passed in so this file does not import `node:util`.
    * @internal
    */
-  [util.inspect.custom]() {
+  [inspectCustom](_depth: number, options: InspectOptions, inspect: InspectFn) {
     const { client, ...props } = this;
-    return `${this.constructor.name} ${util.inspect({
-      ...props,
-      type: this.type,
-      executor: this.executor,
-      target: this.target,
-    })}`;
+    return `${this.constructor.name} ${inspect(
+      {
+        ...props,
+        type: this.type,
+        executor: this.executor,
+        target: this.target,
+      },
+      options,
+    )}`;
   }
 }

@@ -56,9 +56,9 @@ Manages API methods and caching for server roles.
 
 ## Methods
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`Role`](Role.md)\>
+> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Role`](Role.md)\>
 
 #### Returns
 
@@ -66,7 +66,7 @@ Manages API methods and caching for server roles.
 
 #### Inherited from
 
-`BaseManager.[custom]`
+`BaseManager.[inspectCustom]`
 
 ***
 

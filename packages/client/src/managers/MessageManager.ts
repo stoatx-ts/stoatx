@@ -241,8 +241,8 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
   /**
    * Remove a reaction(s) from a message
    * Requires ManageMessages if changing others' reactions.
-   * @param reaction The emoji to remove. Can be a unicode emoji or a custom emoji ID.
    * @param message The MessageResolvable to remove the reaction from.
+   * @param reaction The emoji to remove. Can be a unicode emoji or a custom emoji ID.
    * @param userId The ID of the user whose reaction to remove. If not provided, removes the current user's reaction.
    * @param removeAll Remove all reactions of this type.
    * @throws {Error} If the API request fails. If both userId and removeAll are provided, userId takes precedence.

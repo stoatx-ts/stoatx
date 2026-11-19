@@ -385,6 +385,11 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "../docs/client/type-aliases/AttachmentData",
+          label: "AttachmentData"
+        },
+        {
+          type: "doc",
           id: "../docs/client/type-aliases/AttachmentMetadata",
           label: "AttachmentMetadata"
         },

@@ -4,7 +4,7 @@ import type { User } from "./User";
 import type { Server } from "./Server";
 import type { DMChannel } from "./DMChannel";
 import { Permissions, PermissionFlags } from "../utils/permissions";
-import * as util from "node:util";
+import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import { MemberBanOptions, MemberEditOptions } from "../managers/MemberManager";
 import { MemberRoleManager } from "../managers/MemberRoleManager";
 import { StoatCDN } from "../utils/Constants";
@@ -237,8 +237,15 @@ export class Member extends Base {
     await server.members.kick(this.id);
   }
 
-  /** @internal */
-  [util.inspect.custom](depth: number, options: util.InspectOptions, inspect: typeof util.inspect) {
+  /**
+   * Customizes how Node.js prints this object with `console.log` and `util.inspect`,
+   * hiding the circular client reference. Ignored in browsers.
+   * @param depth How many levels deep Node.js is still allowed to print.
+   * @param options The inspect options Node.js is printing with.
+   * @param inspect Node's `util.inspect`, passed in so this file does not import `node:util`.
+   * @internal
+   */
+  [inspectCustom](depth: number, options: InspectOptions, inspect: InspectFn) {
     const { client, serverId, ...props } = this;
     return `${this.constructor.name} ${inspect(
       {

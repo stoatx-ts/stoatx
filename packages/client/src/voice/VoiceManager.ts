@@ -1,5 +1,24 @@
 import type { Client } from "../client/Client";
-import { VoiceConnection } from "./VoiceConnection";
+import type { VoiceConnection } from "./VoiceConnection";
+
+/** Creates a `VoiceConnection` for a channel. Registered by the voice module in the Node.js build. */
+type VoiceConnectionFactory = (channelId: string, guildId?: string) => VoiceConnection;
+
+/**
+ * Set by the Node entry point when it loads the voice module. The browser build never loads it,
+ * so `Client` can hold a `VoiceManager` without pulling `@livekit/rtc-node` into the bundle.
+ */
+let createConnection: VoiceConnectionFactory | null = null;
+
+/**
+ * Enables voice by registering how `VoiceManager` creates connections. Called once when
+ * `VoiceConnection.ts` loads, which only happens in the Node.js build.
+ * @param factory Creates a `VoiceConnection` for a channel.
+ * @internal
+ */
+export function _registerVoiceConnection(factory: VoiceConnectionFactory): void {
+  createConnection = factory;
+}
 
 export class VoiceManager {
   private readonly connections: Map<string, VoiceConnection> = new Map();
@@ -23,9 +42,13 @@ export class VoiceManager {
   }
 
   private async connect(channelId: string, guildId?: string): Promise<VoiceConnection> {
+    if (!createConnection) {
+      throw new Error("VOICE_UNAVAILABLE: Voice is only supported in the Node.js build of @stoatx/client.");
+    }
+
     const { token, url } = await this.client.rest.post(`/channels/${channelId}/join_call`);
 
-    const connection = new VoiceConnection(channelId, guildId);
+    const connection = createConnection(channelId, guildId);
 
     try {
       await connection.connect(url, token);

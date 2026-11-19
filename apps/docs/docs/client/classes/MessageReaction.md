@@ -58,9 +58,17 @@
 
 ## Methods
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(): `string`
+> **\[inspectCustom\]**(`_depth`, `options`, `inspect`): `string`
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `_depth` | `number` |
+| `options` | `InspectOptions` |
+| `inspect` | `InspectFn` |
 
 #### Returns
 
