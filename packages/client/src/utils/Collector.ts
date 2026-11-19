@@ -26,8 +26,8 @@ export abstract class Collector<K, V> extends EventEmitter {
   public collected: Collection<K, V>;
   public ended: boolean = false;
 
-  private _timeout: NodeJS.Timeout | null = null;
-  private _idletimeout: NodeJS.Timeout | null = null;
+  private _timeout: ReturnType<typeof setTimeout> | null = null;
+  private _idletimeout: ReturnType<typeof setTimeout> | null = null;
 
   protected constructor(client: Client, options: CollectorOptions<V> = {}) {
     super();

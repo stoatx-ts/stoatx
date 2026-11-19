@@ -269,9 +269,9 @@ class instances (client, managers, other structures) are shared by reference.
 
 ***
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(`depth`, `options`, `inspect`): `string`
+> **\[inspectCustom\]**(`depth`, `options`, `inspect`): `string`
 
 #### Parameters
 
@@ -279,7 +279,7 @@ class instances (client, managers, other structures) are shared by reference.
 | ------ | ------ |
 | `depth` | `number` |
 | `options` | `InspectOptions` |
-| `inspect` | *typeof* `inspect` |
+| `inspect` | `InspectFn` |
 
 #### Returns
 

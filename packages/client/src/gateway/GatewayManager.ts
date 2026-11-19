@@ -1,4 +1,3 @@
-import WebSocket from "ws";
 import { Client } from "../client/Client";
 import { Message } from "../structures/Message";
 import { TextChannel } from "../structures/TextChannel";
@@ -11,8 +10,8 @@ import { StoatGateway } from "../utils/Constants";
 export class GatewayManager {
   private ws: WebSocket | null = null;
   private wsURL: string = "";
-  private pingInterval: NodeJS.Timeout | null = null;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private token: string | null = null;
 
   private reconnectAttempts: number = 0;
@@ -27,45 +26,63 @@ export class GatewayManager {
     this.clearReconnectTimeout();
     this.client.emit("debug", "Connecting to Stoat Gateway...");
 
-    if (this.ws) {
-      this.ws.removeAllListeners();
-      this.ws = null;
-    }
+    this.detachSocket();
 
     const baseUrl = this.wsURL || StoatGateway;
     const url = `${baseUrl}?version=1&format=json&token=${this.token}`;
 
-    this.ws = new WebSocket(url);
+    // Use the platform WebSocket (browsers, Deno, Bun and Node 22+) instead of the `ws` package.
+    const ws = new WebSocket(url);
+    // Binary frames would otherwise arrive as Blobs, which can't be decoded synchronously.
+    ws.binaryType = "arraybuffer";
+    this.ws = ws;
 
-    this.ws.on("open", () => {
+    ws.onopen = () => {
       this.client.emit("debug", "WebSocket Opened. Starting ping loop...");
       this.reconnectAttempts = 0;
       this.startPingLoop();
-    });
+    };
 
-    this.ws.on("message", (data) => this.handleMessage(data));
+    ws.onmessage = (event) => this.handleMessage(event.data);
 
-    this.ws.on("close", (code, reason) => {
-      this.client.emit("debug", `WebSocket closed: ${code} - ${reason.toString()}`);
+    ws.onclose = (event) => {
+      this.client.emit("debug", `WebSocket closed: ${event.code} - ${event.reason}`);
       if (this.pingInterval) clearInterval(this.pingInterval);
       if (!this.isIntentionalClose) {
         this.reconnect();
       }
-    });
+    };
 
-    this.ws.on("error", (error) => {
-      this.client._reportError(error);
-    });
+    ws.onerror = () => {
+      // The standard error event carries no details; the close event that follows has the code and reason.
+      this.client._reportError(new Error("Gateway WebSocket error"));
+    };
+  }
+
+  /** Stops listening to the current socket so its late events can't touch client state. */
+  private detachSocket() {
+    if (!this.ws) return;
+    this.ws.onopen = null;
+    this.ws.onmessage = null;
+    this.ws.onclose = null;
+    this.ws.onerror = null;
+    this.ws = null;
   }
 
   public setGatewayUrl(url: string) {
     this.wsURL = url;
   }
 
-  private handleMessage(rawData: WebSocket.RawData) {
+  /**
+   * Parses a gateway frame and dispatches it. Malformed frames are dropped with a `debug` message.
+   * @param rawData The frame from the socket: a string for text frames, an `ArrayBuffer` for binary ones.
+   */
+  private handleMessage(rawData: unknown) {
     let payload: any;
     try {
-      payload = JSON.parse(rawData.toString());
+      const text =
+        typeof rawData === "string" ? rawData : new TextDecoder().decode(rawData as ArrayBuffer | Uint8Array);
+      payload = JSON.parse(text);
     } catch (error) {
       this.client.emit("debug", `Dropped malformed gateway frame: ${(error as Error).message}`);
       return;
@@ -700,8 +717,7 @@ export class GatewayManager {
     if (this.pingInterval) clearInterval(this.pingInterval);
     if (this.ws) {
       this.ws.close(1000, "Client disconnected gracefully");
-      this.ws.removeAllListeners();
-      this.ws = null;
+      this.detachSocket();
     }
     this.client.emit("debug", "Gateway disconnected intentionally.");
   }

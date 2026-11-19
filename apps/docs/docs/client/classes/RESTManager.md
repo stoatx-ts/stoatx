@@ -220,7 +220,7 @@ Stops the internal bucket sweeper.
 
 ### uploadFile()
 
-> **uploadFile**(`tag`, `fileBuffer`, `filename?`): `Promise`\<`string`\>
+> **uploadFile**(`tag`, `file`, `filename?`): `Promise`\<`string`\>
 
 Uploads a file to Stoat's CDN and returns the File ID
 
@@ -229,7 +229,7 @@ Uploads a file to Stoat's CDN and returns the File ID
 | Parameter | Type |
 | ------ | ------ |
 | `tag` | [`CDNTag`](../type-aliases/CDNTag.md) |
-| `fileBuffer` | `Buffer`\<`ArrayBufferLike`\> \| `Blob` |
+| `file` | [`AttachmentData`](../type-aliases/AttachmentData.md) |
 | `filename?` | `string` |
 
 #### Returns

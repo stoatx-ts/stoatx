@@ -13,9 +13,11 @@
   "homepage": "https://github.com/stoatx-ts/stoatx#readme",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
+  "browser": "./dist/browser.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": "./dist/browser.js",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
@@ -25,11 +27,14 @@
     "dist"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsup --config tsup.browser.config.ts",
     "dev": "tsup --watch",
     "lint": "eslint src/**/*.ts"
   },
@@ -37,10 +42,6 @@
     "@livekit/rtc-node": "^0.13.29",
     "events": "^3.3.0",
     "stoat-api": "^0.16.0",
-    "ulid": "^3.0.2",
-    "ws": "8.21.0"
-  },
-  "devDependencies": {
-    "@types/ws": "^8.5.0"
+    "ulid": "^3.0.2"
   }
 }

@@ -49,9 +49,9 @@ Manages API methods and caching for all channels globally.
 
 ## Methods
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
+> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
 
 #### Returns
 
@@ -59,7 +59,7 @@ Manages API methods and caching for all channels globally.
 
 #### Inherited from
 
-`BaseManager.[custom]`
+`BaseManager.[inspectCustom]`
 
 ***
 

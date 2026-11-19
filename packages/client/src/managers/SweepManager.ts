@@ -9,7 +9,7 @@ export interface SweeperOptions {
 }
 
 export class SweeperManager {
-  private messageInterval: NodeJS.Timeout | null = null;
+  private messageInterval: ReturnType<typeof setInterval> | null = null;
   public client: Client;
   public options: SweeperOptions;
 

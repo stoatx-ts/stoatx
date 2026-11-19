@@ -3,7 +3,7 @@ import { Emoji } from "./Emoji";
 import { Collection } from "../utils/Collection";
 import { Client } from "../client/Client";
 import { User } from "./User";
-import * as util from "node:util";
+import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 
 export class MessageReaction {
   public message: Message | { id: string; channelId: string };
@@ -38,13 +38,21 @@ export class MessageReaction {
     }
   }
 
-  [util.inspect.custom]() {
+  /**
+   * Customizes how Node.js prints this object with `console.log` and `util.inspect`,
+   * hiding the circular client reference. Ignored in browsers.
+   * @param _depth How many levels deep Node.js is still allowed to print (unused).
+   * @param options The inspect options Node.js is printing with.
+   * @param inspect Node's `util.inspect`, passed in so this file does not import `node:util`.
+   * @internal
+   */
+  [inspectCustom](_depth: number, options: InspectOptions, inspect: InspectFn) {
     const data = {
       messageId: this.message.id,
       emoji: this.emoji,
       count: this.count,
       users: Array.from(this.users.keys()),
     };
-    return `MessageReaction ${util.inspect(data)}`;
+    return `MessageReaction ${inspect(data, options)}`;
   }
 }

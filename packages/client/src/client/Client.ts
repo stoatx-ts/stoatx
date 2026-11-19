@@ -17,7 +17,8 @@ import { Collection } from "../utils/Collection";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { RevoltConfig } from "stoat-api";
-import { VoiceManager } from "../voice";
+// Import the manager directly: "../voice" also loads VoiceConnection (@livekit/rtc-node), which breaks the browser build.
+import { VoiceManager } from "../voice/VoiceManager";
 import { StoatAPI } from "../utils/Constants";
 
 export interface ClientEvents {

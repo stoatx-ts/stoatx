@@ -54,9 +54,9 @@
 
 ## Methods
 
-### \[custom\]()
+### \[inspectCustom\]()
 
-> **\[custom\]**(): [`Collection`](Collection.md)\<`string`, [`Member`](Member.md)\>
+> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Member`](Member.md)\>
 
 #### Returns
 
@@ -64,7 +64,7 @@
 
 #### Inherited from
 
-`BaseManager.[custom]`
+`BaseManager.[inspectCustom]`
 
 ***
 
