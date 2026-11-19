@@ -191,6 +191,22 @@ Gets the Server Member object (if sent in a server)
 
 ***
 
+### partial
+
+#### Get Signature
+
+> **get** **partial**(): `boolean`
+
+Whether this message is partial: it was created from an update event for an
+uncached message and is missing data such as its author. Call [Message.fetch](#fetch)
+to fill it in.
+
+##### Returns
+
+`boolean`
+
+***
+
 ### server
 
 #### Get Signature
@@ -245,7 +261,7 @@ class instances (client, managers, other structures) are shared by reference.
 
 | Parameter | Type |
 | ------ | ------ |
-| `data` | \{ \} |
+| `data` | `Partial`\<`RawMessage`\> |
 
 #### Returns
 
@@ -400,6 +416,25 @@ Compares this object with another to see if they represent the same entity.
 #### Inherited from
 
 [`Base`](Base.md).[`equals`](Base.md#equals)
+
+***
+
+### fetch()
+
+> **fetch**(`force?`): `Promise`\<`Message`\>
+
+Fetches this message. A cached message, including a partial one, is updated in place
+and the same instance is returned.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `force` | `boolean` | `true` | Whether to skip the cache and request the message from the API. Defaults to true. |
+
+#### Returns
+
+`Promise`\<`Message`\>
 
 ***
 

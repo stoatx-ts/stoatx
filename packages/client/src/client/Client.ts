@@ -10,6 +10,10 @@ import { UserManager } from "../managers/UserManager";
 import { User } from "../structures/User";
 import { ClientUser } from "../structures/ClientUser";
 import { Member } from "../structures/Member";
+import { Role } from "../structures/Role";
+import { Emoji } from "../structures/Emoji";
+import { Webhook } from "../structures/Webhook";
+import { Collection } from "../utils/Collection";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
 import type { RevoltConfig } from "stoat-api";
@@ -19,7 +23,8 @@ import { StoatAPI } from "../utils/Constants";
 export interface ClientEvents {
   ready: [data: any];
   messageCreate: [message: Message];
-  messageUpdate: [oldMessage: null | Message, newMessage: Message];
+  /** For uncached messages (only with `partials.messages`), both messages are partial. */
+  messageUpdate: [oldMessage: Message, newMessage: Message];
   messageDelete: [message: Message | { id: string; channelId: string }];
   messageReact: [message: Message | { id: string; channelId: string }, emojiId: string, userId: string];
   messageUnreact: [message: Message | { id: string; channelId: string }, emojiId: string, userId: string];
@@ -28,20 +33,49 @@ export interface ClientEvents {
   debug: [message: string];
   raw: [data: any];
   channelCreate: [channel: BaseChannel];
-  channelUpdate: [oldChannel: BaseChannel | null, newChannel: BaseChannel];
+  channelUpdate: [oldChannel: BaseChannel, newChannel: BaseChannel];
   channelDelete: [channel: BaseChannel | string];
   serverCreate: [server: Server];
-  serverUpdate: [oldServer: Server | null, newServer: Server];
+  serverUpdate: [oldServer: Server, newServer: Server];
   serverDelete: [server: Server | string];
   userUpdate: [oldUser: User, newUser: User];
   serverMemberJoin: [member: Member];
   serverMemberLeave: [member: Member | { serverId: string; userId: string }];
   serverBanAdd: [member: Member | { serverId: string; userId: string }];
   serverMemberKick: [member: Member | { serverId: string; userId: string }];
+  serverMemberUpdate: [oldMember: Member, newMember: Member];
+  serverRoleCreate: [role: Role];
+  serverRoleUpdate: [oldRole: Role, newRole: Role];
+  serverRoleDelete: [role: Role | { id: string; serverId: string }];
+  serverRoleRanksUpdate: [server: Server];
+  messageDeleteBulk: [messages: Collection<string, Message | { id: string; channelId: string }>, channelId: string];
+  emojiCreate: [emoji: Emoji];
+  emojiUpdate: [oldEmoji: Emoji, newEmoji: Emoji];
+  emojiDelete: [emoji: Emoji | string];
+  channelGroupJoin: [channel: BaseChannel | { id: string }, userId: string];
+  channelGroupLeave: [channel: BaseChannel | { id: string }, userId: string];
+  typingStart: [channelId: string, userId: string];
+  typingStop: [channelId: string, userId: string];
+  channelAck: [channelId: string, userId: string, messageId: string];
+  webhookCreate: [webhook: Webhook];
+  webhookUpdate: [oldWebhook: Webhook, newWebhook: Webhook];
+  webhookDelete: [webhook: Webhook | { id: string; channelId: string }];
+  userRelationship: [user: User];
+  userPlatformWipe: [userId: string, flags: number];
+  logout: [];
 }
 
 export interface ClientOptions {
   sweepers?: SweeperOptions;
+  /**
+   * Emit events for data that is not in the cache, using partial structures.
+   * Partial structures have `partial` set to true and only contain the fields the event carried;
+   * call `fetch()` on them to fill in the rest.
+   */
+  partials?: {
+    /** Emit `messageUpdate` for uncached messages in cached channels, using partial messages. */
+    messages?: boolean;
+  };
   cacheLimits?: {
     users?: number;
     servers?: number;
