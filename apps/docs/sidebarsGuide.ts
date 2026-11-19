@@ -7,7 +7,14 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Getting Started",
-      items: ["intro", "installation-and-setup", "events-and-managers", "webhooks", "browsers-and-runtimes"],
+      items: [
+        "intro",
+        "installation-and-setup",
+        "events-and-managers",
+        "webhooks",
+        "browsers-and-runtimes",
+        "user-accounts",
+      ],
     },
     {
       type: "category",

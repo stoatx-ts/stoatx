@@ -16,7 +16,33 @@
 
 `RESTManager`
 
+## Accessors
+
+### tokenType
+
+#### Get Signature
+
+> **get** **tokenType**(): [`TokenType`](../type-aliases/TokenType.md)
+
+Whether the current token is a bot token or a user session token.
+
+##### Returns
+
+[`TokenType`](../type-aliases/TokenType.md)
+
 ## Methods
+
+### clearToken()
+
+> **clearToken**(): `void`
+
+Forgets the current token, e.g. after logging out. Requests that need a token will fail until a new one is set.
+
+#### Returns
+
+`void`
+
+***
 
 ### delete()
 
@@ -204,13 +230,16 @@ Stops the internal bucket sweeper.
 
 ### setToken()
 
-> **setToken**(`token`): `void`
+> **setToken**(`token`, `type?`): `void`
+
+Sets the token sent with every request.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `token` | `string` |
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `token` | `string` | `undefined` | The bot token or user session token. |
+| `type` | [`TokenType`](../type-aliases/TokenType.md) | `"bot"` | Whether `token` is a bot token or a user session token. Defaults to `"bot"`. |
 
 #### Returns
 
@@ -226,12 +255,14 @@ Uploads a file to Stoat's CDN and returns the File ID
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `tag` | [`CDNTag`](../type-aliases/CDNTag.md) |
-| `file` | [`AttachmentData`](../type-aliases/AttachmentData.md) |
-| `filename?` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `tag` | [`CDNTag`](../type-aliases/CDNTag.md) | The CDN bucket to upload to, e.g. `"attachments"` or `"avatars"`. |
+| `file` | [`AttachmentData`](../type-aliases/AttachmentData.md) | The file contents. A Node.js `Buffer` or a browser `File` both work. |
+| `filename?` | `string` | The name the CDN stores the file under. |
 
 #### Returns
 
 `Promise`\<`string`\>
+
+The ID of the uploaded file.

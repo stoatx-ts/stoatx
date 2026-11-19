@@ -47,20 +47,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### construct()
 
 > `protected` **construct**(`data`): [`User`](User.md)
@@ -125,7 +111,7 @@ console.log(`DM channel ID: ${dm.id}`);
 
 > **editMe**(`options`): `Promise`\<[`User`](User.md)\>
 
-Edits the currently authenticated user (the bot itself).
+Edits the logged-in user (the bot, or the user account for user sessions).
 
 #### Parameters
 
@@ -150,12 +136,12 @@ If the API request fails.
 #### Example
 
 ```ts
-// Update the bot's status and presence
+// Update your status and presence
 await client.users.editMe({
   status: { text: "Watching the server", presence: "Online" }
 });
 
-// Clear the bot's avatar and display name
+// Clear your avatar and display name
 await client.users.editMe({ avatar: null, displayName: null });
 ```
 
@@ -232,7 +218,7 @@ console.log(user.username);
 
 > **fetchMe**(): `Promise`\<[`User`](User.md)\>
 
-Fetch the current user (the bot itself).
+Fetch the logged-in user (the bot, or the user account for user sessions).
 
 #### Returns
 
@@ -247,7 +233,7 @@ Error if the user cannot be fetched.
 #### Example
 
 ```ts
-// Fetch the current user (the bot itself)
+// Fetch the logged-in user
 const me = await client.users.fetchMe();
 console.log(`Logged in as ${me.tag}`);
 ```

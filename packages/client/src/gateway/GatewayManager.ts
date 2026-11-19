@@ -121,7 +121,8 @@ export class GatewayManager {
         break;
 
       case "Logout":
-        this.client.emit("logout");
+        // The session is gone: stop instead of reconnecting forever with a dead token.
+        this.client._endSession();
         break;
 
       case "Ready": {

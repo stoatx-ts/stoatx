@@ -15,7 +15,7 @@ Never put a bot token in a browser
 Anything shipped to a browser can be read by whoever opens the page: the token is visible in devtools, in network requests and in your JavaScript bundle.
 Someone with your bot token has full control of your bot. Keep bot tokens on a server you control.
 
-Logging in as a regular user account (for building web clients) is not supported yet. Until it is, only use the browser build with tokens that are safe for the person in front of the screen to see.
+To build a web client, have people log in with their own account instead. See [User Accounts](./user-accounts.md).
 :::
 
 ## Requirements
@@ -43,7 +43,8 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user?.username}`);
 });
 
-await client.login(token);
+// A user's own session. See the User Accounts guide.
+await client.loginWithCredentials({ email, password });
 ```
 
 Bundlers such as Vite, webpack, Rollup and esbuild pick the browser build automatically through the `"browser"` export condition.

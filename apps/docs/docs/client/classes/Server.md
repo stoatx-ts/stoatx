@@ -306,7 +306,7 @@ A Collection of the fetched members.
 
 Leaves the server.
 
-Note: the API uses the same route to delete a server, so if the bot owns
+Note: the API uses the same route to delete a server, so if the logged-in user owns
 this server it will be deleted.
 
 #### Returns

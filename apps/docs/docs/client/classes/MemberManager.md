@@ -54,20 +54,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Member`](Member.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`Member`](Member.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### ban()
 
 > **ban**(`member`, `options?`): `Promise`\<`void`\>

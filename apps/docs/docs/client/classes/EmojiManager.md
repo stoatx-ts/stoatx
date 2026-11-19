@@ -54,20 +54,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### construct()
 
 > `protected` **construct**(`data`): [`Emoji`](Emoji.md)

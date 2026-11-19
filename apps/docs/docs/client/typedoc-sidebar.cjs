@@ -28,6 +28,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/AuthManager",
+          label: "AuthManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/Base",
           label: "Base"
         },
@@ -125,6 +130,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/MessageReaction",
           label: "MessageReaction"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/OnboardingRequiredError",
+          label: "OnboardingRequiredError"
         },
         {
           type: "doc",
@@ -289,6 +299,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/LoginOptions",
+          label: "LoginOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/Masquerade",
           label: "Masquerade"
         },
@@ -319,8 +334,18 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/PolicyChange",
+          label: "PolicyChange"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/ReactionCollectorOptions",
           label: "ReactionCollectorOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/ReadyData",
+          label: "ReadyData"
         },
         {
           type: "doc",
@@ -349,6 +374,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/SessionInfo",
+          label: "SessionInfo"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/SweeperOptions",
           label: "SweeperOptions"
         },
@@ -366,6 +396,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/UserProfile",
           label: "UserProfile"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/UserSession",
+          label: "UserSession"
         },
         {
           type: "doc",
@@ -425,6 +460,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/type-aliases/CreateSessionResult",
+          label: "CreateSessionResult"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/CredentialLoginOptions",
+          label: "CredentialLoginOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/type-aliases/EmojiParent",
           label: "EmojiParent"
         },
@@ -435,6 +480,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/type-aliases/LoginResult",
+          label: "LoginResult"
+        },
+        {
+          type: "doc",
           id: "../docs/client/type-aliases/MemberResolvable",
           label: "MemberResolvable"
         },
@@ -442,6 +492,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/MessageResolvable",
           label: "MessageResolvable"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/MFAMethod",
+          label: "MFAMethod"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/MFAResponse",
+          label: "MFAResponse"
         },
         {
           type: "doc",
@@ -472,6 +532,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/RoleResolvable",
           label: "RoleResolvable"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/TokenType",
+          label: "TokenType"
         },
         {
           type: "doc",

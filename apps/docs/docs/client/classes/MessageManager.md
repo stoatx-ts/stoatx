@@ -54,20 +54,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### clearReactions()
 
 > **clearReactions**(`message`): `Promise`\<`void`\>
