@@ -26,6 +26,14 @@
 
 ## Properties
 
+### auth
+
+> **auth**: [`AuthManager`](AuthManager.md)
+
+Sessions, logout and onboarding for user accounts.
+
+***
+
 ### channels
 
 > **channels**: [`ChannelManager`](ChannelManager.md)
@@ -158,19 +166,74 @@ v0.1.26
 
 ### login()
 
-> **login**(`token`): `Promise`\<`any`\>
+> **login**(`tokenOrOptions`): `Promise`\<`any`\>
 
-Connects the bot to the Stoat Gateway
+Logs in and connects to the Stoat gateway.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `token` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `tokenOrOptions` | `string` \| [`LoginOptions`](../interfaces/LoginOptions.md) | A bot token, or `{ token, type: "user" }` for a user session. A [UserSession](../interfaces/UserSession.md) from [loginWithCredentials](#loginwithcredentials) can be passed directly. |
 
 #### Returns
 
 `Promise`\<`any`\>
+
+#### Throws
+
+For a user account that hasn't picked a username yet.
+
+#### Example
+
+```ts
+// Bot
+await client.login(process.env.BOT_TOKEN);
+// User session saved from an earlier loginWithCredentials()
+await client.login({ token: savedToken, type: "user" });
+```
+
+***
+
+### loginWithCredentials()
+
+> **loginWithCredentials**(`options`): `Promise`\<[`LoginResult`](../type-aliases/LoginResult.md)\>
+
+Logs in to a user account with an email and password, then connects.
+Save `result.session` to log in again later with `client.login(session)`.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`CredentialLoginOptions`](../type-aliases/CredentialLoginOptions.md) | The email and password, or the MFA ticket and response for the second step. |
+
+#### Returns
+
+`Promise`\<[`LoginResult`](../type-aliases/LoginResult.md)\>
+
+`Success` once connected, `MFA` if a second factor is needed, `Onboarding` if the
+account must pick a username first, or `Disabled`.
+
+#### Example
+
+```ts
+let result = await client.loginWithCredentials({ email, password, friendlyName: "My App" });
+
+if (result.result === "MFA") {
+  const totpCode = await promptForCode();
+  result = await client.loginWithCredentials({ mfaTicket: result.ticket, mfaResponse: { totpCode } });
+}
+
+if (result.result === "Onboarding") {
+  await client.auth.completeOnboarding(await promptForUsername());
+  await client.login(result.session);
+}
+
+if (result.result === "Success" || result.result === "Onboarding") {
+  localStorage.setItem("session", JSON.stringify(result.session));
+}
+```
 
 ***
 

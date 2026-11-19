@@ -13,6 +13,7 @@ export * from "./managers/ServerManager";
 export * from "./managers/SweepManager";
 export * from "./managers/UserManager";
 export * from "./managers/EmojiManager";
+export * from "./managers/AuthManager";
 
 // Structures
 export * from "./structures/Attachment";

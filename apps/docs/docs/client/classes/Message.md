@@ -269,24 +269,6 @@ class instances (client, managers, other structures) are shared by reference.
 
 ***
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(`depth`, `options`, `inspect`): `string`
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `depth` | `number` |
-| `options` | `InspectOptions` |
-| `inspect` | `InspectFn` |
-
-#### Returns
-
-`string`
-
-***
-
 ### awaitReactions()
 
 > **awaitReactions**(`options?`): `Promise`\<[`Collection`](Collection.md)\<`string`, [`MessageReaction`](MessageReaction.md)\>\>

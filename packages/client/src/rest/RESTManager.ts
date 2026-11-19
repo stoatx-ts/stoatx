@@ -12,6 +12,16 @@ const UPLOAD_TIMEOUT_MS = 120_000;
 /** Give up on a route after this many consecutive 429 responses. */
 const MAX_RATELIMIT_RETRIES = 5;
 
+/** Routes that work without a token, such as logging in. */
+const UNAUTHENTICATED_ROUTES = new Set(["/auth/session/login"]);
+
+/**
+ * What kind of token the client authenticates with.
+ * - `"bot"`: a bot token, sent as `X-Bot-Token`.
+ * - `"user"`: a user session token, sent as `X-Session-Token`.
+ */
+export type TokenType = "bot" | "user";
+
 /**
  * Represents an independent rate limit bucket queue
  */
@@ -86,6 +96,8 @@ export class RESTManager {
 
   private token: string | null = null;
 
+  private _tokenType: TokenType = "bot";
+
   private buckets = new Map<string, AsyncBucket>();
 
   private bucketSweeper: ReturnType<typeof setInterval>;
@@ -113,8 +125,31 @@ export class RESTManager {
     this.buckets.clear();
   }
 
-  public setToken(token: string) {
+  /**
+   * Sets the token sent with every request.
+   * @param token The bot token or user session token.
+   * @param type Whether `token` is a bot token or a user session token. Defaults to `"bot"`.
+   */
+  public setToken(token: string, type: TokenType = "bot") {
     this.token = token;
+    this._tokenType = type;
+  }
+
+  /** Forgets the current token, e.g. after logging out. Requests that need a token will fail until a new one is set. */
+  public clearToken() {
+    this.token = null;
+    this._tokenType = "bot";
+  }
+
+  /** Whether the current token is a bot token or a user session token. */
+  public get tokenType(): TokenType {
+    return this._tokenType;
+  }
+
+  /** The authentication header for the current token, or nothing if there is no token. */
+  private authHeaders(): Record<string, string> {
+    if (!this.token) return {};
+    return { [this._tokenType === "user" ? "X-Session-Token" : "X-Bot-Token"]: this.token };
   }
 
   public setBaseURL(baseURL: string) {
@@ -187,7 +222,7 @@ export class RESTManager {
     bucket: AsyncBucket,
     attempt: number = 0,
   ): Promise<any> {
-    if (!this.token) {
+    if (!this.token && !UNAUTHENTICATED_ROUTES.has(endpoint.split("?")[0]!)) {
       throw new Error("REST_NOT_READY: You must call client.login() before making API requests.");
     }
     const url = `${this.baseURL}${endpoint}`;
@@ -201,7 +236,7 @@ export class RESTManager {
     const response = await fetch(url, {
       method: method.toUpperCase(),
       headers: {
-        "X-Bot-Token": this.token,
+        ...this.authHeaders(),
         "Content-Type": "application/json",
       },
       ...(isBodyMethod ? { body: JSON.stringify(body ?? {}) } : {}),
@@ -271,9 +306,7 @@ export class RESTManager {
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "X-Bot-Token": this.token,
-      },
+      headers: this.authHeaders(),
       body: formData,
       signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
     });

@@ -58,24 +58,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(`_depth`, `options`, `inspect`): `string`
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `_depth` | `number` |
-| `options` | `InspectOptions` |
-| `inspect` | `InspectFn` |
-
-#### Returns
-
-`string`
-
-***
-
 ### remove()
 
 > **remove**(): `Promise`\<`void`\>

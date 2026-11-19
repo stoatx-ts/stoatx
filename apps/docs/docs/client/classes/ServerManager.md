@@ -47,20 +47,6 @@
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Server`](Server.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`Server`](Server.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### construct()
 
 > `protected` **construct**(`data`): [`Server`](Server.md)

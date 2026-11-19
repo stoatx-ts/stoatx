@@ -49,20 +49,6 @@ Manages API methods and caching for all channels globally.
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### bulkDelete()
 
 > **bulkDelete**(`id`, `messages`): `Promise`\<`void`\>

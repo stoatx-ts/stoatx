@@ -1,6 +1,6 @@
 # Class: ClientUser
 
-Represents the authenticated bot's user object.
+Represents the logged-in user: the bot, or the user account for user sessions.
 
 ## Extends
 

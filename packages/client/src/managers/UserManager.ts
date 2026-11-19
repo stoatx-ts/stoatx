@@ -77,11 +77,11 @@ export class UserManager extends BaseManager<string, User, RawUser> {
   }
 
   /**
-   * Fetch the current user (the bot itself).
+   * Fetch the logged-in user (the bot, or the user account for user sessions).
    * @returns The fetched User object representing the current user.
    * @throws Error if the user cannot be fetched.
    * @example
-   * // Fetch the current user (the bot itself)
+   * // Fetch the logged-in user
    * const me = await client.users.fetchMe();
    * console.log(`Logged in as ${me.tag}`);
    */
@@ -92,18 +92,18 @@ export class UserManager extends BaseManager<string, User, RawUser> {
   }
 
   /**
-   * Edits the currently authenticated user (the bot itself).
+   * Edits the logged-in user (the bot, or the user account for user sessions).
    * @param options The fields to update (avatar, status, profile, etc.).
    * @returns A promise that resolves to the updated User object.
    * @throws {TypeError} If invalid options are provided.
    * @throws {Error} If the API request fails.
    * @example
-   * // Update the bot's status and presence
+   * // Update your status and presence
    * await client.users.editMe({
    *   status: { text: "Watching the server", presence: "Online" }
    * });
    *
-   * // Clear the bot's avatar and display name
+   * // Clear your avatar and display name
    * await client.users.editMe({ avatar: null, displayName: null });
    */
   public async editMe(options: UserEditOptions): Promise<User> {

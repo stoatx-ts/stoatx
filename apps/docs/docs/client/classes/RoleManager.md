@@ -56,20 +56,6 @@ Manages API methods and caching for server roles.
 
 ## Methods
 
-### \[inspectCustom\]()
-
-> **\[inspectCustom\]**(): [`Collection`](Collection.md)\<`string`, [`Role`](Role.md)\>
-
-#### Returns
-
-[`Collection`](Collection.md)\<`string`, [`Role`](Role.md)\>
-
-#### Inherited from
-
-`BaseManager.[inspectCustom]`
-
-***
-
 ### construct()
 
 > `protected` **construct**(`data`): [`Role`](Role.md)

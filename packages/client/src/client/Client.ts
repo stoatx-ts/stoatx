@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import { GatewayManager } from "../gateway/GatewayManager";
-import { RESTManager } from "../rest/RESTManager";
+import { RESTManager, type TokenType } from "../rest/RESTManager";
 import { Message } from "../structures/Message";
 import { ChannelManager } from "../managers/ChannelManager";
 import { BaseChannel } from "../structures/BaseChannel";
@@ -16,13 +16,63 @@ import { Webhook } from "../structures/Webhook";
 import { Collection } from "../utils/Collection";
 import { SweeperManager, SweeperOptions } from "../managers/SweepManager";
 import { EmojiManager } from "../managers/EmojiManager";
-import type { RevoltConfig } from "stoat-api";
+import {
+  AuthManager,
+  OnboardingRequiredError,
+  type CredentialLoginOptions,
+  type LoginResult,
+} from "../managers/AuthManager";
+import type {
+  RevoltConfig,
+  User as RawUser,
+  Server as RawServer,
+  Channel as RawChannel,
+  Member as RawMember,
+  Emoji as RawEmoji,
+  ChannelUnread,
+} from "stoat-api";
 // Import the manager directly: "../voice" also loads VoiceConnection (@livekit/rtc-node), which breaks the browser build.
 import { VoiceManager } from "../voice/VoiceManager";
 import { StoatAPI } from "../utils/Constants";
 
+/** A change to a platform policy (terms of service, privacy policy) the user has to acknowledge. */
+export interface PolicyChange {
+  created_time: string;
+  effective_time: string;
+  description: string;
+  url: string;
+}
+
+/**
+ * The raw `Ready` payload: the initial state the gateway sends after connecting.
+ * Fields marked "user sessions" are only sent to user accounts, not bots.
+ */
+export interface ReadyData {
+  users?: RawUser[];
+  servers?: RawServer[];
+  channels?: RawChannel[];
+  members?: RawMember[];
+  emojis?: RawEmoji[];
+  /** User sessions: synced client settings, keyed by name, as `[updatedAt, json]`. */
+  user_settings?: Record<string, [number, string]>;
+  /** User sessions: unread state for each channel. */
+  channel_unreads?: ChannelUnread[];
+  /** User sessions: policy changes the user hasn't acknowledged yet. */
+  policy_changes?: PolicyChange[];
+  /** Voice channel participants. Not processed by the client yet. */
+  voice_states?: unknown[];
+}
+
+/** How to log in with {@link Client.login}. A {@link UserSession} works as-is. */
+export interface LoginOptions {
+  /** The bot token or user session token. */
+  token: string;
+  /** Whether `token` is a bot token or a user session token. Defaults to `"bot"`. */
+  type?: TokenType;
+}
+
 export interface ClientEvents {
-  ready: [data: any];
+  ready: [data: ReadyData];
   messageCreate: [message: Message];
   /** For uncached messages (only with `partials.messages`), both messages are partial. */
   messageUpdate: [oldMessage: Message, newMessage: Message];
@@ -63,6 +113,7 @@ export interface ClientEvents {
   webhookDelete: [webhook: Webhook | { id: string; channelId: string }];
   userRelationship: [user: User];
   userPlatformWipe: [userId: string, flags: number];
+  /** The session ended: logged out, revoked from another device, or the token was invalidated. The client has disconnected. */
   logout: [];
 }
 
@@ -103,6 +154,8 @@ export class Client extends EventEmitter {
   public users: UserManager;
   public sweepers: SweeperManager;
   public emojis: EmojiManager;
+  /** Sessions, logout and onboarding for user accounts. */
+  public auth: AuthManager;
   public user: ClientUser | null = null;
   public options: ClientOptions;
   readonly voice: VoiceManager;
@@ -117,22 +170,39 @@ export class Client extends EventEmitter {
     this.users = new UserManager(this, options.cacheLimits?.users);
     this.emojis = new EmojiManager(this, undefined, options.cacheLimits?.emojis);
     this.voice = new VoiceManager(this);
+    this.auth = new AuthManager(this);
+    // Set up front so requests that need no token (credential login) work before login().
+    this.rest.setBaseURL(options.apiURL ?? StoatAPI);
 
     this.sweepers = new SweeperManager(this, options.sweepers ?? {});
   }
 
   /**
-   * Connects the bot to the Stoat Gateway
+   * Logs in and connects to the Stoat gateway.
+   * @param tokenOrOptions A bot token, or `{ token, type: "user" }` for a user session.
+   * A {@link UserSession} from {@link loginWithCredentials} can be passed directly.
+   * @throws {OnboardingRequiredError} For a user account that hasn't picked a username yet.
+   * @example
+   * // Bot
+   * await client.login(process.env.BOT_TOKEN);
+   * // User session saved from an earlier loginWithCredentials()
+   * await client.login({ token: savedToken, type: "user" });
    */
-  public async login(token: string): Promise<any> {
+  public async login(tokenOrOptions: string | LoginOptions): Promise<any> {
+    const { token, type = "bot" } = typeof tokenOrOptions === "string" ? { token: tokenOrOptions } : tokenOrOptions;
     if (!token) throw new Error("A valid token must be provided.");
 
     const rootApiUrl = this.options.apiURL ?? StoatAPI;
 
     this.rest.setBaseURL(rootApiUrl);
-    this.rest.setToken(token);
+    this.rest.setToken(token, type);
 
     const configData = await this.fetchConfig(rootApiUrl);
+
+    // New user accounts can't connect until they pick a username.
+    if (type === "user" && (await this.auth.needsOnboarding())) {
+      throw new OnboardingRequiredError();
+    }
 
     const finalWsUrl = this.options.overrides?.wsURL ?? configData.ws;
 
@@ -158,6 +228,58 @@ export class Client extends EventEmitter {
 
     this.sweepers.start();
     return this.gateway.connect(token);
+  }
+
+  /**
+   * Logs in to a user account with an email and password, then connects.
+   * Save `result.session` to log in again later with `client.login(session)`.
+   * @param options The email and password, or the MFA ticket and response for the second step.
+   * @returns `Success` once connected, `MFA` if a second factor is needed, `Onboarding` if the
+   * account must pick a username first, or `Disabled`.
+   * @example
+   * let result = await client.loginWithCredentials({ email, password, friendlyName: "My App" });
+   *
+   * if (result.result === "MFA") {
+   *   const totpCode = await promptForCode();
+   *   result = await client.loginWithCredentials({ mfaTicket: result.ticket, mfaResponse: { totpCode } });
+   * }
+   *
+   * if (result.result === "Onboarding") {
+   *   await client.auth.completeOnboarding(await promptForUsername());
+   *   await client.login(result.session);
+   * }
+   *
+   * if (result.result === "Success" || result.result === "Onboarding") {
+   *   localStorage.setItem("session", JSON.stringify(result.session));
+   * }
+   */
+  public async loginWithCredentials(options: CredentialLoginOptions): Promise<LoginResult> {
+    const result = await this.auth.createSession(options);
+    if (result.result !== "Success") return result;
+
+    try {
+      await this.login(result.session);
+    } catch (error) {
+      if (error instanceof OnboardingRequiredError) return { result: "Onboarding", session: result.session };
+      throw error;
+    }
+    return result;
+  }
+
+  /**
+   * Disconnects, forgets the token, empties the caches and emits `logout`. Called when the session ends.
+   * The caches are emptied so the next account logged in on the same client (or page) can't see this one's data.
+   * @internal
+   */
+  public _endSession(): void {
+    this.gateway.disconnect();
+    this.rest.clearToken();
+    this.user = null;
+    this.channels.cache.clear();
+    this.servers.cache.clear();
+    this.users.cache.clear();
+    this.emojis.cache.clear();
+    this.emit("logout");
   }
 
   private async fetchConfig(baseURL: string): Promise<RevoltConfig> {

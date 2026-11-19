@@ -72,6 +72,8 @@
 
 > **logout**: \[\]
 
+The session ended: logged out, revoked from another device, or the token was invalidated. The client has disconnected.
+
 ***
 
 ### messageCreate
@@ -126,7 +128,7 @@ For uncached messages (only with `partials.messages`), both messages are partial
 
 ### ready
 
-> **ready**: \[`any`\]
+> **ready**: \[[`ReadyData`](ReadyData.md)\]
 
 ***
 
