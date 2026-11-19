@@ -198,6 +198,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/UnreadManager",
+          label: "UnreadManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/User",
           label: "User"
         },
@@ -251,6 +256,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/ChannelEditOptions",
           label: "ChannelEditOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/ChannelReadState",
+          label: "ChannelReadState"
         },
         {
           type: "doc",
@@ -477,6 +487,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/EmojiResolvable",
           label: "EmojiResolvable"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/GatewayClientMessage",
+          label: "GatewayClientMessage"
         },
         {
           type: "doc",

@@ -28,6 +28,14 @@ export abstract class BaseChannel extends Base {
   public type: ChannelType;
   public messages: MessageManager;
   public webhooks: WebhookManager;
+  /**
+   * IDs of the users currently typing in this channel, kept up to date from gateway events.
+   * Cleared when a user sends a message or stops typing, and on reconnect.
+   */
+  public readonly typingUserIds = new Set<string>();
+
+  /** When {@link startTyping} may next send, so calling it on every keystroke doesn't flood the gateway. */
+  private _typingThrottleUntil = 0;
 
   protected constructor(client: Client, data: RawChannel) {
     super(client, data);
@@ -47,6 +55,51 @@ export abstract class BaseChannel extends Base {
    */
   public async send(contentOrOptions: string | MessageOptions): Promise<Message> {
     return this.messages.send(contentOrOptions);
+  }
+
+  /**
+   * Shows the logged-in user as typing in this channel. Safe to call on every keystroke:
+   * it sends at most once every 2.5 seconds, and other clients drop the indicator after
+   * 4 seconds without a refresh. Call {@link stopTyping} when the user stops, or just send
+   * the message: sending ends the indicator.
+   * @returns `false` if the gateway isn't connected.
+   */
+  public startTyping(): boolean {
+    if (Date.now() < this._typingThrottleUntil) return true;
+    const sent = this.client.gateway.send({ type: "BeginTyping", channel: this.id });
+    if (sent) this._typingThrottleUntil = Date.now() + 2500;
+    return sent;
+  }
+
+  /**
+   * Stops showing the logged-in user as typing in this channel.
+   * @returns `false` if the gateway isn't connected.
+   */
+  public stopTyping(): boolean {
+    this._typingThrottleUntil = 0;
+    return this.client.gateway.send({ type: "EndTyping", channel: this.id });
+  }
+
+  /**
+   * Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
+   */
+  public get unread(): boolean {
+    return this.client.unreads.isUnread(this.id);
+  }
+
+  /**
+   * How many unread messages in this channel mention the logged-in user. Always `0` for bots.
+   */
+  public get mentionCount(): number {
+    return this.client.unreads.mentionCount(this.id);
+  }
+
+  /**
+   * Marks this channel as read (user sessions only).
+   * @param message The last message read. Defaults to the latest message in the channel.
+   */
+  public async ack(message?: MessageResolvable): Promise<void> {
+    return this.client.unreads.ack(this.id, message);
   }
 
   /**

@@ -44,6 +44,26 @@
 
 ***
 
+### send()
+
+> **send**(`payload`): `boolean`
+
+Sends a message to the gateway. Usually you'd use a helper such as `channel.startTyping()` instead.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `payload` | [`GatewayClientMessage`](../type-aliases/GatewayClientMessage.md) | The message to send. |
+
+#### Returns
+
+`boolean`
+
+`false` if the gateway isn't connected, so nothing was sent.
+
+***
+
 ### setGatewayUrl()
 
 > **setGatewayUrl**(`url`): `void`

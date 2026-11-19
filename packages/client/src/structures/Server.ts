@@ -133,6 +133,39 @@ export class Server extends Base {
   }
 
   /**
+   * Whether any channel in this server has messages the logged-in user hasn't read. Always `false` for bots.
+   */
+  public get unread(): boolean {
+    return this.channelIds.some((id) => this.client.unreads.isUnread(id));
+  }
+
+  /**
+   * How many unread messages across this server's channels mention the logged-in user. Always `0` for bots.
+   */
+  public get mentionCount(): number {
+    return this.channelIds.reduce((total, id) => total + this.client.unreads.mentionCount(id), 0);
+  }
+
+  /**
+   * Marks every channel in this server as read (user sessions only).
+   */
+  public async ack(): Promise<void> {
+    return this.client.unreads.ackServer(this);
+  }
+
+  /**
+   * Asks the gateway for presence and member updates from this server (user sessions only; the
+   * server ignores it for bots, which receive these updates anyway).
+   *
+   * A subscription lasts 15 minutes, so call this again while the server stays on screen.
+   * Each connection keeps at most 5 subscriptions; subscribing to a 6th drops the least recently used.
+   * @returns `false` if the gateway isn't connected.
+   */
+  public subscribe(): boolean {
+    return this.client.gateway.send({ type: "Subscribe", server_id: this.id });
+  }
+
+  /**
    * Leaves the server.
    *
    * Note: the API uses the same route to delete a server, so if the logged-in user owns

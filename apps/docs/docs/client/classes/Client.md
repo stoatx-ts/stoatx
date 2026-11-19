@@ -76,6 +76,14 @@ Sessions, logout and onboarding for user accounts.
 
 ***
 
+### unreads
+
+> **unreads**: [`UnreadManager`](UnreadManager.md)
+
+Which channels the logged-in user has read (user sessions only). Most code uses `channel.unread` and `channel.ack()` instead.
+
+***
+
 ### user
 
 > **user**: [`ClientUser`](ClientUser.md) \| `null` = `null`
