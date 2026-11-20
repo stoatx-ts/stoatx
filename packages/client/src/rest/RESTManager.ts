@@ -12,8 +12,21 @@ const UPLOAD_TIMEOUT_MS = 120_000;
 /** Give up on a route after this many consecutive 429 responses. */
 const MAX_RATELIMIT_RETRIES = 5;
 
-/** Routes that work without a token, such as logging in. */
-const UNAUTHENTICATED_ROUTES = new Set(["/auth/session/login"]);
+/** Routes that work without a token: logging in, and previewing an invite. */
+const UNAUTHENTICATED_ROUTES: { method: string; path: RegExp }[] = [
+  { method: "post", path: /^\/auth\/session\/login$/ },
+  { method: "get", path: /^\/invites\/[^/]+$/ },
+];
+
+/**
+ * Whether a request may be sent without a token.
+ * @param method The HTTP method, in any case.
+ * @param endpoint The path, with or without a query string.
+ */
+function isUnauthenticated(method: string, endpoint: string): boolean {
+  const path = endpoint.split("?")[0]!;
+  return UNAUTHENTICATED_ROUTES.some((route) => route.method === method.toLowerCase() && route.path.test(path));
+}
 
 /**
  * What kind of token the client authenticates with.
@@ -222,7 +235,7 @@ export class RESTManager {
     bucket: AsyncBucket,
     attempt: number = 0,
   ): Promise<any> {
-    if (!this.token && !UNAUTHENTICATED_ROUTES.has(endpoint.split("?")[0]!)) {
+    if (!this.token && !isUnauthenticated(method, endpoint)) {
       throw new Error("REST_NOT_READY: You must call client.login() before making API requests.");
     }
     const url = `${this.baseURL}${endpoint}`;

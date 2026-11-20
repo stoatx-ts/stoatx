@@ -9,7 +9,7 @@ sidebar_position: 6
 Besides bots, `@stoatx/client` can log in to a regular user account. This is what you need to build your own Stoat client, for example a web app where people log in with their email and password.
 
 :::warning
-User-account support is new. Logging in, sessions, onboarding, unread tracking and typing indicators work; friends, blocking and joining servers through invites are still being added.
+User-account support is new. Logging in, sessions, onboarding, unreads, typing, friends, blocking, DMs and invites work. Settings sync, creating servers and groups, and account management are still being added.
 :::
 
 ## Logging in with an email and password
@@ -203,6 +203,78 @@ server.subscribe();
 
 A subscription lasts 15 minutes, so subscribe again (for example every 10 minutes) while the server stays on screen. Each connection keeps at most 5 subscriptions; subscribing to a 6th drops the least recently used. Bots don't need this: they get updates from every server automatically.
 
+## Friends and blocking
+
+Everyone the user has a relationship with is loaded when the client connects, so the lists are ready straight away:
+
+```ts
+client.users.friends; // Collection of friends
+client.users.incomingFriendRequests; // requests waiting for an answer
+client.users.outgoingFriendRequests; // requests the user sent
+client.users.blocked; // users the user blocked
+```
+
+They're kept up to date as relationships change, including from the other side or another device. Listen to `userRelationship` to re-render:
+
+```ts
+client.on("userRelationship", (user) => {
+  console.log(`${user.username} is now: ${user.relationship}`);
+});
+```
+
+Each user's `relationship` is one of `"None"`, `"Friend"`, `"Outgoing"`, `"Incoming"`, `"Blocked"`, `"BlockedOther"` (they blocked the user) or `"User"` (the logged-in user).
+
+To change a relationship:
+
+```ts
+// Send a request by username. The discriminator is required.
+await client.users.sendFriendRequest("alice#1234");
+
+await user.addFriend(); // send a request, or accept theirs
+await user.removeFriend(); // unfriend, cancel your request, or decline theirs
+await user.block(); // also removes any friendship or request
+await user.unblock();
+```
+
+Each returns the updated user. Invalid changes reject with a `StoatAPIError`, e.g. `AlreadyFriends`, `AlreadySentRequest`, `Blocked`, `TooManyPendingFriendRequests`, or `NoEffect` when there's nothing to remove.
+
+:::note
+If you set `cacheLimits.users`, users can be evicted from the cache and drop out of these lists. Leave it unset for user clients.
+:::
+
+## Direct messages
+
+All DM, group and Saved Messages channels are loaded when the client connects. To open a DM with someone:
+
+```ts
+const dm = await client.users.createDM(user);
+await dm.send("Hey!");
+```
+
+`client.users.fetchDMs()` reloads the full list if you need to resync.
+
+## Joining servers with invites
+
+Preview an invite before joining. This works even before logging in, e.g. for an invite landing page:
+
+```ts
+const invite = await client.invites.fetch("abc123"); // the code from https://stt.gg/abc123
+
+if (invite.type === "Server") {
+  console.log(`${invite.inviterName} invited you to ${invite.serverName} (${invite.memberCount} members)`);
+} else {
+  console.log(`${invite.inviterName} invited you to the group ${invite.channelName}`);
+}
+```
+
+Then join:
+
+```ts
+const joined = await client.invites.accept("abc123"); // a Server, or a GroupChannel for group invites
+```
+
+The server or group is cached by the time `accept()` resolves. Bots can't accept invites.
+
 ## Bots vs. user accounts
 
 Everything else in this guide works the same for both. The differences:
@@ -214,3 +286,4 @@ Everything else in this guide works the same for both. The differences:
 | `ready` payload extra | –                        | `user_settings`, `channel_unreads`, `policy_changes` |
 | `client.auth`         | Not available            | Sessions, logout, onboarding                         |
 | Unreads               | Always read, acks throw  | `channel.unread`, `mentionCount`, `ack()`            |
+| Friends and invites   | Not allowed by Stoat     | `user.addFriend()`, `client.invites.accept()`, …     |

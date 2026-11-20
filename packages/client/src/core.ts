@@ -15,6 +15,7 @@ export * from "./managers/UserManager";
 export * from "./managers/EmojiManager";
 export * from "./managers/AuthManager";
 export * from "./managers/UnreadManager";
+export * from "./managers/InviteManager";
 
 // Structures
 export * from "./structures/Attachment";
