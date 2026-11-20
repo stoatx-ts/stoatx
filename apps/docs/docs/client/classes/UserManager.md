@@ -45,6 +45,62 @@
 
 `BaseManager.client`
 
+## Accessors
+
+### blocked
+
+#### Get Signature
+
+> **get** **blocked**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+Users you've blocked.
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+***
+
+### friends
+
+#### Get Signature
+
+> **get** **friends**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+Users you're friends with (user sessions only).
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+***
+
+### incomingFriendRequests
+
+#### Get Signature
+
+> **get** **incomingFriendRequests**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+Users who sent you a friend request you haven't answered. Accept with `addFriend()`, decline with `removeFriend()`.
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+***
+
+### outgoingFriendRequests
+
+#### Get Signature
+
+> **get** **outgoingFriendRequests**(): [`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
+Users you sent a friend request to that they haven't answered. Cancel with `removeFriend()`.
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>
+
 ## Methods
 
 ### construct()
@@ -214,6 +270,21 @@ console.log(user.username);
 
 ***
 
+### fetchDMs()
+
+> **fetchDMs**(): `Promise`\<[`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>\>
+
+Fetches every DM, group and Saved Messages channel you're in (user sessions only).
+These already arrive when the client connects, so this is only needed to resync.
+
+#### Returns
+
+`Promise`\<[`Collection`](Collection.md)\<`string`, [`BaseChannel`](BaseChannel.md)\>\>
+
+The channels, keyed by ID.
+
+***
+
 ### fetchMe()
 
 > **fetchMe**(): `Promise`\<[`User`](User.md)\>
@@ -279,3 +350,32 @@ The extracted user ID.
 #### Throws
 
 TypeError if an invalid type is provided.
+
+***
+
+### sendFriendRequest()
+
+> **sendFriendRequest**(`username`): `Promise`\<[`User`](User.md)\>
+
+Sends a friend request by username (user sessions only).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `username` | `string` | The full username with discriminator, e.g. `"alice#1234"`. |
+
+#### Returns
+
+`Promise`\<[`User`](User.md)\>
+
+The user the request was sent to, with `relationship` `"Outgoing"`,
+or `"Friend"` if they had already sent you a request.
+
+#### Throws
+
+If `username` has no `#discriminator`.
+
+#### Throws
+
+`NotFound` if no such user exists, plus the errors from [User.addFriend](User.md#addfriend).

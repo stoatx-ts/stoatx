@@ -103,6 +103,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/InviteManager",
+          label: "InviteManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/Member",
           label: "Member"
         },
@@ -492,6 +497,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/GatewayClientMessage",
           label: "GatewayClientMessage"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/InvitePreview",
+          label: "InvitePreview"
         },
         {
           type: "doc",

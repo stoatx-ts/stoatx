@@ -1,9 +1,11 @@
-import { User, UserProfile, UserStatus } from "../structures/User";
+import { User, UserProfile, UserRelationShip, UserStatus } from "../structures/User";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
 import { User as RawUser, DataEditUser, FieldsUser } from "stoat-api";
 import { finalizeEdit, setOrRemove } from "../utils/editPayload";
+import { Collection } from "../utils/Collection";
+import type { BaseChannel } from "../structures/BaseChannel";
 
 export type UserResolvable = User | string;
 
@@ -180,5 +182,64 @@ export class UserManager extends BaseManager<string, User, RawUser> {
 
     const data = await this.client.rest.get(`/users/${id}/dm`);
     return this.client.channels._add(data) as DMChannel;
+  }
+
+  /**
+   * Sends a friend request by username (user sessions only).
+   * @param username The full username with discriminator, e.g. `"alice#1234"`.
+   * @returns The user the request was sent to, with `relationship` `"Outgoing"`,
+   * or `"Friend"` if they had already sent you a request.
+   * @throws {TypeError} If `username` has no `#discriminator`.
+   * @throws {StoatAPIError} `NotFound` if no such user exists, plus the errors from {@link User.addFriend}.
+   */
+  public async sendFriendRequest(username: string): Promise<User> {
+    if (!username.includes("#")) {
+      throw new TypeError(`Friend requests need the full username with discriminator, e.g. "alice#1234".`);
+    }
+    return this._add(await this.client.rest.post("/users/friend", { username }));
+  }
+
+  /** Users you're friends with (user sessions only). */
+  public get friends(): Collection<string, User> {
+    return this.withRelationship("Friend");
+  }
+
+  /** Users who sent you a friend request you haven't answered. Accept with `addFriend()`, decline with `removeFriend()`. */
+  public get incomingFriendRequests(): Collection<string, User> {
+    return this.withRelationship("Incoming");
+  }
+
+  /** Users you sent a friend request to that they haven't answered. Cancel with `removeFriend()`. */
+  public get outgoingFriendRequests(): Collection<string, User> {
+    return this.withRelationship("Outgoing");
+  }
+
+  /** Users you've blocked. */
+  public get blocked(): Collection<string, User> {
+    return this.withRelationship("Blocked");
+  }
+
+  /**
+   * Fetches every DM, group and Saved Messages channel you're in (user sessions only).
+   * These already arrive when the client connects, so this is only needed to resync.
+   * @returns The channels, keyed by ID.
+   */
+  public async fetchDMs(): Promise<Collection<string, BaseChannel>> {
+    const data = await this.client.rest.get("/users/dms");
+    const channels = new Collection<string, BaseChannel>();
+    for (const raw of data) {
+      const channel = this.client.channels._add(raw);
+      channels.set(channel.id, channel);
+    }
+    return channels;
+  }
+
+  /**
+   * Cached users with the given relationship to you. Everyone you have a relationship with
+   * is sent when the client connects, so this is complete unless `cacheLimits.users` evicted some.
+   * @param relationship The relationship to filter by.
+   */
+  private withRelationship(relationship: UserRelationShip): Collection<string, User> {
+    return this.cache.filter((user) => user.relationship === relationship);
   }
 }

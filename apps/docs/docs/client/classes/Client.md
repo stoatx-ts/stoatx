@@ -52,6 +52,14 @@ Sessions, logout and onboarding for user accounts.
 
 ***
 
+### invites
+
+> **invites**: [`InviteManager`](InviteManager.md)
+
+Preview and accept invites by code.
+
+***
+
 ### options
 
 > **options**: [`ClientOptions`](../interfaces/ClientOptions.md)

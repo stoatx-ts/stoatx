@@ -23,6 +23,7 @@ import {
   type LoginResult,
 } from "../managers/AuthManager";
 import { UnreadManager } from "../managers/UnreadManager";
+import { InviteManager } from "../managers/InviteManager";
 import type {
   RevoltConfig,
   User as RawUser,
@@ -159,6 +160,8 @@ export class Client extends EventEmitter {
   public auth: AuthManager;
   /** Which channels the logged-in user has read (user sessions only). Most code uses `channel.unread` and `channel.ack()` instead. */
   public unreads: UnreadManager;
+  /** Preview and accept invites by code. */
+  public invites: InviteManager;
   public user: ClientUser | null = null;
   public options: ClientOptions;
   readonly voice: VoiceManager;
@@ -175,6 +178,7 @@ export class Client extends EventEmitter {
     this.voice = new VoiceManager(this);
     this.auth = new AuthManager(this);
     this.unreads = new UnreadManager(this);
+    this.invites = new InviteManager(this);
     // Set up front so requests that need no token (credential login) work before login().
     this.rest.setBaseURL(options.apiURL ?? StoatAPI);
 

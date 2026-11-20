@@ -112,4 +112,52 @@ export class User extends Base {
   public async fetch(force: boolean = false): Promise<this> {
     return (await this.client.users.fetch(this.id, force)) as this;
   }
+
+  /**
+   * Sends this user a friend request, or accepts theirs if they sent one (user sessions only).
+   * @returns This user, with `relationship` now `"Outgoing"` (request sent) or `"Friend"` (accepted).
+   * @throws {StoatAPIError} `AlreadyFriends`, `AlreadySentRequest`, `Blocked`, `BlockedByOther`,
+   * `TooManyPendingFriendRequests`, or `IsBot` if either side is a bot.
+   */
+  public async addFriend(): Promise<this> {
+    return this._patchFrom(await this.client.rest.put(`/users/${this.id}/friend`));
+  }
+
+  /**
+   * Removes this user as a friend, cancels a friend request you sent them,
+   * or declines one they sent you (user sessions only).
+   * @returns This user, with `relationship` now `"None"`.
+   * @throws {StoatAPIError} `NoEffect` if there was no friendship or request.
+   */
+  public async removeFriend(): Promise<this> {
+    return this._patchFrom(await this.client.rest.delete(`/users/${this.id}/friend`));
+  }
+
+  /**
+   * Blocks this user. Any friendship or pending request is removed (user sessions only).
+   * @returns This user, with `relationship` now `"Blocked"`.
+   * @throws {StoatAPIError} `NoEffect` if they're already blocked.
+   */
+  public async block(): Promise<this> {
+    return this._patchFrom(await this.client.rest.put(`/users/${this.id}/block`));
+  }
+
+  /**
+   * Unblocks this user (user sessions only).
+   * @returns This user, with `relationship` now `"None"`, or `"BlockedOther"` if they still block you.
+   * @throws {StoatAPIError} `NoEffect` if they weren't blocked.
+   */
+  public async unblock(): Promise<this> {
+    return this._patchFrom(await this.client.rest.delete(`/users/${this.id}/block`));
+  }
+
+  /**
+   * Updates this user from an API response, keeping the cached copy in sync.
+   * @param data The user as returned by the API.
+   */
+  private _patchFrom(data: RawUser): this {
+    this._patch(data);
+    if (this.client.users.cache.get(this.id) !== this) this.client.users._add(data);
+    return this;
+  }
 }

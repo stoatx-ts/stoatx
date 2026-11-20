@@ -256,6 +256,51 @@ class instances (client, managers, other structures) are shared by reference.
 
 ***
 
+### addFriend()
+
+> **addFriend**(): `Promise`\<`ClientUser`\>
+
+Sends this user a friend request, or accepts theirs if they sent one (user sessions only).
+
+#### Returns
+
+`Promise`\<`ClientUser`\>
+
+This user, with `relationship` now `"Outgoing"` (request sent) or `"Friend"` (accepted).
+
+#### Throws
+
+`AlreadyFriends`, `AlreadySentRequest`, `Blocked`, `BlockedByOther`,
+`TooManyPendingFriendRequests`, or `IsBot` if either side is a bot.
+
+#### Inherited from
+
+[`User`](User.md).[`addFriend`](User.md#addfriend)
+
+***
+
+### block()
+
+> **block**(): `Promise`\<`ClientUser`\>
+
+Blocks this user. Any friendship or pending request is removed (user sessions only).
+
+#### Returns
+
+`Promise`\<`ClientUser`\>
+
+This user, with `relationship` now `"Blocked"`.
+
+#### Throws
+
+`NoEffect` if they're already blocked.
+
+#### Inherited from
+
+[`User`](User.md).[`block`](User.md#block)
+
+***
+
 ### equals()
 
 > **equals**(`other`): `boolean`
@@ -313,6 +358,29 @@ await user.fetch();
 
 ***
 
+### removeFriend()
+
+> **removeFriend**(): `Promise`\<`ClientUser`\>
+
+Removes this user as a friend, cancels a friend request you sent them,
+or declines one they sent you (user sessions only).
+
+#### Returns
+
+`Promise`\<`ClientUser`\>
+
+This user, with `relationship` now `"None"`.
+
+#### Throws
+
+`NoEffect` if there was no friendship or request.
+
+#### Inherited from
+
+[`User`](User.md).[`removeFriend`](User.md#removefriend)
+
+***
+
 ### toString()
 
 > **toString**(): `string`
@@ -326,3 +394,25 @@ Returns the UUID string when the object is cast to a string.
 #### Inherited from
 
 [`User`](User.md).[`toString`](User.md#tostring)
+
+***
+
+### unblock()
+
+> **unblock**(): `Promise`\<`ClientUser`\>
+
+Unblocks this user (user sessions only).
+
+#### Returns
+
+`Promise`\<`ClientUser`\>
+
+This user, with `relationship` now `"None"`, or `"BlockedOther"` if they still block you.
+
+#### Throws
+
+`NoEffect` if they weren't blocked.
+
+#### Inherited from
+
+[`User`](User.md).[`unblock`](User.md#unblock)
