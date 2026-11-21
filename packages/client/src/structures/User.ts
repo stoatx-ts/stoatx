@@ -114,6 +114,29 @@ export class User extends Base {
   }
 
   /**
+   * The URL of the generated avatar Stoat shows for users without one. A PNG, served by the API.
+   */
+  public get defaultAvatarURL(): string {
+    return `${this.client.rest.apiURL}/users/${this.id}/default_avatar`;
+  }
+
+  /** The user's avatar URL, or the default avatar's if they haven't set one. */
+  public get displayAvatarURL(): string {
+    return this.avatar?.url ?? this.defaultAvatarURL;
+  }
+
+  /**
+   * Fetches the user's flags (e.g. suspended, deleted, banned) and updates {@link flags}.
+   * Works for any user, even ones the logged-in user can't otherwise see.
+   * @returns The flags bitfield.
+   */
+  public async fetchFlags(): Promise<number> {
+    const { flags } = await this.client.rest.get(`/users/${this.id}/flags`);
+    this.flags = flags;
+    return flags;
+  }
+
+  /**
    * Convenience getter to return the user's tag (username#discriminator)
    */
   public get tag(): string {

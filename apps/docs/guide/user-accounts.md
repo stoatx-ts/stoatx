@@ -404,6 +404,8 @@ mutual.channelIds; // groups and DMs you're both in
 
 Both also exist on the manager, for when you only have an ID: `client.users.fetchProfile(id)` and `client.users.fetchMutual(id)`.
 
+For avatars, `user.displayAvatarURL` is the user's avatar, or the generated default one if they haven't set any (`user.defaultAvatarURL`).
+
 ## Direct messages
 
 All DM, group and Saved Messages channels are loaded when the client connects. To open a DM with someone:
@@ -465,6 +467,22 @@ const joined = await client.invites.accept("abc123"); // a Server, or a GroupCha
 ```
 
 The server or group is cached by the time `accept()` resolves. Bots can't accept invites.
+
+### Creating invites
+
+Server channels and groups can create invites:
+
+```ts
+const invite = await channel.createInvite({
+  maxUses: 10, // 1–100, unlimited by default
+  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // never expires by default
+});
+invite.code; // e.g. share https://stt.gg/<code> on stoat.chat
+
+await invite.delete(); // or client.invites.delete(code)
+```
+
+`expiresAt` must be in the future and within the instance's maximum invite duration, otherwise the request fails with `InvalidOperation`. A server's invites are listed with `server.invites.fetch()`.
 
 ## Searching messages
 
@@ -535,6 +553,22 @@ await bot.inviteToGroup(group);
 const info = await client.bots.fetchPublic(botId);
 await client.bots.inviteToServer(botId, server);
 ```
+
+### Discover
+
+Bots and servers can ask to be listed on Discover. Requests are reviewed only on instances that run Discover, such as stoat.chat; elsewhere they're stored without anyone reviewing them.
+
+```ts
+await bot.requestDiscover(); // or server.requestDiscover()
+
+const request = await bot.fetchDiscoverRequest();
+request.status; // "Pending", "UnderReview", "Approved", "Denied" or "Removed"
+request.reason; // the reviewers' reason, if they gave one
+
+await bot.cancelDiscoverRequest(); // only while it's still in the queue
+```
+
+A bot needs `analytics` turned on to be listed: `bot.edit({ analytics: true })`.
 
 ## Bots vs. user accounts
 

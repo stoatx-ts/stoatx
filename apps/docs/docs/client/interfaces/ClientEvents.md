@@ -242,6 +242,55 @@ Synced settings changed on another device (user sessions only). Only the changed
 
 ***
 
+### voiceCallUpdate
+
+> **voiceCallUpdate**: \[[`VoiceCallUpdate`](VoiceCallUpdate.md)\]
+
+A call in a DM or group started, or ended.
+
+***
+
+### voiceChannelJoin
+
+> **voiceChannelJoin**: \[[`VoiceState`](../classes/VoiceState.md)\]
+
+Someone joined a voice call.
+
+***
+
+### voiceChannelLeave
+
+> **voiceChannelLeave**: \[[`VoiceState`](../classes/VoiceState.md) \| \{ `channelId`: `string`; `userId`: `string`; \}\]
+
+Someone left a voice call. Partial if their state wasn't cached.
+
+***
+
+### voiceChannelMove
+
+> **voiceChannelMove**: \[[`VoiceState`](../classes/VoiceState.md), `string`\]
+
+Someone moved from one call to another.
+
+***
+
+### voiceMoveRequest
+
+> **voiceMoveRequest**: \[[`VoiceMoveRequest`](VoiceMoveRequest.md)\]
+
+The server moved the logged-in user to another call, e.g. a moderator dragged them.
+A voice package needs to reconnect to `toChannelId` with the given `token` and `node`.
+
+***
+
+### voiceStateUpdate
+
+> **voiceStateUpdate**: \[[`VoiceState`](../classes/VoiceState.md), [`VoiceState`](../classes/VoiceState.md)\]
+
+Someone in a call muted, deafened, or turned screen sharing or their camera on or off.
+
+***
+
 ### webhookCreate
 
 > **webhookCreate**: \[[`Webhook`](../classes/Webhook.md)\]

@@ -1,15 +1,11 @@
 import type { Server } from "../structures/Server";
 import type { Client } from "../client/Client";
 import { Collection } from "../utils/Collection";
-import { ServerInvite } from "../structures/ServerInvite";
+import { ServerInvite, type InviteCreateOptions } from "../structures/ServerInvite";
+import { requestInvite } from "../utils/invites";
+import type { BaseChannel } from "../structures/BaseChannel";
 import { BaseManager } from "./BaseManager";
 import { Invite as RawInvite } from "stoat-api";
-
-export interface Invite {
-  code: string;
-  creatorId: string;
-  channelId: string;
-}
 
 export class ServerInviteManager extends BaseManager<string, ServerInvite, RawInvite> {
   constructor(
@@ -25,7 +21,7 @@ export class ServerInviteManager extends BaseManager<string, ServerInvite, RawIn
   }
 
   protected construct(data: RawInvite): ServerInvite {
-    return new ServerInvite(data);
+    return new ServerInvite(this.client, data);
   }
 
   /**
@@ -42,5 +38,24 @@ export class ServerInviteManager extends BaseManager<string, ServerInvite, RawIn
     }
 
     return fetched;
+  }
+
+  /**
+   * Creates an invite to one of this server's channels, and caches it.
+   * @param channel The channel or its ID.
+   * @param options A use limit and expiry time.
+   * @returns The new invite.
+   */
+  public async create(channel: BaseChannel | string, options: InviteCreateOptions = {}): Promise<ServerInvite> {
+    return this._add(await requestInvite(this.client, typeof channel === "string" ? channel : channel.id, options));
+  }
+
+  /**
+   * Deletes one of this server's invites and removes it from the cache.
+   * @param invite The invite or its code.
+   */
+  public async delete(invite: ServerInvite | string): Promise<void> {
+    const code = typeof invite === "string" ? invite : invite.code;
+    await this.client.invites.delete(code);
   }
 }

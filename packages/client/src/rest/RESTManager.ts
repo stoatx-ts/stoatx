@@ -186,6 +186,11 @@ export class RESTManager {
     return { [this._tokenType === "user" ? "X-Session-Token" : "X-Bot-Token"]: this.token };
   }
 
+  /** The API's base URL, without a trailing slash. */
+  public get apiURL(): string {
+    return this.baseURL;
+  }
+
   public setBaseURL(baseURL: string) {
     this.baseURL = baseURL.replace(/\/+$/, "");
   }

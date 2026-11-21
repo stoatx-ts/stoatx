@@ -18,6 +18,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/AuditLogEntry",
+          label: "AuditLogEntry"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/AuthManager",
           label: "AuthManager"
         },
@@ -30,6 +35,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/BaseChannel",
           label: "BaseChannel"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/BaseManager",
+          label: "BaseManager"
         },
         {
           type: "doc",
@@ -118,6 +128,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/MemberRoleManager",
+          label: "MemberRoleManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/Message",
           label: "Message"
         },
@@ -130,6 +145,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/classes/MessageManager",
           label: "MessageManager"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/MessageMentions",
+          label: "MessageMentions"
         },
         {
           type: "doc",
@@ -178,8 +198,28 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/ServerBan",
+          label: "ServerBan"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/ServerBanManager",
+          label: "ServerBanManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/ServerChannelManager",
           label: "ServerChannelManager"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/ServerInvite",
+          label: "ServerInvite"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/ServerInviteManager",
+          label: "ServerInviteManager"
         },
         {
           type: "doc",
@@ -228,8 +268,28 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/VoiceChannel",
+          label: "VoiceChannel"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/VoiceState",
+          label: "VoiceState"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/VoiceStateManager",
+          label: "VoiceStateManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/Webhook",
           label: "Webhook"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/WebhookManager",
+          label: "WebhookManager"
         }
       ]
     },
@@ -294,6 +354,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/DiscoverRequest",
+          label: "DiscoverRequest"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/EmojiCreateOptions",
           label: "EmojiCreateOptions"
         },
@@ -326,6 +391,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/Interaction",
           label: "Interaction"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/InviteCreateOptions",
+          label: "InviteCreateOptions"
         },
         {
           type: "doc",
@@ -384,6 +454,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/Patchable",
+          label: "Patchable"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/PendingPolicyChange",
           label: "PendingPolicyChange"
         },
@@ -406,6 +481,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/PushSubscriptionLike",
           label: "PushSubscriptionLike"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/RawChannelVoiceState",
+          label: "RawChannelVoiceState"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/RawVoiceState",
+          label: "RawVoiceState"
         },
         {
           type: "doc",
@@ -496,6 +581,21 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/UserSession",
           label: "UserSession"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/VoiceCallUpdate",
+          label: "VoiceCallUpdate"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/VoiceMoveRequest",
+          label: "VoiceMoveRequest"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/WebhookCreateOptions",
+          label: "WebhookCreateOptions"
         },
         {
           type: "doc",
@@ -667,6 +767,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/UserStatus",
           label: "UserStatus"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/WebhookResolvable",
+          label: "WebhookResolvable"
         }
       ]
     },

@@ -5,6 +5,7 @@ import { Server } from "../structures/Server";
 import { DataCreateEmoji, DataEditEmoji, Emoji as RawEmoji } from "stoat-api";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { resolveAttachment } from "../utils/resolveAttachment";
+import { Collection } from "../utils/Collection";
 
 export interface EmojiCreateOptions {
   // Autumn ID or Attachment
@@ -42,6 +43,23 @@ export class EmojiManager extends BaseManager<string, Emoji, RawEmoji> {
    */
   protected construct(data: RawEmoji): Emoji {
     return new Emoji(this.client, data);
+  }
+
+  /**
+   * Fetches every emoji in this manager's server and caches them. Only works on `server.emojis`.
+   * The server's emojis already arrive when the client connects, so this is only needed to resync.
+   * @returns The emojis, keyed by ID.
+   * @throws {Error} If this isn't a server's emoji manager.
+   */
+  public async fetchAll(): Promise<Collection<string, Emoji>> {
+    if (!this.server) throw new Error("SERVER_ONLY: emojis.fetchAll() only works on server.emojis.");
+    const data = await this.client.rest.get(`/servers/${this.server.id}/emojis`);
+    const emojis = new Collection<string, Emoji>();
+    for (const raw of data) {
+      const emoji = this._add(raw);
+      emojis.set(emoji.id, emoji);
+    }
+    return emojis;
   }
 
   /**

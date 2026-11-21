@@ -48,6 +48,33 @@ Joining a channel the client is already in returns the existing connection. The 
 Server voice channels are `VoiceChannel`s: check with `channel.isVoice()` before joining.
 :::
 
+## Who's in a call
+
+`@stoatx/client` tracks who's in every call the client can see, without joining and without a voice package:
+
+```ts
+for (const state of channel.voiceStates.values()) {
+  state.user?.username;
+  state.isPublishing; // microphone on
+  state.isReceiving; // false when they've deafened
+  state.screensharing;
+  state.camera;
+  state.joinedAt;
+}
+
+client.voiceStates.getUser(userId); // the call a user is in, if any
+```
+
+Listen to these events to keep a UI up to date:
+
+| Event               | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `voiceChannelJoin`  | Someone joined a call.                                                 |
+| `voiceChannelLeave` | Someone left a call.                                                   |
+| `voiceChannelMove`  | Someone moved to another call. Also passes the channel they came from. |
+| `voiceStateUpdate`  | Someone muted, deafened, or toggled screen sharing or their camera.    |
+| `voiceCallUpdate`   | A call in a DM or group started or ended.                              |
+
 ## Connection events
 
 | Event        | Description                                           |

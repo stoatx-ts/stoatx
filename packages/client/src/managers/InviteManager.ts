@@ -83,6 +83,15 @@ export class InviteManager {
   }
 
   /**
+   * Deletes an invite so it stops working.
+   * @param code The invite code.
+   */
+  public async delete(code: string): Promise<void> {
+    await this.client.rest.delete(`/invites/${encodeURIComponent(code)}`);
+    for (const server of this.client.servers.cache.values()) server.invites.cache.delete(code);
+  }
+
+  /**
    * Joins the server or group an invite is for (user sessions only; bots can't accept invites).
    * The server or group is cached straight away, so it's usable as soon as this resolves.
    * A discoverable server can also be joined by passing its ID as the code.

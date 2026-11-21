@@ -135,6 +135,24 @@ Delete this webhook.
 
 ***
 
+### deleteMessage()
+
+> **deleteMessage**(`message`): `Promise`\<`void`\>
+
+Deletes a message this webhook sent. Needs the webhook's token.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `message` | [`MessageResolvable`](../type-aliases/MessageResolvable.md) | The message or its ID. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### edit()
 
 > **edit**(`data`): `Promise`\<`Webhook`\>
@@ -150,6 +168,27 @@ Edit this webhook's name/avatar (bot auth).
 #### Returns
 
 `Promise`\<`Webhook`\>
+
+***
+
+### editMessage()
+
+> **editMessage**(`message`, `contentOrOptions`): `Promise`\<[`Message`](Message.md)\>
+
+Edits a message this webhook sent. Needs the webhook's token.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `message` | [`MessageResolvable`](../type-aliases/MessageResolvable.md) | The message or its ID. |
+| `contentOrOptions` | `string` \| [`MessageOptions`](../interfaces/MessageOptions.md) | The new content, or the new content and embeds. `embeds: []` removes them. |
+
+#### Returns
+
+`Promise`\<[`Message`](Message.md)\>
+
+The edited message.
 
 ***
 
@@ -190,6 +229,27 @@ Send a message through this webhook.
 #### Returns
 
 `Promise`\<[`Message`](Message.md)\>
+
+***
+
+### sendGitHubEvent()
+
+> **sendGitHubEvent**(`event`, `payload`): `Promise`\<`void`\>
+
+Posts a GitHub webhook event through this webhook, which Stoat turns into a message.
+Usually GitHub calls this itself: point a GitHub webhook at `{apiURL}/webhooks/{id}/{token}/github`.
+Use this to forward events you received some other way.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `event` | `string` | The GitHub event name, from GitHub's `X-GitHub-Event` header, e.g. `"push"`. |
+| `payload` | `Record`\<`string`, `unknown`\> | The event's JSON payload, as GitHub sent it. |
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 

@@ -17,8 +17,11 @@ export * from "./managers/AuthManager";
 export * from "./managers/MFAManager";
 export * from "./managers/SettingsManager";
 export * from "./managers/BotManager";
+export * from "./managers/VoiceStateManager";
+export * from "./structures/VoiceState";
 export * from "./structures/Bot";
 export type { ContentReportReason, UserReportReason, ReportOptions } from "./utils/report";
+export type { DiscoverRequest } from "./utils/discover";
 export * from "./managers/UnreadManager";
 export * from "./managers/InviteManager";
 
@@ -39,6 +42,7 @@ export * from "./structures/Emoji";
 export * from "./structures/MessageReaction";
 export * from "./structures/GroupChannel";
 export * from "./structures/Webhook";
+export * from "./structures/ServerInvite";
 
 // Builders
 export * from "./builders/EmbedBuilder";
@@ -54,3 +58,12 @@ export * from "./utils/BitField";
 export { decodeTime } from "ulid";
 
 export * as API from "stoat-api";
+export * from "./structures/AuditLogEntry";
+export * from "./structures/MessageMentions";
+export * from "./structures/ServerBan";
+export * from "./structures/VoiceChannel";
+export * from "./managers/BaseManager";
+export * from "./managers/MemberRoleManager";
+export * from "./managers/ServerBanManager";
+export * from "./managers/ServerInviteManager";
+export * from "./managers/WebhookManager";

@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Role`](Role.md), `RawRole`\>
+- [`BaseManager`](BaseManager.md)\<`string`, [`Role`](Role.md), `RawRole`\>
 
 ## Constructors
 
@@ -26,7 +26,7 @@ Manages API methods and caching for server roles.
 
 #### Overrides
 
-`BaseManager<string, Role, RawRole>.constructor`
+[`BaseManager`](BaseManager.md).[`constructor`](BaseManager.md#constructor)
 
 ## Properties
 
@@ -36,7 +36,7 @@ Manages API methods and caching for server roles.
 
 #### Inherited from
 
-`BaseManager.cache`
+[`BaseManager`](BaseManager.md).[`cache`](BaseManager.md#cache)
 
 ***
 
@@ -46,7 +46,7 @@ Manages API methods and caching for server roles.
 
 #### Inherited from
 
-`BaseManager.client`
+[`BaseManager`](BaseManager.md).[`client`](BaseManager.md#client)
 
 ***
 

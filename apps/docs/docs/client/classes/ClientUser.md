@@ -199,6 +199,42 @@ Represents the logged-in user: the bot, or the user account for user sessions.
 
 ## Accessors
 
+### defaultAvatarURL
+
+#### Get Signature
+
+> **get** **defaultAvatarURL**(): `string`
+
+The URL of the generated avatar Stoat shows for users without one. A PNG, served by the API.
+
+##### Returns
+
+`string`
+
+#### Inherited from
+
+[`User`](User.md).[`defaultAvatarURL`](User.md#defaultavatarurl)
+
+***
+
+### displayAvatarURL
+
+#### Get Signature
+
+> **get** **displayAvatarURL**(): `string`
+
+The user's avatar URL, or the default avatar's if they haven't set one.
+
+##### Returns
+
+`string`
+
+#### Inherited from
+
+[`User`](User.md).[`displayAvatarURL`](User.md#displayavatarurl)
+
+***
+
 ### tag
 
 #### Get Signature
@@ -355,6 +391,25 @@ await user.fetch();
 #### Inherited from
 
 [`User`](User.md).[`fetch`](User.md#fetch)
+
+***
+
+### fetchFlags()
+
+> **fetchFlags**(): `Promise`\<`number`\>
+
+Fetches the user's flags (e.g. suspended, deleted, banned) and updates [flags](#flags).
+Works for any user, even ones the logged-in user can't otherwise see.
+
+#### Returns
+
+`Promise`\<`number`\>
+
+The flags bitfield.
+
+#### Inherited from
+
+[`User`](User.md).[`fetchFlags`](User.md#fetchflags)
 
 ***
 

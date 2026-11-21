@@ -6,6 +6,10 @@ The base class for all structures.
 
 - [`BaseChannel`](BaseChannel.md)
 
+## Extended by
+
+- [`VoiceChannel`](VoiceChannel.md)
+
 ## Constructors
 
 ### Constructor
@@ -160,7 +164,7 @@ Cleared when a user sends a message or stops typing, and on reconnect.
 
 ### webhooks
 
-> **webhooks**: `WebhookManager`
+> **webhooks**: [`WebhookManager`](WebhookManager.md)
 
 #### Inherited from
 
@@ -192,8 +196,6 @@ How many unread messages in this channel mention the logged-in user. Always `0` 
 
 > **get** **unread**(): `boolean`
 
-Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
-
 ##### Returns
 
 `boolean`
@@ -201,6 +203,24 @@ Whether this channel has messages the logged-in user hasn't read. Always `false`
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`unread`](BaseChannel.md#unread)
+
+***
+
+### voiceStates
+
+#### Get Signature
+
+> **get** **voiceStates**(): [`Collection`](Collection.md)\<`string`, [`VoiceState`](VoiceState.md)\>
+
+Everyone in this channel's voice call, by user ID. Empty if nobody is in it.
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`VoiceState`](VoiceState.md)\>
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`voiceStates`](BaseChannel.md#voicestates)
 
 ## Methods
 
@@ -231,7 +251,7 @@ class instances (client, managers, other structures) are shared by reference.
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | (`"Description"` \| `"Icon"` \| `"DefaultPermissions"` \| `"Voice"` \| `"Slowmode"`)[] |
+| `clear?` | (`"Voice"` \| `"Description"` \| `"Icon"` \| `"DefaultPermissions"` \| `"Slowmode"`)[] |
 
 #### Returns
 
@@ -327,6 +347,32 @@ await channel.bulkDelete([message1, message2, message3]);
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`bulkDelete`](BaseChannel.md#bulkdelete)
+
+***
+
+### createInvite()
+
+> **createInvite**(`options?`): `Promise`\<[`ServerInvite`](ServerInvite.md)\>
+
+Creates an invite to this channel.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`InviteCreateOptions`](../interfaces/InviteCreateOptions.md) | A use limit and expiry time. |
+
+#### Returns
+
+`Promise`\<[`ServerInvite`](ServerInvite.md)\>
+
+The new invite. Share its `code`.
+
+#### Example
+
+```ts
+const invite = await channel.createInvite({ maxUses: 10, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
+```
 
 ***
 

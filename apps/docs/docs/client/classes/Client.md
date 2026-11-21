@@ -118,6 +118,14 @@ Which channels the logged-in user has read (user sessions only). Most code uses 
 
 > **users**: [`UserManager`](UserManager.md)
 
+***
+
+### voiceStates
+
+> **voiceStates**: [`VoiceStateManager`](VoiceStateManager.md)
+
+Who's in which voice call, without joining.
+
 ## Methods
 
 ### emit()

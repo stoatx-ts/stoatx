@@ -147,6 +147,34 @@ The base class for all structures.
 
 ## Accessors
 
+### defaultAvatarURL
+
+#### Get Signature
+
+> **get** **defaultAvatarURL**(): `string`
+
+The URL of the generated avatar Stoat shows for users without one. A PNG, served by the API.
+
+##### Returns
+
+`string`
+
+***
+
+### displayAvatarURL
+
+#### Get Signature
+
+> **get** **displayAvatarURL**(): `string`
+
+The user's avatar URL, or the default avatar's if they haven't set one.
+
+##### Returns
+
+`string`
+
+***
+
 ### tag
 
 #### Get Signature
@@ -283,6 +311,21 @@ Error if the user cannot be found or fetched
 // Fetch a user
 await user.fetch();
 ```
+
+***
+
+### fetchFlags()
+
+> **fetchFlags**(): `Promise`\<`number`\>
+
+Fetches the user's flags (e.g. suspended, deleted, banned) and updates [flags](#flags).
+Works for any user, even ones the logged-in user can't otherwise see.
+
+#### Returns
+
+`Promise`\<`number`\>
+
+The flags bitfield.
 
 ***
 

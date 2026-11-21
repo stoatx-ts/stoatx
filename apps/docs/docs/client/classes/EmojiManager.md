@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Emoji`](Emoji.md), `RawEmoji`\>
+- [`BaseManager`](BaseManager.md)\<`string`, [`Emoji`](Emoji.md), `RawEmoji`\>
 
 ## Constructors
 
@@ -24,7 +24,7 @@
 
 #### Overrides
 
-`BaseManager<string, Emoji, RawEmoji>.constructor`
+[`BaseManager`](BaseManager.md).[`constructor`](BaseManager.md#constructor)
 
 ## Properties
 
@@ -34,7 +34,7 @@
 
 #### Inherited from
 
-`BaseManager.cache`
+[`BaseManager`](BaseManager.md).[`cache`](BaseManager.md#cache)
 
 ***
 
@@ -44,7 +44,7 @@
 
 #### Inherited from
 
-`BaseManager.client`
+[`BaseManager`](BaseManager.md).[`client`](BaseManager.md#client)
 
 ***
 
@@ -220,6 +220,25 @@ If the API request fails.
 // Fetch an emoji, bypassing cache
 const emoji = await client.emojis.fetch("01H...", true);
 ```
+
+***
+
+### fetchAll()
+
+> **fetchAll**(): `Promise`\<[`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>\>
+
+Fetches every emoji in this manager's server and caches them. Only works on `server.emojis`.
+The server's emojis already arrive when the client connects, so this is only needed to resync.
+
+#### Returns
+
+`Promise`\<[`Collection`](Collection.md)\<`string`, [`Emoji`](Emoji.md)\>\>
+
+The emojis, keyed by ID.
+
+#### Throws
+
+If this isn't a server's emoji manager.
 
 ***
 
