@@ -11,7 +11,7 @@
     "release": "pnpm -r build && changeset publish",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --noEmit",
     "build": "pnpm -r build"
   },
   "keywords": [

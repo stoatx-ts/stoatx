@@ -16,7 +16,14 @@ describe("RoleManager", () => {
     vi.mocked(client.rest.get).mockResolvedValueOnce(fakeApiResponse as any);
 
     const serverId = ulid();
-    const server = client.servers._add({ _id: serverId, name: "Test Server" });
+    const server = client.servers._add({
+      _id: serverId,
+      owner: ulid(),
+      name: "Test Server",
+      channels: [],
+      default_permissions: 0,
+      approximate_member_count: 0,
+    });
 
     const role = await server.roles.fetch(roleId);
 
