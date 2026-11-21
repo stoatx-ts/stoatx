@@ -324,6 +324,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/FetchedUserProfile",
+          label: "FetchedUserProfile"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/FetchMembersOptions",
           label: "FetchMembersOptions"
         },
@@ -381,6 +386,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/MFATicket",
           label: "MFATicket"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/MutualConnections",
+          label: "MutualConnections"
         },
         {
           type: "doc",

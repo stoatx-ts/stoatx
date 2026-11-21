@@ -386,6 +386,24 @@ Each returns the updated user. Invalid changes reject with a `StoatAPIError`, e.
 If you set `cacheLimits.users`, users can be evicted from the cache and drop out of these lists. Leave it unset for user clients.
 :::
 
+## Profiles and mutuals
+
+For a profile page, fetch the user's profile and what they have in common with the logged-in user:
+
+```ts
+const profile = await user.fetchProfile();
+profile.content; // the "about me" text, or null
+profile.background?.url; // the background image, or null
+
+const mutual = await user.fetchMutual();
+// IDs: look them up in client.users, client.servers and client.channels
+mutual.userIds; // mutual friends
+mutual.serverIds; // servers you're both in
+mutual.channelIds; // groups and DMs you're both in
+```
+
+Both also exist on the manager, for when you only have an ID: `client.users.fetchProfile(id)` and `client.users.fetchMutual(id)`.
+
 ## Direct messages
 
 All DM, group and Saved Messages channels are loaded when the client connects. To open a DM with someone:

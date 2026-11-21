@@ -18,6 +18,24 @@ export interface UserProfile {
   content?: string | null;
 }
 
+/** A user's profile, from {@link User.fetchProfile}. */
+export interface FetchedUserProfile {
+  /** The profile's text ("about me"), or `null` if empty. */
+  content: string | null;
+  /** The profile's background image, or `null` if there isn't one. */
+  background: Attachment | null;
+}
+
+/** What the logged-in user has in common with another user, from {@link User.fetchMutual}. */
+export interface MutualConnections {
+  /** Friends both users have. */
+  userIds: string[];
+  /** Servers both users are in. */
+  serverIds: string[];
+  /** Groups and DMs both users are in. */
+  channelIds: string[];
+}
+
 export class User extends Base {
   public discriminator!: string;
   public online!: boolean;
@@ -111,6 +129,23 @@ export class User extends Base {
    */
   public async fetch(force: boolean = false): Promise<this> {
     return (await this.client.users.fetch(this.id, force)) as this;
+  }
+
+  /**
+   * Fetches this user's profile text and background.
+   * @returns The profile.
+   * @throws {StoatAPIError} `NotFound` if the logged-in user isn't allowed to see it.
+   */
+  public async fetchProfile(): Promise<FetchedUserProfile> {
+    return this.client.users.fetchProfile(this.id);
+  }
+
+  /**
+   * Fetches the friends, servers, groups and DMs the logged-in user has in common with this user.
+   * @returns The IDs of each.
+   */
+  public async fetchMutual(): Promise<MutualConnections> {
+    return this.client.users.fetchMutual(this.id);
   }
 
   /**

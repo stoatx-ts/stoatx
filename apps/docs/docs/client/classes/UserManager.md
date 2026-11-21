@@ -311,6 +311,63 @@ console.log(`Logged in as ${me.tag}`);
 
 ***
 
+### fetchMutual()
+
+> **fetchMutual**(`user`): `Promise`\<[`MutualConnections`](../interfaces/MutualConnections.md)\>
+
+Fetches the friends, servers, groups and DMs the logged-in user has in common with a user.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user or their ID. |
+
+#### Returns
+
+`Promise`\<[`MutualConnections`](../interfaces/MutualConnections.md)\>
+
+The IDs of each. Look them up in `client.users`, `client.servers` and `client.channels`.
+
+#### Example
+
+```ts
+const { serverIds } = await client.users.fetchMutual(userId);
+const servers = serverIds.map((id) => client.servers.cache.get(id)).filter(Boolean);
+```
+
+***
+
+### fetchProfile()
+
+> **fetchProfile**(`user`): `Promise`\<[`FetchedUserProfile`](../interfaces/FetchedUserProfile.md)\>
+
+Fetches a user's profile text and background.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user or their ID. |
+
+#### Returns
+
+`Promise`\<[`FetchedUserProfile`](../interfaces/FetchedUserProfile.md)\>
+
+The profile.
+
+#### Throws
+
+`NotFound` if the logged-in user isn't allowed to see it.
+
+#### Example
+
+```ts
+const { content, background } = await client.users.fetchProfile(userId);
+```
+
+***
+
 ### resolve()
 
 > **resolve**(`user`): [`User`](User.md) \| `undefined`

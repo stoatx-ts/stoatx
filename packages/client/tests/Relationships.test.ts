@@ -295,3 +295,38 @@ describe("invites", () => {
     expect(calls[0]!.path).toBe("/invites/a%2Fb");
   });
 });
+
+describe("profiles and mutuals", () => {
+  it("fetchProfile() maps the content and background", async () => {
+    const user = client.users._add(rawUser("Friend") as any);
+    const background = {
+      _id: "bg1",
+      tag: "backgrounds",
+      filename: "bg.png",
+      metadata: { type: "Image", width: 10, height: 10 },
+      content_type: "image/png",
+      size: 100,
+    };
+    mockApi({ [`GET /users/${user.id}/profile`]: () => ({ content: "Hello!", background }) });
+
+    const profile = await user.fetchProfile();
+
+    expect(profile.content).toBe("Hello!");
+    expect(profile.background).toBeInstanceOf(Attachment);
+    expect(profile.background!.id).toBe("bg1");
+  });
+
+  it("fetchProfile() returns nulls for an empty profile", async () => {
+    const userId = id();
+    mockApi({ [`GET /users/${userId}/profile`]: () => ({}) });
+
+    expect(await client.users.fetchProfile(userId)).toEqual({ content: null, background: null });
+  });
+
+  it("fetchMutual() returns the IDs", async () => {
+    const user = client.users._add(rawUser("Friend") as any);
+    mockApi({ [`GET /users/${user.id}/mutual`]: () => ({ users: ["u1"], servers: ["s1", "s2"], channels: ["c1"] }) });
+
+    expect(await user.fetchMutual()).toEqual({ userIds: ["u1"], serverIds: ["s1", "s2"], channelIds: ["c1"] });
+  });
+});

@@ -1,4 +1,12 @@
-import { User, UserProfile, UserRelationShip, UserStatus } from "../structures/User";
+import {
+  User,
+  UserProfile,
+  UserRelationShip,
+  UserStatus,
+  type FetchedUserProfile,
+  type MutualConnections,
+} from "../structures/User";
+import { Attachment } from "../structures/Attachment";
 import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { DMChannel } from "../structures/DMChannel";
@@ -91,6 +99,35 @@ export class UserManager extends BaseManager<string, User, RawUser> {
     const data = await this.client.rest.get(`/users/@me`);
 
     return this._add(data);
+  }
+
+  /**
+   * Fetches a user's profile text and background.
+   * @param user The user or their ID.
+   * @returns The profile.
+   * @throws {StoatAPIError} `NotFound` if the logged-in user isn't allowed to see it.
+   * @example
+   * const { content, background } = await client.users.fetchProfile(userId);
+   */
+  public async fetchProfile(user: UserResolvable): Promise<FetchedUserProfile> {
+    const data = await this.client.rest.get(`/users/${this.resolveId(user)}/profile`);
+    return {
+      content: data.content || null,
+      background: data.background ? new Attachment(this.client, data.background) : null,
+    };
+  }
+
+  /**
+   * Fetches the friends, servers, groups and DMs the logged-in user has in common with a user.
+   * @param user The user or their ID.
+   * @returns The IDs of each. Look them up in `client.users`, `client.servers` and `client.channels`.
+   * @example
+   * const { serverIds } = await client.users.fetchMutual(userId);
+   * const servers = serverIds.map((id) => client.servers.cache.get(id)).filter(Boolean);
+   */
+  public async fetchMutual(user: UserResolvable): Promise<MutualConnections> {
+    const data = await this.client.rest.get(`/users/${this.resolveId(user)}/mutual`);
+    return { userIds: data.users, serverIds: data.servers, channelIds: data.channels };
   }
 
   /**
