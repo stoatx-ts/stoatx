@@ -482,3 +482,65 @@ describe("MFA", () => {
     client.rest.destroy();
   });
 });
+
+describe("policy changes", () => {
+  const raw = {
+    created_time: "2026-11-01T00:00:00Z",
+    effective_time: "2026-12-01T00:00:00Z",
+    description: "Updated terms of service",
+    url: "https://example.com/terms",
+  };
+
+  async function loggedIn(routes: Record<string, Route> = {}) {
+    const calls = mockApi({ "GET /": config, "GET /onboard/hello": () => ({ onboarding: false }), ...routes });
+    const { client } = makeClient();
+    await client.login({ token: "user-token", type: "user" });
+    return { client, calls };
+  }
+
+  it("loads policy_changes from Ready", async () => {
+    const { client } = await loggedIn();
+
+    (client.gateway as any).handleMessage(JSON.stringify({ type: "Ready", policy_changes: [raw] }));
+
+    expect(client.auth.policyChanges).toEqual([
+      {
+        description: "Updated terms of service",
+        url: "https://example.com/terms",
+        createdAt: new Date("2026-11-01T00:00:00Z"),
+        effectiveAt: new Date("2026-12-01T00:00:00Z"),
+      },
+    ]);
+    client.rest.destroy();
+  });
+
+  it("acknowledgePolicyChanges() acknowledges and empties the list", async () => {
+    const { client, calls } = await loggedIn({ "POST /policy/acknowledge": () => undefined });
+    (client.gateway as any).handleMessage(JSON.stringify({ type: "Ready", policy_changes: [raw] }));
+
+    await client.auth.acknowledgePolicyChanges();
+
+    expect(calls.at(-1)!.path).toBe("/policy/acknowledge");
+    expect(client.auth.policyChanges).toEqual([]);
+    client.rest.destroy();
+  });
+
+  it("is emptied when the session ends", async () => {
+    const { client } = await loggedIn();
+    (client.gateway as any).handleMessage(JSON.stringify({ type: "Ready", policy_changes: [raw] }));
+
+    client._endSession();
+
+    expect(client.auth.policyChanges).toEqual([]);
+    client.rest.destroy();
+  });
+
+  it("acknowledgePolicyChanges() rejects for bots", async () => {
+    mockApi({ "GET /": config });
+    const { client } = makeClient();
+    await client.login("bot-token");
+
+    await expect(client.auth.acknowledgePolicyChanges()).rejects.toThrow("USER_ONLY");
+    client.rest.destroy();
+  });
+});

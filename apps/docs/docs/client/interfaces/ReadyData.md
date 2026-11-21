@@ -35,7 +35,7 @@ User sessions: unread state for each channel.
 
 > `optional` **policy\_changes?**: [`PolicyChange`](PolicyChange.md)[]
 
-User sessions: policy changes the user hasn't acknowledged yet.
+User sessions: policy changes the user hasn't acknowledged yet. Loaded into `client.auth.policyChanges`.
 
 ***
 

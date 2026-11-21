@@ -26,7 +26,38 @@ Accounts, sessions, logout and onboarding for user accounts. Bots don't need any
 
 Two-factor authentication: TOTP, recovery codes and MFA tickets.
 
+***
+
+### policyChanges
+
+> **policyChanges**: [`PendingPolicyChange`](../interfaces/PendingPolicyChange.md)[] = `[]`
+
+Policy changes the user hasn't acknowledged yet, loaded when the client connects.
+Show them to the user, then call [acknowledgePolicyChanges](#acknowledgepolicychanges). Always empty for bots.
+
 ## Methods
+
+### acknowledgePolicyChanges()
+
+> **acknowledgePolicyChanges**(): `Promise`\<`void`\>
+
+Acknowledges every pending policy change and empties [policyChanges](#policychanges).
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Example
+
+```ts
+client.on("ready", () => {
+  if (client.auth.policyChanges.length > 0) showPolicyNotice(client.auth.policyChanges);
+});
+// When the user clicks "OK":
+await client.auth.acknowledgePolicyChanges();
+```
+
+***
 
 ### changeEmail()
 

@@ -185,6 +185,7 @@ export class GatewayManager {
 
         this.client.unreads._setAll(payload.channel_unreads ?? []);
         if (payload.user_settings) this.client.settings._setAll(payload.user_settings);
+        this.client.auth._setPolicyChanges(payload.policy_changes ?? []);
 
         // Typing state from before a reconnect is stale: nobody re-sends a stop event for it.
         this.clearTyping();

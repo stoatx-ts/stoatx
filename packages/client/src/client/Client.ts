@@ -60,7 +60,7 @@ export interface ReadyData {
   user_settings?: Record<string, [number, string]>;
   /** User sessions: unread state for each channel. */
   channel_unreads?: ChannelUnread[];
-  /** User sessions: policy changes the user hasn't acknowledged yet. */
+  /** User sessions: policy changes the user hasn't acknowledged yet. Loaded into `client.auth.policyChanges`. */
   policy_changes?: PolicyChange[];
   /** Voice channel participants. Not processed by the client yet. */
   voice_states?: unknown[];
@@ -295,6 +295,7 @@ export class Client extends EventEmitter {
     this.emojis.cache.clear();
     this.unreads.cache.clear();
     this.settings.cache.clear();
+    this.auth.policyChanges = [];
     this.emit("logout");
   }
 
