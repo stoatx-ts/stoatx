@@ -247,7 +247,7 @@ class instances (client, managers, other structures) are shared by reference.
 | Parameter | Type |
 | ------ | ------ |
 | `data` | \{ \} |
-| `clear?` | (`"Description"` \| `"Icon"` \| `"DefaultPermissions"` \| `"Voice"` \| `"Slowmode"`)[] |
+| `clear?` | (`"Voice"` \| `"Description"` \| `"Icon"` \| `"DefaultPermissions"` \| `"Slowmode"`)[] |
 
 #### Returns
 
@@ -757,6 +757,28 @@ the message: sending ends the indicator.
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`startTyping`](BaseChannel.md#starttyping)
+
+***
+
+### stopRinging()
+
+> **stopRinging**(`user`): `Promise`\<`void`\>
+
+Stops ringing a user for the call in this group. The logged-in user must be in the call.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user to stop ringing. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Throws
+
+`NotConnected` if the logged-in user isn't in the call.
 
 ***
 

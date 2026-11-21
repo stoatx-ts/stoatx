@@ -259,6 +259,20 @@ Each session's ID and friendly name.
 
 ***
 
+### fetchVapidKey()
+
+> **fetchVapidKey**(): `Promise`\<`string` \| `null`\>
+
+Fetches the instance's VAPID public key, needed to create a Web Push subscription in the browser.
+
+#### Returns
+
+`Promise`\<`string` \| `null`\>
+
+The key, base64url-encoded, or `null` if the instance doesn't support push notifications.
+
+***
+
 ### logout()
 
 > **logout**(): `Promise`\<`void`\>
@@ -398,6 +412,48 @@ Emails a password reset link. Works without logging in.
 | `email` | `string` | The account's email address. |
 | `options` | \{ `captcha?`: `string`; \} | Optional extra parameters for the request. |
 | `options.captcha?` | `string` | A captcha response, for instances that require one. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### subscribePush()
+
+> **subscribePush**(`subscription`): `Promise`\<`void`\>
+
+Sends push notifications for this session to a Web Push subscription.
+A session has at most one subscription, so this replaces any earlier one.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `subscription` | [`PushSubscriptionKeys`](../interfaces/PushSubscriptionKeys.md) \| [`PushSubscriptionLike`](../interfaces/PushSubscriptionLike.md) | A browser `PushSubscription`, or its endpoint and keys. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Example
+
+```ts
+const registration = await navigator.serviceWorker.ready;
+const subscription = await registration.pushManager.subscribe({
+  userVisibleOnly: true,
+  applicationServerKey: await client.auth.fetchVapidKey(),
+});
+await client.auth.subscribePush(subscription);
+```
+
+***
+
+### unsubscribePush()
+
+> **unsubscribePush**(): `Promise`\<`void`\>
+
+Stops push notifications for this session.
 
 #### Returns
 

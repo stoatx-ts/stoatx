@@ -13,6 +13,7 @@ import { decodeTime } from "ulid";
 import { RouteParams } from "../utils/schema";
 import { Collection } from "../utils/Collection";
 import { AuditLogEntry } from "./AuditLogEntry";
+import { sendReport, type ContentReportReason, type ReportOptions } from "../utils/report";
 
 export interface FetchAuditLogsOptions {
   /* Filter by who ran the action */
@@ -163,6 +164,15 @@ export class Server extends Base {
    */
   public subscribe(): boolean {
     return this.client.gateway.send({ type: "Subscribe", server_id: this.id });
+  }
+
+  /**
+   * Reports this server to Stoat's moderation team.
+   * @param reason Why it's being reported.
+   * @param options More details for the moderators.
+   */
+  public async report(reason: ContentReportReason, options?: ReportOptions): Promise<void> {
+    await sendReport(this.client, { type: "Server", id: this.id, report_reason: reason }, options);
   }
 
   /**

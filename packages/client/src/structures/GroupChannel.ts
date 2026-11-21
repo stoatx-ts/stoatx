@@ -107,6 +107,15 @@ export class GroupChannel extends BaseChannel {
   }
 
   /**
+   * Stops ringing a user for the call in this group. The logged-in user must be in the call.
+   * @param user The user to stop ringing.
+   * @throws {StoatAPIError} `NotConnected` if the logged-in user isn't in the call.
+   */
+  public async stopRinging(user: UserResolvable): Promise<void> {
+    await this.client.rest.put(`/channels/${this.id}/end_ring/${this.client.users.resolveId(user)}`);
+  }
+
+  /**
    * Leaves the group and removes it from the cache.
    * @param options Set `silent` to leave without a "user left" message in the group.
    */

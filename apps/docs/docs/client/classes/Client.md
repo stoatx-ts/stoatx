@@ -34,6 +34,14 @@ Sessions, logout and onboarding for user accounts.
 
 ***
 
+### bots
+
+> **bots**: [`BotManager`](BotManager.md)
+
+The logged-in user's bots (user sessions only).
+
+***
+
 ### channels
 
 > **channels**: [`ChannelManager`](ChannelManager.md)

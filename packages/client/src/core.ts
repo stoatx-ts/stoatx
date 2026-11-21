@@ -16,6 +16,9 @@ export * from "./managers/EmojiManager";
 export * from "./managers/AuthManager";
 export * from "./managers/MFAManager";
 export * from "./managers/SettingsManager";
+export * from "./managers/BotManager";
+export * from "./structures/Bot";
+export type { ContentReportReason, UserReportReason, ReportOptions } from "./utils/report";
 export * from "./managers/UnreadManager";
 export * from "./managers/InviteManager";
 
