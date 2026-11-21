@@ -12,7 +12,9 @@ A high-performance, fully-typed, and memory-efficient client library for the Sto
 - **Automatic Memory Management:** Includes a built-in `SweeperManager` to prevent memory leaks in long-running applications.
 - **Extensible:** Designed to seamlessly integrate with higher-level command frameworks like the Stoatx Handler.
 - **Self-hosting support:** Natively supports custom Stoat instances via root API discovery.
-- **Modern Node:** Pure ESM and CommonJS support built with `tsup`.
+- **User accounts:** Log in with an email and password, manage sessions and two-factor authentication, and track unreads, friends and synced settings, to build your own Stoat client.
+- **Runs anywhere:** Node.js, browsers, Deno and Bun, with ESM and CommonJS builds.
+- **Voice:** Join calls with [`@stoatx/voice-node`](https://www.npmjs.com/package/@stoatx/voice-node) or [`@stoatx/voice-browser`](https://www.npmjs.com/package/@stoatx/voice-browser).
 
 For installation instructions, guides, and API references, visit the **[Stoatx Documentation](https://stoatx-ts.github.io/stoatx/)**.
 
