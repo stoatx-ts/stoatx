@@ -2,7 +2,7 @@ name: Sync peerDependencies
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, "release/**"]
     types: [opened, synchronize]
 
 jobs:

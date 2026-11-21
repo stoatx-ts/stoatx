@@ -1,0 +1,42 @@
+name: Backport
+
+# Label a pull request `backport:release/vX.Y` to cherry-pick it into that release branch,
+# before or after merging. The backport opens as its own pull request with the same title.
+on:
+  pull_request_target:
+    types: [closed, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backport:
+    name: Backport
+    runs-on: ubuntu-latest
+    # Only merged pull requests: on merge, or when a backport label is added afterwards.
+    if: >-
+      github.event.pull_request.merged &&
+      (github.event.action == 'closed' || startsWith(github.event.label.name, 'backport:'))
+    steps:
+      # The app token, unlike GITHUB_TOKEN, lets the backport pull request trigger CI.
+      - id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_STOATX_RELEASE_APP_ID }}
+          private-key: ${{ secrets.STOATX_RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: korthout/backport-action@v4.7.1
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          label_pattern: ^backport:([^ ]+)$
+          # Keep the conventional title: PR titles are validated, and release-please reads it.
+          pull_title: ${pull_title}
+          pull_description: |-
+            Backport of #${pull_number} to `${target_branch}`.
+          git_committer_name: stoatx-release[bot]
+          git_committer_email: stoatx-release[bot]@users.noreply.github.com
