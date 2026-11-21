@@ -184,6 +184,7 @@ export class GatewayManager {
         }
 
         this.client.unreads._setAll(payload.channel_unreads ?? []);
+        if (payload.user_settings) this.client.settings._setAll(payload.user_settings);
 
         // Typing state from before a reconnect is stale: nobody re-sends a stop event for it.
         this.clearTyping();
@@ -623,6 +624,13 @@ export class GatewayManager {
         const webhook = webhooks?.cache.get(payload.id);
         webhooks?.cache.delete(payload.id);
         this.client.emit("webhookDelete", webhook ?? { id: payload.id, channelId: payload.channel_id });
+        break;
+      }
+
+      case "UserSettingsUpdate": {
+        // Only sent for the logged-in user, including the echo of this client's own changes.
+        const changed = this.client.settings._applyUpdate(payload.update ?? {});
+        if (changed.size > 0) this.client.emit("settingsUpdate", changed);
         break;
       }
 

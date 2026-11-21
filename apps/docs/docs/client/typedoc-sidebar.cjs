@@ -188,6 +188,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/SettingsManager",
+          label: "SettingsManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/StoatAPIError",
           label: "StoatAPIError"
         },
@@ -436,6 +441,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/SweeperOptions",
           label: "SweeperOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/SyncedSetting",
+          label: "SyncedSetting"
         },
         {
           type: "doc",

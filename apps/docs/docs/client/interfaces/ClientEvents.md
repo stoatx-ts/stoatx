@@ -204,6 +204,14 @@ For uncached messages (only with `partials.messages`), both messages are partial
 
 ***
 
+### settingsUpdate
+
+> **settingsUpdate**: \[[`Collection`](../classes/Collection.md)\<`string`, [`SyncedSetting`](SyncedSetting.md)\>\]
+
+Synced settings changed on another device (user sessions only). Only the changed keys are included.
+
+***
+
 ### typingStart
 
 > **typingStart**: \[`string`, `string`\]

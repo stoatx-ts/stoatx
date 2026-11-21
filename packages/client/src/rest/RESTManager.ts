@@ -48,6 +48,12 @@ export type TokenType = "bot" | "user";
 export interface RequestOptions {
   /** Headers sent with this request only, e.g. `X-MFA-Ticket`. */
   headers?: Record<string, string>;
+  /**
+   * Query parameters for this request. When set, `params` are all sent in the body as-is,
+   * instead of moving the ones named like a query parameter into the URL. Use it for
+   * bodies with arbitrary keys, like settings.
+   */
+  query?: Record<string, string | number | boolean>;
 }
 
 /**
@@ -204,13 +210,15 @@ export class RESTManager {
     let finalEndpoint = endpoint as string;
     let finalBody: Record<string, any> | undefined = undefined;
 
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.query ?? {})) query.append(key, String(value));
+
     if (params && typeof params === "object") {
-      const query = new URLSearchParams();
       finalBody = {};
 
       for (const [key, value] of Object.entries(params)) {
         if (value !== undefined) {
-          if (ALL_QUERY_KEYS.has(key)) {
+          if (!options.query && ALL_QUERY_KEYS.has(key)) {
             query.append(key, String(value));
           } else {
             finalBody[key] = value;
@@ -218,11 +226,11 @@ export class RESTManager {
         }
       }
 
-      const qs = query.toString();
-      if (qs) finalEndpoint += `?${qs}`;
-
       if (Object.keys(finalBody).length === 0) finalBody = undefined;
     }
+
+    const qs = query.toString();
+    if (qs) finalEndpoint += `?${qs}`;
     const routeKey = this.getRouteKey(method, finalEndpoint);
 
     return new Promise((resolve, reject) => {

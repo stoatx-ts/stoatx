@@ -49,7 +49,7 @@ User sessions: policy changes the user hasn't acknowledged yet.
 
 > `optional` **user\_settings?**: `Record`\<`string`, \[`number`, `string`\]\>
 
-User sessions: synced client settings, keyed by name, as `[updatedAt, json]`.
+User sessions: synced settings, keyed by name, as `[updatedAt, value]`. Loaded into `client.settings`.
 
 ***
 

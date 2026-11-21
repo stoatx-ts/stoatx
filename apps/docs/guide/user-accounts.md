@@ -9,7 +9,7 @@ sidebar_position: 6
 Besides bots, `@stoatx/client` can log in to a regular user account. This is what you need to build your own Stoat client, for example a web app where people log in with their email and password.
 
 :::warning
-User-account support is new. Signing up, logging in, sessions, onboarding, account management, two-factor authentication, unreads, typing, friends, blocking, DMs, groups, creating servers and invites work. Settings sync is still being added.
+User-account support is new. Signing up, logging in, sessions, onboarding, account management, two-factor authentication, settings sync, unreads, typing, friends, blocking, DMs, groups, creating servers and invites all work, but expect rough edges.
 :::
 
 ## Logging in with an email and password
@@ -232,6 +232,32 @@ await client.auth.deleteAccount(await client.auth.mfa.createTicket({ password })
 await client.auth.confirmAccountDeletion(token);
 ```
 
+## Synced settings
+
+Settings like the theme or notification preferences can be saved on the server, so they follow the user to every device. Stoat stores each setting as a string under a key you choose and never looks inside it, so most apps store JSON:
+
+```ts
+await client.settings.fetch(["appearance", "notifications"]);
+
+const appearance = client.settings.getJSON<{ theme: string }>("appearance");
+client.settings.get("appearance"); // the raw string
+
+// Strings are stored as-is, anything else as JSON. Other keys are left unchanged.
+await client.settings.set({ appearance: { theme: "dark" } });
+```
+
+Changes from the user's other devices update `client.settings.cache` and emit `settingsUpdate` with the keys that changed. Your own `set()` calls don't trigger it:
+
+```ts
+client.on("settingsUpdate", (changed) => {
+  if (changed.has("appearance")) applyTheme(client.settings.getJSON("appearance"));
+});
+```
+
+:::note
+Keys are shared with every other Stoat client the user logs in with, including the official one. Prefix your keys (e.g. `myapp:appearance`) unless you mean to read or write the official client's settings.
+:::
+
 ## Unread messages
 
 The client keeps track of what the user has read, using the state sent on connect and live updates (including reads on the user's other devices). Channels and servers have getters for it:
@@ -416,4 +442,5 @@ Everything else in this guide works the same for both. The differences:
 | `ready` payload extra | –                        | `user_settings`, `channel_unreads`, `policy_changes` |
 | `client.auth`         | Not available            | Account, 2FA, sessions, logout, onboarding           |
 | Unreads               | Always read, acks throw  | `channel.unread`, `mentionCount`, `ack()`            |
+| Synced settings       | Not available            | `client.settings`                                    |
 | Friends and invites   | Not allowed by Stoat     | `user.addFriend()`, `client.invites.accept()`, …     |
