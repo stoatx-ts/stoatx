@@ -113,15 +113,29 @@ const group = await client.channels.createGroup({ name: "Weekend plans", users: 
 
 > **delete**(`channel`): `Promise`\<`void`\>
 
+Deletes a server channel, leaves a group, or closes a DM.
+
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `channel` | [`ChannelResolvable`](../type-aliases/ChannelResolvable.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `channel` | [`ChannelResolvable`](../type-aliases/ChannelResolvable.md) | The channel object, raw ID, or mention string to delete. |
 
 #### Returns
 
 `Promise`\<`void`\>
+
+A promise that resolves when the action is successful.
+
+#### Throws
+
+If the API request fails.
+
+#### Example
+
+```ts
+await client.channels.delete("01H...");
+```
 
 ***
 

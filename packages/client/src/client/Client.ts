@@ -23,6 +23,7 @@ import {
   type LoginResult,
 } from "../managers/AuthManager";
 import { UnreadManager } from "../managers/UnreadManager";
+import { SettingsManager, type SyncedSetting } from "../managers/SettingsManager";
 import { InviteManager } from "../managers/InviteManager";
 import type {
   RevoltConfig,
@@ -55,7 +56,7 @@ export interface ReadyData {
   channels?: RawChannel[];
   members?: RawMember[];
   emojis?: RawEmoji[];
-  /** User sessions: synced client settings, keyed by name, as `[updatedAt, json]`. */
+  /** User sessions: synced settings, keyed by name, as `[updatedAt, value]`. Loaded into `client.settings`. */
   user_settings?: Record<string, [number, string]>;
   /** User sessions: unread state for each channel. */
   channel_unreads?: ChannelUnread[];
@@ -115,6 +116,8 @@ export interface ClientEvents {
   webhookDelete: [webhook: Webhook | { id: string; channelId: string }];
   userRelationship: [user: User];
   userPlatformWipe: [userId: string, flags: number];
+  /** Synced settings changed on another device (user sessions only). Only the changed keys are included. */
+  settingsUpdate: [settings: Collection<string, SyncedSetting>];
   /** The session ended: logged out, revoked from another device, or the token was invalidated. The client has disconnected. */
   logout: [];
 }
@@ -160,6 +163,8 @@ export class Client extends EventEmitter {
   public auth: AuthManager;
   /** Which channels the logged-in user has read (user sessions only). Most code uses `channel.unread` and `channel.ack()` instead. */
   public unreads: UnreadManager;
+  /** Settings synced between the user's devices (user sessions only). */
+  public settings: SettingsManager;
   /** Preview and accept invites by code. */
   public invites: InviteManager;
   public user: ClientUser | null = null;
@@ -178,6 +183,7 @@ export class Client extends EventEmitter {
     this.voice = new VoiceManager(this);
     this.auth = new AuthManager(this);
     this.unreads = new UnreadManager(this);
+    this.settings = new SettingsManager(this);
     this.invites = new InviteManager(this);
     // Set up front so requests that need no token (credential login) work before login().
     this.rest.setBaseURL(options.apiURL ?? StoatAPI);
@@ -288,6 +294,7 @@ export class Client extends EventEmitter {
     this.users.cache.clear();
     this.emojis.cache.clear();
     this.unreads.cache.clear();
+    this.settings.cache.clear();
     this.emit("logout");
   }
 

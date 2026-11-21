@@ -78,6 +78,14 @@ Preview and accept invites by code.
 
 ***
 
+### settings
+
+> **settings**: [`SettingsManager`](SettingsManager.md)
+
+Settings synced between the user's devices (user sessions only).
+
+***
+
 ### sweepers
 
 > **sweepers**: [`SweeperManager`](SweeperManager.md)
