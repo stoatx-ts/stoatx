@@ -1,0 +1,103 @@
+name: Create Release Branch
+
+# Creates release/<package>/vX.Y from a package's release, for patch releases of that line.
+# Patches are backported to it with a `backport:release/<package>/vX.Y` label (see backport.yml),
+# and release-please opens a patch release PR on it (see release.yml).
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to release patches for"
+        required: true
+        type: choice
+        options:
+          - client
+          - stoatx
+          - voice
+          - voice-node
+          - voice-browser
+      version:
+        description: "Version line to branch, e.g. 1.0. Defaults to the package's latest release."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create:
+    name: Create release branch
+    runs-on: ubuntu-latest
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_STOATX_RELEASE_APP_ID }}
+          private-key: ${{ secrets.STOATX_RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Create the branch
+        id: branch
+        env:
+          PACKAGE: ${{ inputs.package }}
+          LINE_INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          # release-please tags each package as <package>-vX.Y.Z.
+          if [ -n "$LINE_INPUT" ]; then
+            TAG=$(git tag -l "${PACKAGE}-v${LINE_INPUT}.*" --sort=-v:refname | head -n 1)
+          else
+            TAG=$(git tag -l "${PACKAGE}-v*" --sort=-v:refname | head -n 1)
+          fi
+          if [ -z "$TAG" ]; then
+            echo "::error::No $PACKAGE release found for '${LINE_INPUT:-latest}'."
+            exit 1
+          fi
+
+          VERSION="${TAG#"${PACKAGE}"-v}"
+          BRANCH="release/${PACKAGE}/v${VERSION%.*}"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "::error::$BRANCH already exists."
+            exit 1
+          fi
+
+          git config user.name "stoatx-release[bot]"
+          git config user.email "stoatx-release[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH" "$TAG"
+
+          # Release only this package from the branch, and only patch versions,
+          # even if a backported change touches other packages or is a feature.
+          node -e '
+            const fs = require("fs");
+            const path = "release-please-config.json";
+            const config = JSON.parse(fs.readFileSync(path, "utf8"));
+            const key = "packages/" + process.env.PACKAGE;
+            if (!config.packages[key]) throw new Error(key + " is not in " + path);
+            config.packages = { [key]: config.packages[key] };
+            fs.writeFileSync(path, JSON.stringify({ versioning: "always-bump-patch", ...config }, null, 2) + "\n");
+          '
+          npx --yes prettier@3.8.1 --write release-please-config.json
+
+          git commit -s -am "chore: release only patch versions of $PACKAGE from $BRANCH"
+          git push origin "$BRANCH"
+
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Created $BRANCH from $TAG." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create the backport label
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          gh label create "backport:$BRANCH" --repo "$GITHUB_REPOSITORY" --force \
+            --color "0e8a16" --description "Backport this pull request to $BRANCH"

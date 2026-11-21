@@ -76,6 +76,29 @@ You can run these tasks using `mise run <task>` (or `mise <task>` for short):
 
 You can also view all available tasks by running `mise tasks`.
 
+### Releasing
+
+Releases are made with [release-please](https://github.com/googleapis/release-please) from Conventional Commit pull request titles. Each package is versioned on its own.
+
+| Release         | Versioned as      | Branch                     |
+| --------------- | ----------------- | -------------------------- |
+| Minor and major | `1.0.0` → `1.1.0` | `main`                     |
+| Patch           | `1.0.0` → `1.0.1` | `release/<package>/vX.Y`   |
+
+- **Minor and major:** release-please keeps a release pull request open on `main`. Merging it tags the releases and publishes them to npm with the `latest` tag.
+- **Patches for a released line:** run **Actions → Create Release Branch** once per package and line. Pick the package (`client`, `stoatx`, `voice`, `voice-node` or `voice-browser`); it creates `release/<package>/vX.Y` from that package's latest release (or the `version` you enter, e.g. `1.0`), set to release only that package and only patch versions.
+- **Backporting a fix:** label its pull request `backport:release/<package>/vX.Y`, before or after merging. A backport pull request opens against the branch; merge it once CI passes.
+- **Releasing the patch:** release-please opens a release pull request on the branch. Merging it publishes the package under the `release-vX.Y` npm tag, and moves `latest` only if the patch is the package's highest version.
+
+--------------- | ----------------- | --------------- |
+| Minor and major | `1.0.0` → `1.1.0` | `main`          |
+| Patch           | `1.0.0` → `1.0.1` | `release/vX.Y`  |
+
+- **Minor and major:** release-please keeps a release pull request open on `main`. Merging it tags the release and publishes to npm with the `latest` tag.
+- **Patches for a released line:** run **Actions → Create Release Branch** once per line. It creates `release/vX.Y` from the latest `@stoatx/client` release (or the `version` you enter, e.g. `1.0`), set to only release patch versions.
+- **Backporting a fix:** label its pull request `backport:release/vX.Y`, before or after merging. A backport pull request opens against the branch; merge it once CI passes.
+- **Releasing the patch:** release-please opens a release pull request on the branch. Merging it publishes under the `release-vX.Y` npm tag, and moves `latest` only if the patch is the highest version.
+
 ---
 
 ## 📄 License
