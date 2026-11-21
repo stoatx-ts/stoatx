@@ -286,6 +286,38 @@ await user.fetch();
 
 ***
 
+### fetchMutual()
+
+> **fetchMutual**(): `Promise`\<[`MutualConnections`](../interfaces/MutualConnections.md)\>
+
+Fetches the friends, servers, groups and DMs the logged-in user has in common with this user.
+
+#### Returns
+
+`Promise`\<[`MutualConnections`](../interfaces/MutualConnections.md)\>
+
+The IDs of each.
+
+***
+
+### fetchProfile()
+
+> **fetchProfile**(): `Promise`\<[`FetchedUserProfile`](../interfaces/FetchedUserProfile.md)\>
+
+Fetches this user's profile text and background.
+
+#### Returns
+
+`Promise`\<[`FetchedUserProfile`](../interfaces/FetchedUserProfile.md)\>
+
+The profile.
+
+#### Throws
+
+`NotFound` if the logged-in user isn't allowed to see it.
+
+***
+
 ### removeFriend()
 
 > **removeFriend**(): `Promise`\<`User`\>
