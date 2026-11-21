@@ -14,6 +14,7 @@ const sidebars: SidebarsConfig = {
         "webhooks",
         "browsers-and-runtimes",
         "user-accounts",
+        "frameworks",
       ],
     },
     {
@@ -33,7 +34,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Voice",
       collapsed: false,
-      items: ["voice/intro", "voice/audio-player", "voice/playing-audio"],
+      items: ["voice/intro", "voice/audio-player", "voice/playing-audio", "voice/browser"],
     },
   ],
 };
