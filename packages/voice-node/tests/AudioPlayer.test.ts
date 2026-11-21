@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { PassThrough } from "node:stream";
-import { AudioPlayer } from "../src/voice/AudioPlayer";
-import { AudioResource } from "../src/voice/AudioResource";
+import { AudioPlayer } from "../src/AudioPlayer";
+import { AudioResource } from "../src/AudioResource";
 
 function fakeResource() {
   const stream = new PassThrough();

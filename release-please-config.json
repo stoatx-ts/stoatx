@@ -13,8 +13,35 @@
           "type": "json",
           "path": "packages/stoatx/package.json",
           "jsonpath": "$.peerDependencies['@stoatx/client']"
+        },
+        {
+          "type": "json",
+          "path": "packages/voice/package.json",
+          "jsonpath": "$.peerDependencies['@stoatx/client']"
+        },
+        {
+          "type": "json",
+          "path": "packages/voice-node/package.json",
+          "jsonpath": "$.peerDependencies['@stoatx/client']"
+        },
+        {
+          "type": "json",
+          "path": "packages/voice-browser/package.json",
+          "jsonpath": "$.peerDependencies['@stoatx/client']"
         }
       ]
+    },
+    "packages/voice": {
+      "release-type": "node",
+      "package-name": "@stoatx/voice"
+    },
+    "packages/voice-node": {
+      "release-type": "node",
+      "package-name": "@stoatx/voice-node"
+    },
+    "packages/voice-browser": {
+      "release-type": "node",
+      "package-name": "@stoatx/voice-browser"
     }
   },
   "plugins": ["node-workspace"]

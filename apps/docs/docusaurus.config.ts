@@ -193,6 +193,93 @@ const config: Config = {
         hidePageHeader: true,
       },
     ],
+    [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "voice-api",
+        entryPoints: ["../../packages/voice/src/index.ts"],
+        tsconfig: "../../packages/voice/tsconfig.json",
+
+        out: "docs/voice",
+
+        name: "Overview",
+
+        excludeExternals: true,
+        excludeInternal: true,
+        excludePrivate: true,
+        readme: "none",
+        disableSources: true,
+
+        parametersFormat: "table",
+        enumMembersFormat: "table",
+        typeDeclarationFormat: "table",
+
+        sidebar: {
+          autoConfiguration: true,
+          pretty: true,
+        },
+        hideBreadcrumbs: true,
+        hidePageHeader: true,
+      },
+    ],
+    [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "voice-node-api",
+        entryPoints: ["../../packages/voice-node/src/index.ts"],
+        tsconfig: "../../packages/voice-node/tsconfig.json",
+
+        out: "docs/voice-node",
+
+        name: "Overview",
+
+        excludeExternals: true,
+        excludeInternal: true,
+        excludePrivate: true,
+        readme: "none",
+        disableSources: true,
+
+        parametersFormat: "table",
+        enumMembersFormat: "table",
+        typeDeclarationFormat: "table",
+
+        sidebar: {
+          autoConfiguration: true,
+          pretty: true,
+        },
+        hideBreadcrumbs: true,
+        hidePageHeader: true,
+      },
+    ],
+    [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "voice-browser-api",
+        entryPoints: ["../../packages/voice-browser/src/index.ts"],
+        tsconfig: "../../packages/voice-browser/tsconfig.json",
+
+        out: "docs/voice-browser",
+
+        name: "Overview",
+
+        excludeExternals: true,
+        excludeInternal: true,
+        excludePrivate: true,
+        readme: "none",
+        disableSources: true,
+
+        parametersFormat: "table",
+        enumMembersFormat: "table",
+        typeDeclarationFormat: "table",
+
+        sidebar: {
+          autoConfiguration: true,
+          pretty: true,
+        },
+        hideBreadcrumbs: true,
+        hidePageHeader: true,
+      },
+    ],
   ],
 };
 

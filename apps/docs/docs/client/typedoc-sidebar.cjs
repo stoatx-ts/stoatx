@@ -18,16 +18,6 @@ const typedocSidebar = {
         },
         {
           type: "doc",
-          id: "../docs/client/classes/AudioPlayer",
-          label: "AudioPlayer"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/classes/AudioResource",
-          label: "AudioResource"
-        },
-        {
-          type: "doc",
           id: "../docs/client/classes/AuthManager",
           label: "AuthManager"
         },
@@ -238,16 +228,6 @@ const typedocSidebar = {
         },
         {
           type: "doc",
-          id: "../docs/client/classes/VoiceConnection",
-          label: "VoiceConnection"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/classes/VoiceManager",
-          label: "VoiceManager"
-        },
-        {
-          type: "doc",
           id: "../docs/client/classes/Webhook",
           label: "Webhook"
         }
@@ -261,16 +241,6 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/AccountInfo",
           label: "AccountInfo"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/interfaces/AudioPlayerEvents",
-          label: "AudioPlayerEvents"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/interfaces/AudioResourceOptions",
-          label: "AudioResourceOptions"
         },
         {
           type: "doc",
@@ -529,11 +499,6 @@ const typedocSidebar = {
         },
         {
           type: "doc",
-          id: "../docs/client/interfaces/VoiceConnectionEvents",
-          label: "VoiceConnectionEvents"
-        },
-        {
-          type: "doc",
           id: "../docs/client/interfaces/WebhookEditOptions",
           label: "WebhookEditOptions"
         }
@@ -552,16 +517,6 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/AttachmentMetadata",
           label: "AttachmentMetadata"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/type-aliases/AudioPlayerStatus",
-          label: "AudioPlayerStatus"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/type-aliases/AudioSource",
-          label: "AudioSource"
         },
         {
           type: "doc",
@@ -712,11 +667,6 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/UserStatus",
           label: "UserStatus"
-        },
-        {
-          type: "doc",
-          id: "../docs/client/type-aliases/VoiceConnectionStatus",
-          label: "VoiceConnectionStatus"
         }
       ]
     },

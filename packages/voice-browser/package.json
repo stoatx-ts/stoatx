@@ -1,0 +1,46 @@
+{
+  "name": "@stoatx/voice-browser",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Voice for @stoatx/client in browsers: join voice channels with the microphone and hear others.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stoatx-ts/stoatx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stoatx-ts/stoatx/issues"
+  },
+  "homepage": "https://github.com/stoatx-ts/stoatx#readme",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@stoatx/voice": "workspace:*",
+    "livekit-client": "^2.23.0"
+  },
+  "peerDependencies": {
+    "@stoatx/client": "^0.10.1"
+  },
+  "devDependencies": {
+    "@stoatx/client": "workspace:*"
+  }
+}

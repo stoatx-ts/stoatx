@@ -53,8 +53,4 @@ export * from "./utils/ReactionCollector";
 export * from "./utils/BitField";
 export { decodeTime } from "ulid";
 
-// Voice (the connection/audio classes are Node-only and exported from ./index.ts)
-export { VoiceManager } from "./voice/VoiceManager";
-export type { VoiceConnectionStatus, VoiceConnectionEvents } from "./voice/VoiceConnection";
-
 export * as API from "stoat-api";

@@ -7,7 +7,7 @@ sidebar_position: 5
 # Browsers and Other Runtimes
 
 `@stoatx/client` runs in Node.js, in browsers, and in other runtimes with a standard `WebSocket` and `fetch` (Deno, Bun).
-Everything works the same way in each one except voice, which needs Node.js.
+Everything works the same way in each one. Voice is in separate packages: `@stoatx/voice-node` for Node.js and `@stoatx/voice-browser` for browsers.
 
 :::danger
 Never put a bot token in a browser
@@ -48,7 +48,7 @@ await client.loginWithCredentials({ email, password });
 ```
 
 Bundlers such as Vite, webpack, Rollup and esbuild pick the browser build automatically through the `"browser"` export condition.
-The browser build has the same API as the Node.js build, without the voice classes.
+The browser build has the same API as the Node.js build.
 
 ### What works
 
@@ -81,8 +81,8 @@ In Node.js, a `Buffer` works too.
 
 ### Voice
 
-Voice uses `@livekit/rtc-node` and `ffmpeg`, which only run in Node.js. In the browser build, `VoiceConnection`, `AudioPlayer` and `AudioResource` are not exported,
-and `client.voice.join()` (or `channel.join()`) rejects with a `VOICE_UNAVAILABLE` error.
+Install `@stoatx/voice-browser` to join calls with the user's microphone. See [Voice in the Browser](./voice/browser.md).
+`@stoatx/voice-node` uses `@livekit/rtc-node` and `ffmpeg`, so it only runs in Node.js.
 
 ## TypeScript
 
@@ -102,4 +102,4 @@ To have TypeScript resolve the browser build's declarations, add the `browser` c
 }
 ```
 
-This is optional: without it, TypeScript uses the Node.js declarations, which only add the voice classes.
+This is optional: the Node.js and browser declarations are the same.

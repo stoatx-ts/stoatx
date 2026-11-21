@@ -4,10 +4,10 @@ sidebar_position: 2
 
 # AudioPlayer
 
-`AudioPlayer` is the playback controller. It is decoupled from any specific voice connection, meaning you can create it independently and subscribe it to a connection later.
+`AudioPlayer` controls playback in Node.js, from `@stoatx/voice-node`. It isn't tied to a connection: create it on its own and subscribe connections to it. One player can play into several calls at once.
 
 ```ts
-import { AudioPlayer } from "stoatx";
+import { AudioPlayer } from "@stoatx/voice-node";
 
 const player = new AudioPlayer();
 ```
@@ -17,10 +17,12 @@ const player = new AudioPlayer();
 After joining a voice channel, subscribe the player to the connection:
 
 ```ts
-const conn = await channel.join();
-player = new AudioPlayer();
-conn.subscribe(player);
+const connection = await voice.join(channel);
+const player = new AudioPlayer();
+connection.subscribe(player);
 ```
+
+`connection.unsubscribe()` stops playing from the player.
 
 ## Events
 

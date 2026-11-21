@@ -118,12 +118,6 @@ Which channels the logged-in user has read (user sessions only). Most code uses 
 
 > **users**: [`UserManager`](UserManager.md)
 
-***
-
-### voice
-
-> `readonly` **voice**: [`VoiceManager`](VoiceManager.md)
-
 ## Methods
 
 ### emit()

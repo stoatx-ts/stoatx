@@ -4,8 +4,6 @@
 
 - [Attachment](classes/Attachment.md)
 - [AttachmentBuilder](classes/AttachmentBuilder.md)
-- [AudioPlayer](classes/AudioPlayer.md)
-- [AudioResource](classes/AudioResource.md)
 - [AuthManager](classes/AuthManager.md)
 - [Base](classes/Base.md)
 - [BaseChannel](classes/BaseChannel.md)
@@ -48,15 +46,11 @@
 - [UnreadManager](classes/UnreadManager.md)
 - [User](classes/User.md)
 - [UserManager](classes/UserManager.md)
-- [VoiceConnection](classes/VoiceConnection.md)
-- [VoiceManager](classes/VoiceManager.md)
 - [Webhook](classes/Webhook.md)
 
 ## Interfaces
 
 - [AccountInfo](interfaces/AccountInfo.md)
-- [AudioPlayerEvents](interfaces/AudioPlayerEvents.md)
-- [AudioResourceOptions](interfaces/AudioResourceOptions.md)
 - [BotEditOptions](interfaces/BotEditOptions.md)
 - [BotInformation](interfaces/BotInformation.md)
 - [ChannelCreateOptions](interfaces/ChannelCreateOptions.md)
@@ -108,15 +102,12 @@
 - [UserEditOptions](interfaces/UserEditOptions.md)
 - [UserProfile](interfaces/UserProfile.md)
 - [UserSession](interfaces/UserSession.md)
-- [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
 - [WebhookEditOptions](interfaces/WebhookEditOptions.md)
 
 ## Type Aliases
 
 - [AttachmentData](type-aliases/AttachmentData.md)
 - [AttachmentMetadata](type-aliases/AttachmentMetadata.md)
-- [AudioPlayerStatus](type-aliases/AudioPlayerStatus.md)
-- [AudioSource](type-aliases/AudioSource.md)
 - [BitFieldResolvable](type-aliases/BitFieldResolvable.md)
 - [BotResolvable](type-aliases/BotResolvable.md)
 - [CDNTag](type-aliases/CDNTag.md)
@@ -147,7 +138,6 @@
 - [UserReportReason](type-aliases/UserReportReason.md)
 - [UserResolvable](type-aliases/UserResolvable.md)
 - [UserStatus](type-aliases/UserStatus.md)
-- [VoiceConnectionStatus](type-aliases/VoiceConnectionStatus.md)
 
 ## Variables
 

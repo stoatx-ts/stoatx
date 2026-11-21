@@ -1,3 +1,3 @@
 // Browser entry point, picked through the "browser" export condition.
-// Same API as the Node build, minus the voice connection and audio classes.
+// Same API as the Node build.
 export * from "./core";
