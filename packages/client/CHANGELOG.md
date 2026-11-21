@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.10.1...client-v1.0.0) (2026-11-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* move voice into separate packages and add browser voice ([#170](https://github.com/stoatx-ts/stoatx/issues/170))
+
+### Features
+
+* add invites and relationship structs/routes ([#152](https://github.com/stoatx-ts/stoatx/issues/152)) ([fb265ee](https://github.com/stoatx-ts/stoatx/commit/fb265ee71e28c87e77e7fccd653f682c6e96efd9))
+* add missing gateway events ([#147](https://github.com/stoatx-ts/stoatx/issues/147)) ([21deead](https://github.com/stoatx-ts/stoatx/commit/21deeadd7e80235ee78a298d5951f22cd7fcbd31))
+* **client:** add account management and two-factor authentication ([#163](https://github.com/stoatx-ts/stoatx/issues/163)) ([a9e7960](https://github.com/stoatx-ts/stoatx/commit/a9e7960b379d85eb3775eb2f54a637e9a07110e8))
+* **client:** add invites, voice states and other missing routes ([#171](https://github.com/stoatx-ts/stoatx/issues/171)) ([6262ecf](https://github.com/stoatx-ts/stoatx/commit/6262ecfca931f632ab6e12b874f6e3b2e5abf810))
+* **client:** add message search, reports, push, call ringing and bot management ([#169](https://github.com/stoatx-ts/stoatx/issues/169)) ([5ad9441](https://github.com/stoatx-ts/stoatx/commit/5ad9441bc05aa5391832e7d121c3ee168935a891))
+* **client:** add policy change acknowledgement ([#167](https://github.com/stoatx-ts/stoatx/issues/167)) ([6d7cdb5](https://github.com/stoatx-ts/stoatx/commit/6d7cdb57467bb29cf693d5ef27cfa3e7508c6e75))
+* **client:** add server creation, group management and username change ([#164](https://github.com/stoatx-ts/stoatx/issues/164)) ([645fda0](https://github.com/stoatx-ts/stoatx/commit/645fda0a13f455db333b1461ee34e7e0c086235e))
+* **client:** add settings sync ([#165](https://github.com/stoatx-ts/stoatx/issues/165)) ([2c45187](https://github.com/stoatx-ts/stoatx/commit/2c45187f3a9d5f12f571a0dca57ebff96c7bf040))
+* **client:** add unread tracking, typing indicators and server subscribe ([#151](https://github.com/stoatx-ts/stoatx/issues/151)) ([d513a57](https://github.com/stoatx-ts/stoatx/commit/d513a57a2dc21060b5d201c34207bde1b054c328))
+* **client:** add user account login, sessions and onboarding ([#150](https://github.com/stoatx-ts/stoatx/issues/150)) ([fd3232c](https://github.com/stoatx-ts/stoatx/commit/fd3232ceac2414987300315ade7ecc1947927f11))
+* **client:** add user profiles and mutual connections ([#168](https://github.com/stoatx-ts/stoatx/issues/168)) ([0710106](https://github.com/stoatx-ts/stoatx/commit/0710106f1c59d9375bf1f461b9e2e03ab75cb232))
+* **client:** make @stoatx/client run in browsers ([#149](https://github.com/stoatx-ts/stoatx/issues/149)) ([99b2fa1](https://github.com/stoatx-ts/stoatx/commit/99b2fa1cce9e3bd46686edbf8041e1cb59c2e788))
+* move voice into separate packages and add browser voice ([#170](https://github.com/stoatx-ts/stoatx/issues/170)) ([fa6aab8](https://github.com/stoatx-ts/stoatx/commit/fa6aab8ed1385546bc485891b127fce2669a8046))
+
+
+### Bug Fixes
+
+* make the root typecheck pass and run it in CI ([#173](https://github.com/stoatx-ts/stoatx/issues/173)) ([74cc6a4](https://github.com/stoatx-ts/stoatx/commit/74cc6a4813e32d9ee42d6b81b504f8948b190029))
+
 ## [0.10.1](https://github.com/stoatx-ts/stoatx/compare/client-v0.10.0...client-v0.10.1) (2026-11-18)
 
 

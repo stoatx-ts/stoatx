@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/voice",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Shared voice connection and manager for @stoatx/voice-node and @stoatx/voice-browser.",
   "repository": {

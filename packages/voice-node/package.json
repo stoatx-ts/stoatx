@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/voice-node",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Voice for @stoatx/client in Node.js: join voice channels and play audio with ffmpeg.",
   "repository": {

@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/voice-browser",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Voice for @stoatx/client in browsers: join voice channels with the microphone and hear others.",
   "repository": {
