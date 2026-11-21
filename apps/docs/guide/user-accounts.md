@@ -9,7 +9,7 @@ sidebar_position: 6
 Besides bots, `@stoatx/client` can log in to a regular user account. This is what you need to build your own Stoat client, for example a web app where people log in with their email and password.
 
 :::warning
-User-account support is new. Logging in, sessions, onboarding, unreads, typing, friends, blocking, DMs and invites work. Settings sync, creating servers and groups, and account management are still being added.
+User-account support is new. Signing up, logging in, sessions, onboarding, account management, two-factor authentication, unreads, typing, friends, blocking, DMs and invites work. Settings sync and creating servers and groups are still being added.
 :::
 
 ## Logging in with an email and password
@@ -129,7 +129,105 @@ await client.auth.revokeSession(sessions[1].id);
 await client.auth.revokeAllSessions();
 ```
 
-The `client.auth` methods only work with a user session; with a bot token they throw a `USER_ONLY` error.
+The `client.auth` methods that act on the logged-in account only work with a user session; with a bot token they throw a `USER_ONLY` error.
+
+## Creating an account
+
+Signing up works before logging in. Stoat emails a verification link, and the account can log in once it's verified:
+
+```ts
+await client.auth.createAccount({ email, password });
+// Some instances also need { invite } or { captcha }.
+```
+
+The link contains a code. Pass it to `verifyEmail()`, which returns a ticket that logs the new account in without asking for the password again:
+
+```ts
+const ticket = await client.auth.verifyEmail(code);
+if (ticket) {
+  const result = await client.loginWithCredentials({ mfaTicket: ticket.token });
+  // A new account always needs onboarding: result.result === "Onboarding"
+}
+```
+
+If the email didn't arrive, `client.auth.resendVerification(email)` sends it again.
+
+## Resetting a forgotten password
+
+Also works before logging in:
+
+```ts
+await client.auth.sendPasswordReset(email);
+
+// Later, with the token from the emailed link:
+await client.auth.resetPassword(token, newPassword, { logoutAllSessions: true });
+```
+
+## Account settings
+
+```ts
+const { email } = await client.auth.fetchAccount();
+
+await client.auth.changePassword(currentPassword, newPassword);
+
+// Stoat emails a link to the new address; the change applies once it's verified with verifyEmail().
+await client.auth.changeEmail(currentPassword, newEmail);
+```
+
+## Two-factor authentication
+
+Sensitive actions need an **MFA ticket**, which proves the user just confirmed who they are. Create one with a TOTP or recovery code, or with the password if the account doesn't have two-factor authentication yet:
+
+```ts
+const methods = await client.auth.mfa.fetchMethods(); // e.g. ["Password"] or ["Totp", "Recovery"]
+const ticket = await client.auth.mfa.createTicket({ password });
+// or { totpCode } / { recoveryCode }
+```
+
+A ticket can only be used once and expires after a few minutes, so create a new one for each action.
+
+### Setting up an authenticator app
+
+```ts
+// Recovery codes first, so the user can still get in if they lose their phone.
+const codes = await client.auth.mfa.generateRecoveryCodes(await client.auth.mfa.createTicket({ password }));
+showRecoveryCodes(codes);
+
+const { secret, uri } = await client.auth.mfa.generateTotpSecret(await client.auth.mfa.createTicket({ password }));
+showQrCode(uri); // or show `secret` so it can be typed in by hand
+
+// TOTP isn't on until the user confirms a code from the app.
+await client.auth.mfa.enableTotp(await askForCode());
+```
+
+`uri` is an `otpauth://` link with `Stoat` as the issuer and the username as the label. Pass `{ issuer, accountName }` as the second argument to change them.
+
+### Managing it
+
+```ts
+const status = await client.auth.mfa.fetchStatus(); // { totp: true, recoveryCodes: true }
+
+await client.auth.mfa.fetchRecoveryCodes(await client.auth.mfa.createTicket({ totpCode }));
+
+await client.auth.mfa.disableTotp(await client.auth.mfa.createTicket({ totpCode }));
+```
+
+`generateRecoveryCodes()` replaces the old codes, so they stop working.
+
+## Disabling or deleting the account
+
+Both need an MFA ticket:
+
+```ts
+// Logs out every session, including this one: the client disconnects and emits `logout`.
+await client.auth.disableAccount(await client.auth.mfa.createTicket({ password }));
+
+// Emails a confirmation link. Nothing is deleted until it's confirmed.
+await client.auth.deleteAccount(await client.auth.mfa.createTicket({ password }));
+
+// Later, with the token from the link (works without logging in):
+await client.auth.confirmAccountDeletion(token);
+```
 
 ## Unread messages
 
@@ -284,6 +382,6 @@ Everything else in this guide works the same for both. The differences:
 | Log in with           | `client.login(botToken)` | `client.loginWithCredentials()` or a session         |
 | Where it can run      | A server you control     | Anywhere, including the user's browser               |
 | `ready` payload extra | –                        | `user_settings`, `channel_unreads`, `policy_changes` |
-| `client.auth`         | Not available            | Sessions, logout, onboarding                         |
+| `client.auth`         | Not available            | Account, 2FA, sessions, logout, onboarding           |
 | Unreads               | Always read, acks throw  | `channel.unread`, `mentionCount`, `ack()`            |
 | Friends and invites   | Not allowed by Stoat     | `user.addFriend()`, `client.invites.accept()`, …     |

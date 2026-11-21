@@ -278,3 +278,207 @@ describe("user-only methods", () => {
     client.rest.destroy();
   });
 });
+
+describe("account routes without a session", () => {
+  it("createAccount, resendVerification and password reset work before logging in", async () => {
+    const calls = mockApi({
+      "POST /auth/account/create": () => undefined,
+      "POST /auth/account/reverify": () => undefined,
+      "POST /auth/account/reset_password": () => undefined,
+      "PATCH /auth/account/reset_password": () => undefined,
+    });
+    const { client } = makeClient();
+
+    await client.auth.createAccount({ email: "a@b.c", password: "pw", invite: "inv" });
+    await client.auth.resendVerification("a@b.c");
+    await client.auth.sendPasswordReset("a@b.c", { captcha: "cap" });
+    await client.auth.resetPassword("reset-token", "new-pw", { logoutAllSessions: true });
+
+    expect(calls.map((c) => c.body)).toEqual([
+      { email: "a@b.c", password: "pw", invite: "inv", captcha: null },
+      { email: "a@b.c", captcha: null },
+      { email: "a@b.c", captcha: "cap" },
+      { token: "reset-token", password: "new-pw", remove_sessions: true },
+    ]);
+    for (const call of calls) expect(call.headers["X-Session-Token"]).toBeUndefined();
+    client.rest.destroy();
+  });
+
+  it("verifyEmail returns the login ticket, which logs in without a password", async () => {
+    const ticket = { _id: "t1", account_id: USER_ID, token: "login-ticket", validated: true, authorised: true };
+    const calls = mockApi({
+      "POST /auth/account/verify/abc%2F123": () => ({ ticket }),
+      "POST /auth/session/login": () => session,
+    });
+    const { client } = makeClient();
+
+    const result = await client.auth.verifyEmail("abc/123");
+    expect(result).toEqual({ id: "t1", accountId: USER_ID, token: "login-ticket", validated: true, authorised: true });
+
+    await client.auth.createSession({ mfaTicket: result!.token });
+    expect(calls[1]!.body).toEqual({ mfa_ticket: "login-ticket" });
+    client.rest.destroy();
+  });
+
+  it("verifyEmail returns null when there's no ticket", async () => {
+    mockApi({ "POST /auth/account/verify/code": () => null });
+    const { client } = makeClient();
+
+    expect(await client.auth.verifyEmail("code")).toBeNull();
+    client.rest.destroy();
+  });
+
+  it("confirmAccountDeletion works before logging in", async () => {
+    const calls = mockApi({ "PUT /auth/account/delete": () => undefined });
+    const { client } = makeClient();
+
+    await client.auth.confirmAccountDeletion("del-token");
+
+    expect(calls[0]!.body).toEqual({ token: "del-token" });
+    client.rest.destroy();
+  });
+});
+
+describe("account management", () => {
+  async function loggedIn(routes: Record<string, Route>) {
+    const calls = mockApi({ "GET /": config, "GET /onboard/hello": () => ({ onboarding: false }), ...routes });
+    const { client } = makeClient();
+    await client.login({ token: "user-token", type: "user" });
+    return { client, calls };
+  }
+
+  it("fetchAccount maps the account", async () => {
+    const { client } = await loggedIn({ "GET /auth/account/": () => ({ _id: USER_ID, email: "a@b.c" }) });
+
+    expect(await client.auth.fetchAccount()).toEqual({ id: USER_ID, email: "a@b.c" });
+    client.rest.destroy();
+  });
+
+  it("changePassword and changeEmail send the current password", async () => {
+    const { client, calls } = await loggedIn({
+      "PATCH /auth/account/change/password": () => undefined,
+      "PATCH /auth/account/change/email": () => undefined,
+    });
+
+    await client.auth.changePassword("old", "new");
+    await client.auth.changeEmail("old", "new@b.c");
+
+    expect(calls.at(-2)!.body).toEqual({ current_password: "old", password: "new" });
+    expect(calls.at(-1)!.body).toEqual({ current_password: "old", email: "new@b.c" });
+    client.rest.destroy();
+  });
+
+  it("deleteAccount sends the MFA ticket and keeps the session", async () => {
+    const { client, calls } = await loggedIn({ "POST /auth/account/delete": () => undefined });
+    const onLogout = vi.fn();
+    client.on("logout", onLogout);
+
+    await client.auth.deleteAccount("mfa-ticket");
+
+    expect(calls.at(-1)!.headers["X-MFA-Ticket"]).toBe("mfa-ticket");
+    expect(calls.at(-1)!.headers["X-Session-Token"]).toBe("user-token");
+    expect(onLogout).not.toHaveBeenCalled();
+    client.rest.destroy();
+  });
+
+  it("disableAccount sends the MFA ticket and ends the session", async () => {
+    const { client, calls } = await loggedIn({ "POST /auth/account/disable": () => undefined });
+    const disconnect = vi.spyOn(client.gateway, "disconnect");
+    const onLogout = vi.fn();
+    client.on("logout", onLogout);
+
+    await client.auth.disableAccount({
+      id: "t1",
+      accountId: USER_ID,
+      token: "mfa-ticket",
+      validated: true,
+      authorised: false,
+    });
+
+    expect(calls.at(-1)!.headers["X-MFA-Ticket"]).toBe("mfa-ticket");
+    expect(disconnect).toHaveBeenCalled();
+    expect(onLogout).toHaveBeenCalledTimes(1);
+    client.rest.destroy();
+  });
+});
+
+describe("MFA", () => {
+  async function loggedIn(routes: Record<string, Route>) {
+    const calls = mockApi({ "GET /": config, "GET /onboard/hello": () => ({ onboarding: false }), ...routes });
+    const { client } = makeClient();
+    await client.login({ token: "user-token", type: "user" });
+    return { client, calls };
+  }
+
+  it("fetchStatus and fetchMethods", async () => {
+    const { client } = await loggedIn({
+      "GET /auth/mfa/": () => ({ totp_mfa: true, recovery_active: false, email_otp: false }),
+      "GET /auth/mfa/methods": () => ["Totp", "Recovery"],
+    });
+
+    expect(await client.auth.mfa.fetchStatus()).toEqual({ totp: true, recoveryCodes: false });
+    expect(await client.auth.mfa.fetchMethods()).toEqual(["Totp", "Recovery"]);
+    client.rest.destroy();
+  });
+
+  it("createTicket sends the response in API format", async () => {
+    const { client, calls } = await loggedIn({
+      "PUT /auth/mfa/ticket": () => ({
+        _id: "t1",
+        account_id: USER_ID,
+        token: "mfa-ticket",
+        validated: true,
+        authorised: false,
+        last_totp_code: null,
+      }),
+    });
+
+    const ticket = await client.auth.mfa.createTicket({ password: "pw" });
+
+    expect(calls.at(-1)!.body).toEqual({ password: "pw" });
+    expect(ticket).toEqual({ id: "t1", accountId: USER_ID, token: "mfa-ticket", validated: true, authorised: false });
+    client.rest.destroy();
+  });
+
+  it("recovery codes and TOTP routes send the ticket", async () => {
+    const { client, calls } = await loggedIn({
+      "POST /auth/mfa/recovery": () => ["aaaa-bbbb"],
+      "PATCH /auth/mfa/recovery": () => ["cccc-dddd"],
+      "DELETE /auth/mfa/totp": () => undefined,
+    });
+
+    expect(await client.auth.mfa.fetchRecoveryCodes("t1")).toEqual(["aaaa-bbbb"]);
+    expect(await client.auth.mfa.generateRecoveryCodes("t2")).toEqual(["cccc-dddd"]);
+    await client.auth.mfa.disableTotp("t3");
+
+    expect(calls.slice(-3).map((c) => c.headers["X-MFA-Ticket"])).toEqual(["t1", "t2", "t3"]);
+    client.rest.destroy();
+  });
+
+  it("generateTotpSecret builds an otpauth URI, and enableTotp sends the code", async () => {
+    const { client, calls } = await loggedIn({
+      "POST /auth/mfa/totp": () => ({ secret: "JBSWY3DPEHPK3PXP" }),
+      "PUT /auth/mfa/totp": () => undefined,
+    });
+
+    const { secret, uri } = await client.auth.mfa.generateTotpSecret("t1", { accountName: "a@b.c" });
+    expect(secret).toBe("JBSWY3DPEHPK3PXP");
+    expect(uri).toBe("otpauth://totp/Stoat%3Aa%40b.c?secret=JBSWY3DPEHPK3PXP&issuer=Stoat");
+
+    await client.auth.mfa.enableTotp("123456");
+    expect(calls.at(-1)!.body).toEqual({ totp_code: "123456" });
+    client.rest.destroy();
+  });
+
+  it("rejects when logged in as a bot", async () => {
+    mockApi({ "GET /": config });
+    const { client } = makeClient();
+    await client.login("bot-token");
+
+    await expect(client.auth.mfa.fetchStatus()).rejects.toThrow("USER_ONLY: auth.mfa.fetchStatus()");
+    await expect(client.auth.mfa.createTicket({ password: "pw" })).rejects.toThrow("USER_ONLY");
+    await expect(client.auth.changePassword("a", "b")).rejects.toThrow("USER_ONLY");
+    await expect(client.auth.deleteAccount("t")).rejects.toThrow("USER_ONLY");
+    client.rest.destroy();
+  });
+});

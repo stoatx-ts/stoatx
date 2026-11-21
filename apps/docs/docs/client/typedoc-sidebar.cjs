@@ -138,6 +138,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/MFAManager",
+          label: "MFAManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/OnboardingRequiredError",
           label: "OnboardingRequiredError"
         },
@@ -239,6 +244,11 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "../docs/client/interfaces/AccountInfo",
+          label: "AccountInfo"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/AudioPlayerEvents",
           label: "AudioPlayerEvents"
         },
@@ -286,6 +296,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/CollectorOptions",
           label: "CollectorOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/CreateAccountOptions",
+          label: "CreateAccountOptions"
         },
         {
           type: "doc",
@@ -349,6 +364,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/MFAStatus",
+          label: "MFAStatus"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/MFATicket",
+          label: "MFATicket"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/PolicyChange",
           label: "PolicyChange"
         },
@@ -366,6 +391,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/ReplyIntent",
           label: "ReplyIntent"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/RequestOptions",
+          label: "RequestOptions"
         },
         {
           type: "doc",
@@ -401,6 +431,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/TextEmbedData",
           label: "TextEmbedData"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/TotpSecret",
+          label: "TotpSecret"
         },
         {
           type: "doc",
@@ -527,6 +562,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/MFAResponse",
           label: "MFAResponse"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/MFATicketResolvable",
+          label: "MFATicketResolvable"
         },
         {
           type: "doc",

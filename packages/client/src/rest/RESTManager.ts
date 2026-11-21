@@ -12,10 +12,19 @@ const UPLOAD_TIMEOUT_MS = 120_000;
 /** Give up on a route after this many consecutive 429 responses. */
 const MAX_RATELIMIT_RETRIES = 5;
 
-/** Routes that work without a token: logging in, and previewing an invite. */
+/**
+ * Routes that work without a token: logging in, previewing an invite, and the account routes
+ * used before logging in (sign-up, email verification, password reset, confirming deletion).
+ */
 const UNAUTHENTICATED_ROUTES: { method: string; path: RegExp }[] = [
   { method: "post", path: /^\/auth\/session\/login$/ },
   { method: "get", path: /^\/invites\/[^/]+$/ },
+  { method: "post", path: /^\/auth\/account\/create$/ },
+  { method: "post", path: /^\/auth\/account\/reverify$/ },
+  { method: "post", path: /^\/auth\/account\/verify\/[^/]+$/ },
+  { method: "post", path: /^\/auth\/account\/reset_password$/ },
+  { method: "patch", path: /^\/auth\/account\/reset_password$/ },
+  { method: "put", path: /^\/auth\/account\/delete$/ },
 ];
 
 /**
@@ -34,6 +43,12 @@ function isUnauthenticated(method: string, endpoint: string): boolean {
  * - `"user"`: a user session token, sent as `X-Session-Token`.
  */
 export type TokenType = "bot" | "user";
+
+/** Extra options for a single request. */
+export interface RequestOptions {
+  /** Headers sent with this request only, e.g. `X-MFA-Ticket`. */
+  headers?: Record<string, string>;
+}
 
 /**
  * Represents an independent rate limit bucket queue
@@ -184,6 +199,7 @@ export class RESTManager {
     method: M,
     endpoint: P,
     params?: RouteParams<M, P>,
+    options: RequestOptions = {},
   ): Promise<RouteResponse<M, P>> {
     let finalEndpoint = endpoint as string;
     let finalBody: Record<string, any> | undefined = undefined;
@@ -219,7 +235,7 @@ export class RESTManager {
       bucket.queue = bucket.queue.then(async () => {
         try {
           // Pass the split finalEndpoint and finalBody down to your request executor
-          const result = await this.execute(method, finalEndpoint, finalBody, bucket!);
+          const result = await this.execute(method, finalEndpoint, finalBody, bucket!, options.headers);
           resolve(result);
         } catch (error) {
           reject(error);
@@ -233,6 +249,7 @@ export class RESTManager {
     endpoint: string,
     body: any,
     bucket: AsyncBucket,
+    extraHeaders: Record<string, string> = {},
     attempt: number = 0,
   ): Promise<any> {
     if (!this.token && !isUnauthenticated(method, endpoint)) {
@@ -250,6 +267,7 @@ export class RESTManager {
       method: method.toUpperCase(),
       headers: {
         ...this.authHeaders(),
+        ...extraHeaders,
         "Content-Type": "application/json",
       },
       ...(isBodyMethod ? { body: JSON.stringify(body ?? {}) } : {}),
@@ -288,7 +306,7 @@ export class RESTManager {
 
       await sleep(retryMs);
 
-      return this.execute(method, endpoint, body, bucket, attempt + 1);
+      return this.execute(method, endpoint, body, bucket, extraHeaders, attempt + 1);
     }
 
     if (response.status >= 400) {
@@ -343,35 +361,40 @@ export class RESTManager {
   public get<P extends ValidPath<"get">>(
     endpoint: P,
     params?: RouteParams<"get", P>,
+    options?: RequestOptions,
   ): Promise<RouteResponse<"get", P>> {
-    return this.makeRequest("get", endpoint, params);
+    return this.makeRequest("get", endpoint, params, options);
   }
 
   public post<P extends ValidPath<"post">>(
     endpoint: P,
     params?: RouteParams<"post", P>,
+    options?: RequestOptions,
   ): Promise<RouteResponse<"post", P>> {
-    return this.makeRequest("post", endpoint, params);
+    return this.makeRequest("post", endpoint, params, options);
   }
 
   public patch<P extends ValidPath<"patch">>(
     endpoint: P,
     params?: RouteParams<"patch", P>,
+    options?: RequestOptions,
   ): Promise<RouteResponse<"patch", P>> {
-    return this.makeRequest("patch", endpoint, params);
+    return this.makeRequest("patch", endpoint, params, options);
   }
 
   public delete<P extends ValidPath<"delete">>(
     endpoint: P,
     params?: RouteParams<"delete", P>,
+    options?: RequestOptions,
   ): Promise<RouteResponse<"delete", P>> {
-    return this.makeRequest("delete", endpoint, params);
+    return this.makeRequest("delete", endpoint, params, options);
   }
 
   public put<P extends ValidPath<"put">>(
     endpoint: P,
     params?: RouteParams<"put", P>,
+    options?: RequestOptions,
   ): Promise<RouteResponse<"put", P>> {
-    return this.makeRequest("put", endpoint, params);
+    return this.makeRequest("put", endpoint, params, options);
   }
 }
