@@ -44,6 +44,31 @@ await voice.leaveAll();
 
 Joining a channel the client is already in returns the existing connection. The client leaves every call when it logs out.
 
+### Join options
+
+```ts
+await voice.join(channel, {
+  // Disconnect the user's voice connections on other devices first.
+  forceDisconnect: true,
+  // When starting a call in a DM or group: who to notify.
+  recipients: [friend],
+  // Which voice server to use, by name. Defaults to the server's choice.
+  node: "eu",
+});
+```
+
+`voice.fetchNodes()` lists the instance's voice servers with their locations, e.g. to pick the nearest one.
+
+### Being moved
+
+The server can move the user to another call, for example when a moderator drags them. The manager follows automatically: it connects to the new call, keeps playing the same audio (Node.js) or keeps the microphone and deafen state (browser), and leaves the old call. The old connection emits `move` with the new one, so you can swap your reference:
+
+```ts
+connection.on("move", (newConnection) => {
+  connection = newConnection;
+});
+```
+
 :::info
 Server voice channels are `VoiceChannel`s: check with `channel.isVoice()` before joining.
 :::

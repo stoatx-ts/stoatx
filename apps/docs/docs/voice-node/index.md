@@ -12,6 +12,8 @@
 - [AudioPlayerEvents](interfaces/AudioPlayerEvents.md)
 - [AudioResourceOptions](interfaces/AudioResourceOptions.md)
 - [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
+- [VoiceJoinOptions](interfaces/VoiceJoinOptions.md)
+- [VoiceNode](interfaces/VoiceNode.md)
 
 ## Type Aliases
 

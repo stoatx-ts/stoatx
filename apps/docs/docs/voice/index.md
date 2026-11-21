@@ -8,6 +8,8 @@
 ## Interfaces
 
 - [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
+- [VoiceJoinOptions](interfaces/VoiceJoinOptions.md)
+- [VoiceNode](interfaces/VoiceNode.md)
 
 ## Type Aliases
 

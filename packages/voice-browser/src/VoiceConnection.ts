@@ -132,6 +132,16 @@ export class VoiceConnection extends BaseVoiceConnection<BrowserVoiceConnectionE
     await this.room.startAudio();
   }
 
+  /**
+   * Keeps the microphone and deafen state after the server moves the user to another call.
+   * @param previous The connection being replaced.
+   * @internal
+   */
+  public override async _takeOver(previous: VoiceConnection): Promise<void> {
+    this.setDeafened(previous.deafened);
+    if (previous.microphoneEnabled) await this.setMicrophoneEnabled(true);
+  }
+
   /** Leaves the call, turns the microphone off and removes the audio elements. */
   public async disconnect(): Promise<void> {
     this._status = "disconnecting";

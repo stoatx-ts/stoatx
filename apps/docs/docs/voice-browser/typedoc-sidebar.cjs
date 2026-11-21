@@ -36,6 +36,16 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/voice-browser/interfaces/VoiceConnectionEvents",
           label: "VoiceConnectionEvents"
+        },
+        {
+          type: "doc",
+          id: "../docs/voice-browser/interfaces/VoiceJoinOptions",
+          label: "VoiceJoinOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/voice-browser/interfaces/VoiceNode",
+          label: "VoiceNode"
         }
       ]
     },

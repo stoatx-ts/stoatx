@@ -37,7 +37,7 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@livekit/rtc-node": "^0.13.29",
+    "@livekit/rtc-node": "^1.2.1",
     "@stoatx/voice": "workspace:*"
   },
   "peerDependencies": {

@@ -173,4 +173,16 @@ describe("browser VoiceConnection", () => {
     expect(connection.status).toBe("disconnected");
     expect(onDisconnect).toHaveBeenCalledTimes(1);
   });
+
+  it("_takeOver() keeps the microphone and deafen state", async () => {
+    const previous = connect().connection;
+    previous.setDeafened(true);
+    await previous.setMicrophoneEnabled(true);
+    const { connection, room } = connect();
+
+    await connection._takeOver(previous);
+
+    expect(connection.deafened).toBe(true);
+    expect(room.localParticipant.setMicrophoneEnabled).toHaveBeenCalledWith(true, undefined);
+  });
 });

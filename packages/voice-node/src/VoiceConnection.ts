@@ -23,6 +23,7 @@ export class VoiceConnection extends BaseVoiceConnection {
   private readonly room: Room;
   private _player: AudioPlayer | null = null;
   private _audioTrack: LocalAudioTrack | null = null;
+  private _audioSource: AudioSource | null = null;
   private _publishing: Promise<AudioSource> | null = null;
   private _leftover: Buffer = Buffer.alloc(0);
 
@@ -61,6 +62,15 @@ export class VoiceConnection extends BaseVoiceConnection {
     if (this._player) this._player.removeSubscriber(this);
     this._player = player;
     player.addSubscriber(this);
+  }
+
+  /**
+   * Keeps playing the old connection's player after the server moves the user to another call.
+   * @param previous The connection being replaced.
+   * @internal
+   */
+  override async _takeOver(previous: VoiceConnection): Promise<void> {
+    if (previous.player) this.subscribe(previous.player);
   }
 
   /** Stops playing audio from the current player. */
@@ -121,6 +131,7 @@ export class VoiceConnection extends BaseVoiceConnection {
         await this.room.localParticipant.publishTrack(track, options);
 
         this._audioTrack = track;
+        this._audioSource = source;
         return source;
       })();
       this._publishing.catch(() => {
@@ -137,6 +148,11 @@ export class VoiceConnection extends BaseVoiceConnection {
     if (this._audioTrack) {
       await this._audioTrack.close();
       this._audioTrack = null;
+    }
+    // The source holds a native handle; close it so a disconnect doesn't leak it.
+    if (this._audioSource) {
+      await this._audioSource.close();
+      this._audioSource = null;
     }
     this._publishing = null;
     this._leftover = Buffer.alloc(0);
