@@ -37,7 +37,7 @@
     "events": "^3.3.0"
   },
   "peerDependencies": {
-    "@stoatx/client": "^0.10.1"
+    "@stoatx/client": "^1.0.0"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*",
