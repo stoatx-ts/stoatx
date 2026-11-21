@@ -148,6 +148,24 @@ export class UserManager extends BaseManager<string, User, RawUser> {
   }
 
   /**
+   * Changes the logged-in user's username (user sessions only). The discriminator may change too,
+   * if the new username is already taken with the current one.
+   * @param username The new username: 2–32 characters, letters, numbers, `_`, `.` and `-`.
+   * @param password The account's current password.
+   * @returns The updated user.
+   * @throws {StoatAPIError} `InvalidCredentials` for a wrong password, or `UsernameTaken`.
+   * @example
+   * const me = await client.users.setUsername("newname", password);
+   * console.log(`${me.username}#${me.discriminator}`);
+   */
+  public async setUsername(username: string, password: string): Promise<User> {
+    const data = await this.client.rest.patch("/users/@me/username", { username, password });
+    // client.user is its own instance, so keep it in sync with the cached user.
+    if (this.client.user?.id === data._id) this.client.user._patch(data);
+    return this._add(data);
+  }
+
+  /**
    * The DM between the client's user and a user
    *
    * @param {string} userId The user id

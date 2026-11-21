@@ -69,6 +69,37 @@ Tell BaseManager how to build a Server
 
 ***
 
+### create()
+
+> **create**(`options`): `Promise`\<[`Server`](Server.md)\>
+
+Creates a server owned by the logged-in user (user sessions only; bots can't create servers).
+The server and its default channels are cached by the time this resolves.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`ServerCreateOptions`](../interfaces/ServerCreateOptions.md) | The server's name, and optionally its description and whether it's age-restricted. |
+
+#### Returns
+
+`Promise`\<[`Server`](Server.md)\>
+
+The new server.
+
+#### Throws
+
+`IsBot` for bots, or `TooManyServers` if the user is at the server limit.
+
+#### Example
+
+```ts
+const server = await client.servers.create({ name: "My Server" });
+```
+
+***
+
 ### edit()
 
 > **edit**(`serverId`, `options`): `Promise`\<[`Server`](Server.md)\>

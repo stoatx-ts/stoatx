@@ -2,6 +2,8 @@ import { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import { BaseChannel } from "./BaseChannel";
 import type { User } from "./User";
+import type { UserResolvable } from "../managers/UserManager";
+import { Collection } from "../utils/Collection";
 import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import { PermissionResolvable } from "../utils/permissions";
 import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
@@ -66,6 +68,51 @@ export class GroupChannel extends BaseChannel {
     return this.recipients
       .map((id) => this.client.users.cache.get(id))
       .filter((user): user is User => user !== undefined);
+  }
+
+  /**
+   * Fetches the group's members and caches them.
+   * @returns The members, keyed by user ID.
+   */
+  public async fetchMembers(): Promise<Collection<string, User>> {
+    const data = await this.client.rest.get(`/channels/${this.id}/members`);
+    const members = new Collection<string, User>();
+    for (const raw of data) {
+      const user = this.client.users._add(raw);
+      members.set(user.id, user);
+    }
+    return members;
+  }
+
+  /**
+   * Adds a user to the group. They must be a friend of the logged-in user.
+   * @param user The user to add.
+   * @throws {StoatAPIError} `NotFriends`, `AlreadyInGroup`, `GroupTooLarge`, or `MissingPermission`.
+   */
+  public async addMember(user: UserResolvable): Promise<void> {
+    const id = this.client.users.resolveId(user);
+    await this.client.rest.put(`/channels/${this.id}/recipients/${id}`);
+    if (!this.recipients.includes(id)) this.recipients = [...this.recipients, id];
+  }
+
+  /**
+   * Removes a user from the group. Only the owner can do this.
+   * @param user The user to remove. To leave the group yourself, use {@link leave}.
+   * @throws {StoatAPIError} `NotOwner`, `NotInGroup`, or `CannotRemoveYourself`.
+   */
+  public async removeMember(user: UserResolvable): Promise<void> {
+    const id = this.client.users.resolveId(user);
+    await this.client.rest.delete(`/channels/${this.id}/recipients/${id}`);
+    this.recipients = this.recipients.filter((recipient) => recipient !== id);
+  }
+
+  /**
+   * Leaves the group and removes it from the cache.
+   * @param options Set `silent` to leave without a "user left" message in the group.
+   */
+  public async leave(options: { silent?: boolean } = {}): Promise<void> {
+    await this.client.rest.delete(`/channels/${this.id}`, { leave_silently: options.silent ?? false });
+    this.client.channels.cache.delete(this.id);
   }
 
   /**

@@ -7,6 +7,8 @@ import { GroupChannel } from "../structures/GroupChannel";
 import { Permissions, type PermissionResolvable } from "../utils/permissions";
 import { BaseManager } from "./BaseManager";
 import { MessageResolvable } from "./MessageManager";
+import type { UserResolvable } from "./UserManager";
+import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import {
   Channel as RawChannel,
@@ -35,6 +37,20 @@ export interface ChannelEditOptions {
 export interface ChannelRolePermissionOptions {
   allow?: PermissionResolvable;
   deny?: PermissionResolvable;
+}
+
+/** Options for {@link ChannelManager.createGroup}. */
+export interface GroupCreateOptions {
+  /** The group name, 1–32 characters. */
+  name: string;
+  /** The group description, up to 1024 characters. */
+  description?: string;
+  /** The group icon: an uploaded file ID, or an {@link AttachmentBuilder} to upload. */
+  icon?: string | AttachmentBuilder;
+  /** Friends to add to the group, up to 49. */
+  users?: UserResolvable[];
+  /** Whether the group is age-restricted. */
+  nsfw?: boolean;
 }
 
 export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel> {
@@ -203,6 +219,27 @@ export class ChannelManager extends BaseManager<string, BaseChannel, RawChannel>
 
     const data = await this.client.rest.put(`/channels/${id}/permissions/default`, payload);
     return this._add(data);
+  }
+
+  /**
+   * Creates a group with the logged-in user as owner (user sessions only).
+   * @param options The group's name, and optionally a description, icon, members and age restriction.
+   * @returns The new group, cached.
+   * @throws {StoatAPIError} `NotFriends` if a user isn't the logged-in user's friend,
+   * or `GroupTooLarge` with too many users.
+   * @example
+   * const group = await client.channels.createGroup({ name: "Weekend plans", users: [alice, bob] });
+   */
+  public async createGroup(options: GroupCreateOptions): Promise<GroupChannel> {
+    const icon = options.icon === undefined ? null : await resolveAttachment(this.client.rest, options.icon, "icons");
+    const data = await this.client.rest.post("/channels/create", {
+      name: options.name,
+      description: options.description ?? null,
+      icon: icon ?? null,
+      users: (options.users ?? []).map((user) => this.client.users.resolveId(user)),
+      nsfw: options.nsfw ?? null,
+    });
+    return this._add(data) as GroupChannel;
   }
 
   /**

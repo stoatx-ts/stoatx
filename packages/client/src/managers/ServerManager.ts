@@ -24,6 +24,16 @@ export interface ServerEditOptions {
   owner?: string;
 }
 
+/** Options for {@link ServerManager.create}. */
+export interface ServerCreateOptions {
+  /** The server name, 1–32 characters. */
+  name: string;
+  /** The server description, up to 1024 characters. */
+  description?: string;
+  /** Whether the server is age-restricted. */
+  nsfw?: boolean;
+}
+
 export class ServerManager extends BaseManager<string, Server, RawServer> {
   constructor(client: Client, limit: number = Infinity) {
     super(client, limit);
@@ -56,6 +66,26 @@ export class ServerManager extends BaseManager<string, Server, RawServer> {
 
     const data = (await this.client.rest.get(`/servers/${id}`)) as RawServer;
     return this._add(data);
+  }
+
+  /**
+   * Creates a server owned by the logged-in user (user sessions only; bots can't create servers).
+   * The server and its default channels are cached by the time this resolves.
+   * @param options The server's name, and optionally its description and whether it's age-restricted.
+   * @returns The new server.
+   * @throws {StoatAPIError} `IsBot` for bots, or `TooManyServers` if the user is at the server limit.
+   * @example
+   * const server = await client.servers.create({ name: "My Server" });
+   */
+  public async create(options: ServerCreateOptions): Promise<Server> {
+    const data = await this.client.rest.post("/servers/create", {
+      name: options.name,
+      description: options.description ?? null,
+      nsfw: options.nsfw ?? null,
+    });
+    const server = this._add(data.server);
+    for (const channel of data.channels) this.client.channels._add(channel);
+    return server;
   }
 
   public async edit(serverId: string, options: ServerEditOptions): Promise<Server> {
