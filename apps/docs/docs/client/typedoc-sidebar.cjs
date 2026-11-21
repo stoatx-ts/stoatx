@@ -324,6 +324,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/GroupCreateOptions",
+          label: "GroupCreateOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/Interaction",
           label: "Interaction"
         },
@@ -411,6 +416,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/RolePermissionOptions",
           label: "RolePermissionOptions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/ServerCreateOptions",
+          label: "ServerCreateOptions"
         },
         {
           type: "doc",

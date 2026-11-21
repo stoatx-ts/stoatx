@@ -379,3 +379,36 @@ If `username` has no `#discriminator`.
 #### Throws
 
 `NotFound` if no such user exists, plus the errors from [User.addFriend](User.md#addfriend).
+
+***
+
+### setUsername()
+
+> **setUsername**(`username`, `password`): `Promise`\<[`User`](User.md)\>
+
+Changes the logged-in user's username (user sessions only). The discriminator may change too,
+if the new username is already taken with the current one.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `username` | `string` | The new username: 2–32 characters, letters, numbers, `_`, `.` and `-`. |
+| `password` | `string` | The account's current password. |
+
+#### Returns
+
+`Promise`\<[`User`](User.md)\>
+
+The updated user.
+
+#### Throws
+
+`InvalidCredentials` for a wrong password, or `UsernameTaken`.
+
+#### Example
+
+```ts
+const me = await client.users.setUsername("newname", password);
+console.log(`${me.username}#${me.discriminator}`);
+```

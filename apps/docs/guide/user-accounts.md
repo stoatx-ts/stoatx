@@ -9,7 +9,7 @@ sidebar_position: 6
 Besides bots, `@stoatx/client` can log in to a regular user account. This is what you need to build your own Stoat client, for example a web app where people log in with their email and password.
 
 :::warning
-User-account support is new. Signing up, logging in, sessions, onboarding, account management, two-factor authentication, unreads, typing, friends, blocking, DMs and invites work. Settings sync and creating servers and groups are still being added.
+User-account support is new. Signing up, logging in, sessions, onboarding, account management, two-factor authentication, unreads, typing, friends, blocking, DMs, groups, creating servers and invites work. Settings sync is still being added.
 :::
 
 ## Logging in with an email and password
@@ -172,6 +172,9 @@ await client.auth.changePassword(currentPassword, newPassword);
 
 // Stoat emails a link to the new address; the change applies once it's verified with verifyEmail().
 await client.auth.changeEmail(currentPassword, newEmail);
+
+// The discriminator can change too, if the new username is taken with the current one.
+await client.users.setUsername(newUsername, currentPassword);
 ```
 
 ## Two-factor authentication
@@ -350,6 +353,35 @@ await dm.send("Hey!");
 ```
 
 `client.users.fetchDMs()` reloads the full list if you need to resync.
+
+## Groups
+
+A group is a channel with up to 50 members. Only friends can be added:
+
+```ts
+const group = await client.channels.createGroup({
+  name: "Weekend plans",
+  users: [alice, bob], // users or IDs
+  // Optional: description, icon (a file ID or an AttachmentBuilder), nsfw
+});
+
+await group.addMember(carol);
+await group.removeMember(bob); // owner only
+const members = await group.fetchMembers();
+
+await group.leave(); // or { silent: true } to leave without a "user left" message
+```
+
+`group.recipients` holds the member IDs and stays up to date as people join and leave.
+
+## Creating servers
+
+```ts
+const server = await client.servers.create({ name: "My Server" });
+// Optional: description, nsfw
+```
+
+The server and its default channels are cached by the time `create()` resolves. Bots can't create servers.
 
 ## Joining servers with invites
 

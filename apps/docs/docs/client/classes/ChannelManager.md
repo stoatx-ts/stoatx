@@ -78,33 +78,50 @@ await client.channels.bulkDelete("CHANNEL_ID", ["MESSAGE_ID_1", "MESSAGE_ID_2", 
 
 ***
 
-### delete()
+### createGroup()
 
-> **delete**(`channel`): `Promise`\<`void`\>
+> **createGroup**(`options`): `Promise`\<[`GroupChannel`](GroupChannel.md)\>
 
-Deletes a server channel, leaves a group, or closes a DM.
+Creates a group with the logged-in user as owner (user sessions only).
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `channel` | [`ChannelResolvable`](../type-aliases/ChannelResolvable.md) | The channel object, raw ID, or mention string to delete. |
+| `options` | [`GroupCreateOptions`](../interfaces/GroupCreateOptions.md) | The group's name, and optionally a description, icon, members and age restriction. |
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\<[`GroupChannel`](GroupChannel.md)\>
 
-A promise that resolves when the action is successful.
+The new group, cached.
 
 #### Throws
 
-If the API request fails.
+`NotFriends` if a user isn't the logged-in user's friend,
+or `GroupTooLarge` with too many users.
 
 #### Example
 
 ```ts
-await client.channels.delete("01H...");
+const group = await client.channels.createGroup({ name: "Weekend plans", users: [alice, bob] });
 ```
+
+***
+
+### delete()
+
+> **delete**(`channel`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `channel` | [`ChannelResolvable`](../type-aliases/ChannelResolvable.md) |
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 

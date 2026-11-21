@@ -287,7 +287,7 @@ Sends the verification email again. Works without logging in.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `email` | `string` | The account's email address. |
-| `options` | \{ `captcha?`: `string`; \} | - |
+| `options` | \{ `captcha?`: `string`; \} | Optional extra parameters for the request. |
 | `options.captcha?` | `string` | A captcha response, for instances that require one. |
 
 #### Returns
@@ -308,7 +308,7 @@ Sets a new password with the token from the reset link. Works without logging in
 | ------ | ------ | ------ |
 | `token` | `string` | The token from the link. |
 | `password` | `string` | The new password. |
-| `options` | \{ `logoutAllSessions?`: `boolean`; \} | - |
+| `options` | \{ `logoutAllSessions?`: `boolean`; \} | Optional extra parameters for the request. |
 | `options.logoutAllSessions?` | `boolean` | Also log out every session on the account. |
 
 #### Returns
@@ -365,7 +365,7 @@ Emails a password reset link. Works without logging in.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `email` | `string` | The account's email address. |
-| `options` | \{ `captcha?`: `string`; \} | - |
+| `options` | \{ `captcha?`: `string`; \} | Optional extra parameters for the request. |
 | `options.captcha?` | `string` | A captcha response, for instances that require one. |
 
 #### Returns

@@ -142,7 +142,7 @@ Cleared when a user sends a message or stops typing, and on reconnect.
 
 #### Inherited from
 
-[`TextChannel`](TextChannel.md).[`typingUserIds`](TextChannel.md#typinguserids)
+[`BaseChannel`](BaseChannel.md).[`typingUserIds`](BaseChannel.md#typinguserids)
 
 ***
 
@@ -274,6 +274,28 @@ Marks this channel as read (user sessions only).
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`ack`](BaseChannel.md#ack)
+
+***
+
+### addMember()
+
+> **addMember**(`user`): `Promise`\<`void`\>
+
+Adds a user to the group. They must be a friend of the logged-in user.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user to add. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Throws
+
+`NotFriends`, `AlreadyInGroup`, `GroupTooLarge`, or `MissingPermission`.
 
 ***
 
@@ -495,6 +517,20 @@ await channel.fetch(true);
 
 ***
 
+### fetchMembers()
+
+> **fetchMembers**(): `Promise`\<[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>\>
+
+Fetches the group's members and caches them.
+
+#### Returns
+
+`Promise`\<[`Collection`](Collection.md)\<`string`, [`User`](User.md)\>\>
+
+The members, keyed by user ID.
+
+***
+
 ### fetchMessages()
 
 > **fetchMessages**(`options?`): `Promise`\<[`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>\>
@@ -593,6 +629,47 @@ console.log(`Fetched ${messages.size} messages sent around the specified message
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`isVoice`](BaseChannel.md#isvoice)
+
+***
+
+### leave()
+
+> **leave**(`options?`): `Promise`\<`void`\>
+
+Leaves the group and removes it from the cache.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | \{ `silent?`: `boolean`; \} | Set `silent` to leave without a "user left" message in the group. |
+| `options.silent?` | `boolean` | - |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### removeMember()
+
+> **removeMember**(`user`): `Promise`\<`void`\>
+
+Removes a user from the group. Only the owner can do this.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user to remove. To leave the group yourself, use [leave](#leave). |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Throws
+
+`NotOwner`, `NotInGroup`, or `CannotRemoveYourself`.
 
 ***
 
