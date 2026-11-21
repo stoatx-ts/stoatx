@@ -1,6 +1,6 @@
 # Class: AuthManager
 
-Account sessions, logout and onboarding for user accounts. Bots don't need any of this.
+Accounts, sessions, logout and onboarding for user accounts. Bots don't need any of this.
 
 ## Constructors
 
@@ -18,7 +18,54 @@ Account sessions, logout and onboarding for user accounts. Bots don't need any o
 
 `AuthManager`
 
+## Properties
+
+### mfa
+
+> `readonly` **mfa**: [`MFAManager`](MFAManager.md)
+
+Two-factor authentication: TOTP, recovery codes and MFA tickets.
+
 ## Methods
+
+### changeEmail()
+
+> **changeEmail**(`currentPassword`, `newEmail`): `Promise`\<`void`\>
+
+Changes the account's email address. Stoat emails a verification link to the new address,
+and the change applies once it's verified with [verifyEmail](#verifyemail).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `currentPassword` | `string` | The current password. |
+| `newEmail` | `string` | The new email address. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### changePassword()
+
+> **changePassword**(`currentPassword`, `newPassword`): `Promise`\<`void`\>
+
+Changes the account's password.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `currentPassword` | `string` | The current password. |
+| `newPassword` | `string` | The new password. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
 
 ### completeOnboarding()
 
@@ -37,6 +84,50 @@ Picks the username for a new account. Afterwards, call `client.login()` again to
 `Promise`\<[`User`](User.md)\>
 
 The account's user.
+
+***
+
+### confirmAccountDeletion()
+
+> **confirmAccountDeletion**(`token`): `Promise`\<`void`\>
+
+Confirms an account deletion with the token from the confirmation email. Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `token` | `string` | The token from the link. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### createAccount()
+
+> **createAccount**(`options`): `Promise`\<`void`\>
+
+Creates an account. Stoat then emails a verification link; the account can log in once
+it's verified with [verifyEmail](#verifyemail). Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`CreateAccountOptions`](../interfaces/CreateAccountOptions.md) | The email, password and, if the instance needs them, an invite code and captcha. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Example
+
+```ts
+await client.auth.createAccount({ email, password });
+showMessage("Check your inbox to verify your email.");
+```
 
 ***
 
@@ -68,6 +159,58 @@ if (result.result === "MFA") {
   result = await client.auth.createSession({ mfaTicket: result.ticket, mfaResponse: { totpCode: "123456" } });
 }
 ```
+
+***
+
+### deleteAccount()
+
+> **deleteAccount**(`ticket`): `Promise`\<`void`\>
+
+Requests the account's deletion. Stoat emails a confirmation link; nothing is deleted until
+it's confirmed with [confirmAccountDeletion](#confirmaccountdeletion).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `ticket` | [`MFATicketResolvable`](../type-aliases/MFATicketResolvable.md) | A ticket from [MFAManager.createTicket](MFAManager.md#createticket). |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### disableAccount()
+
+> **disableAccount**(`ticket`): `Promise`\<`void`\>
+
+Disables the account. Every session is logged out, including this one, so the client
+disconnects and emits `logout`. Only Stoat's staff can enable it again.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `ticket` | [`MFATicketResolvable`](../type-aliases/MFATicketResolvable.md) | A ticket from [MFAManager.createTicket](MFAManager.md#createticket). |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### fetchAccount()
+
+> **fetchAccount**(): `Promise`\<[`AccountInfo`](../interfaces/AccountInfo.md)\>
+
+Fetches the logged-in account's ID and email address.
+
+#### Returns
+
+`Promise`\<[`AccountInfo`](../interfaces/AccountInfo.md)\>
+
+The account.
 
 ***
 
@@ -133,6 +276,47 @@ The updated session.
 
 ***
 
+### resendVerification()
+
+> **resendVerification**(`email`, `options?`): `Promise`\<`void`\>
+
+Sends the verification email again. Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `email` | `string` | The account's email address. |
+| `options` | \{ `captcha?`: `string`; \} | - |
+| `options.captcha?` | `string` | A captcha response, for instances that require one. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### resetPassword()
+
+> **resetPassword**(`token`, `password`, `options?`): `Promise`\<`void`\>
+
+Sets a new password with the token from the reset link. Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `token` | `string` | The token from the link. |
+| `password` | `string` | The new password. |
+| `options` | \{ `logoutAllSessions?`: `boolean`; \} | - |
+| `options.logoutAllSessions?` | `boolean` | Also log out every session on the account. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### revokeAllSessions()
 
 > **revokeAllSessions**(`options?`): `Promise`\<`void`\>
@@ -167,3 +351,44 @@ Logs out a session, e.g. another device. Use [logout](#logout) for the current s
 #### Returns
 
 `Promise`\<`void`\>
+
+***
+
+### sendPasswordReset()
+
+> **sendPasswordReset**(`email`, `options?`): `Promise`\<`void`\>
+
+Emails a password reset link. Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `email` | `string` | The account's email address. |
+| `options` | \{ `captcha?`: `string`; \} | - |
+| `options.captcha?` | `string` | A captcha response, for instances that require one. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### verifyEmail()
+
+> **verifyEmail**(`code`): `Promise`\<[`MFATicket`](../interfaces/MFATicket.md) \| `null`\>
+
+Verifies an email address with the code from the verification link. Works without logging in.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `code` | `string` | The code from the link. |
+
+#### Returns
+
+`Promise`\<[`MFATicket`](../interfaces/MFATicket.md) \| `null`\>
+
+For a new account, a ticket that logs it in without the password:
+`client.loginWithCredentials({ mfaTicket: ticket.token })`. `null` after an email change.

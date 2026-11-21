@@ -46,7 +46,7 @@ Forgets the current token, e.g. after logging out. Requests that need a token wi
 
 ### delete()
 
-> **delete**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"delete"`, `P`\>\>
+> **delete**\<`P`\>(`endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`"delete"`, `P`\>\>
 
 #### Type Parameters
 
@@ -60,6 +60,7 @@ Forgets the current token, e.g. after logging out. Requests that need a token wi
 | ------ | ------ |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`"delete"`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
@@ -81,7 +82,7 @@ Stops the internal bucket sweeper.
 
 ### get()
 
-> **get**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"get"`, `P`\>\>
+> **get**\<`P`\>(`endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`"get"`, `P`\>\>
 
 #### Type Parameters
 
@@ -95,6 +96,7 @@ Stops the internal bucket sweeper.
 | ------ | ------ |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`"get"`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
@@ -104,7 +106,7 @@ Stops the internal bucket sweeper.
 
 ### makeRequest()
 
-> **makeRequest**\<`M`, `P`\>(`method`, `endpoint`, `params?`): `Promise`\<`RouteResponse`\<`M`, `P`\>\>
+> **makeRequest**\<`M`, `P`\>(`method`, `endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`M`, `P`\>\>
 
 #### Type Parameters
 
@@ -120,6 +122,7 @@ Stops the internal bucket sweeper.
 | `method` | `M` |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`M`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
@@ -129,7 +132,7 @@ Stops the internal bucket sweeper.
 
 ### patch()
 
-> **patch**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"patch"`, `P`\>\>
+> **patch**\<`P`\>(`endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`"patch"`, `P`\>\>
 
 #### Type Parameters
 
@@ -143,6 +146,7 @@ Stops the internal bucket sweeper.
 | ------ | ------ |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`"patch"`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
@@ -152,7 +156,7 @@ Stops the internal bucket sweeper.
 
 ### post()
 
-> **post**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"post"`, `P`\>\>
+> **post**\<`P`\>(`endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`"post"`, `P`\>\>
 
 #### Type Parameters
 
@@ -166,6 +170,7 @@ Stops the internal bucket sweeper.
 | ------ | ------ |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`"post"`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
@@ -175,7 +180,7 @@ Stops the internal bucket sweeper.
 
 ### put()
 
-> **put**\<`P`\>(`endpoint`, `params?`): `Promise`\<`RouteResponse`\<`"put"`, `P`\>\>
+> **put**\<`P`\>(`endpoint`, `params?`, `options?`): `Promise`\<`RouteResponse`\<`"put"`, `P`\>\>
 
 #### Type Parameters
 
@@ -189,6 +194,7 @@ Stops the internal bucket sweeper.
 | ------ | ------ |
 | `endpoint` | `P` |
 | `params?` | `RouteParams`\<`"put"`, `P`\> |
+| `options?` | [`RequestOptions`](../interfaces/RequestOptions.md) |
 
 #### Returns
 
