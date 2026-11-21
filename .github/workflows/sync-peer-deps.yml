@@ -7,7 +7,7 @@ on:
 
 jobs:
   sync-peer-deps:
-    name: Sync @stoatx/client peerDependency
+    name: Sync @stoatx/client peerDependencies
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release-please--')
     steps:
@@ -22,19 +22,23 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Sync peerDependency version
+      - name: Sync peerDependency versions
         run: |
+          # Give every package that peers on the client a caret range of the new version.
           node -e "
             const fs = require('fs');
             const clientPkg = JSON.parse(fs.readFileSync('packages/client/package.json'));
-            const stoatxPkg = JSON.parse(fs.readFileSync('packages/stoatx/package.json'));
-            stoatxPkg.peerDependencies['@stoatx/client'] = '^' + clientPkg.version;
-            fs.writeFileSync('packages/stoatx/package.json', JSON.stringify(stoatxPkg, null, 2) + '\n');
+            for (const name of ['stoatx', 'voice', 'voice-node', 'voice-browser']) {
+              const path = 'packages/' + name + '/package.json';
+              const pkg = JSON.parse(fs.readFileSync(path));
+              pkg.peerDependencies['@stoatx/client'] = '^' + clientPkg.version;
+              fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+            }
           "
 
       - name: Commit if changed
         run: |
           git config user.name "stoatx-release[bot]"
           git config user.email "stoatx-release[bot]@users.noreply.github.com"
-          git diff --quiet || (git add packages/stoatx/package.json && git commit -m "chore: sync @stoatx/client peerDependency")
+          git diff --quiet || (git add packages/stoatx/package.json packages/voice/package.json packages/voice-node/package.json packages/voice-browser/package.json && git commit -m "chore: sync @stoatx/client peerDependencies")
           git push

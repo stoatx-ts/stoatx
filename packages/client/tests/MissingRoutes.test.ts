@@ -247,7 +247,7 @@ describe("webhook messages", () => {
     });
     const hook = webhook();
 
-    const edited = await hook.editMessage(messageId, { content: "edited", embeds: [] });
+    const edited = await hook.editMessage(messageId, { content: "edited", embeds: null });
     await hook.deleteMessage(messageId);
 
     expect(calls[0]!.body).toEqual({ content: "edited", embeds: [] });
@@ -367,5 +367,23 @@ describe("voice states", () => {
     client._endSession();
 
     expect(client.voiceStates.cache.size).toBe(0);
+  });
+});
+
+describe("editing embeds", () => {
+  it("message edits accept embeds: null to remove them", async () => {
+    const channel = client.channels._add(rawGroup() as any) as GroupChannel;
+    const messageId = id();
+    const calls = mockApi({
+      [`PATCH /channels/${channel.id}/messages/${messageId}`]: () => ({
+        _id: messageId,
+        channel: channel.id,
+        author: self,
+      }),
+    });
+
+    await channel.messages.edit(messageId, { embeds: null });
+
+    expect(calls[0]!.body).toEqual({ embeds: [] });
   });
 });
