@@ -46,5 +46,8 @@
     "lib": ["ESNext"],
     "target": "ESNext",
     "useDefineForClassFields": true
-  }
+  },
+  // Used by the root `typecheck` script, which also covers tests. The docs site has its own config
+  // (JSX, Docusaurus types) and is checked with it.
+  "exclude": ["node_modules", "**/node_modules", "**/dist", "apps/docs"]
 }

@@ -4,3 +4,5 @@
 set -e
 
 pnpm -r exec tsc --noEmit
+# Each package's tsconfig leaves out tests; the root config checks everything, tests included.
+pnpm typecheck
