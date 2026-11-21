@@ -1,5 +1,8 @@
 # @stoatx/voice-node
 
+[![npm version](https://img.shields.io/npm/v/@stoatx/voice-node.svg?style=flat-square)](https://www.npmjs.com/package/@stoatx/voice-node)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
+
 Voice for [`@stoatx/client`](https://www.npmjs.com/package/@stoatx/client) in Node.js: join voice channels and play audio files or streams. Needs `ffmpeg` on your `PATH`.
 
 ```bash

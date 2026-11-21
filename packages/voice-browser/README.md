@@ -1,5 +1,8 @@
 # @stoatx/voice-browser
 
+[![npm version](https://img.shields.io/npm/v/@stoatx/voice-browser.svg?style=flat-square)](https://www.npmjs.com/package/@stoatx/voice-browser)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
+
 Voice for [`@stoatx/client`](https://www.npmjs.com/package/@stoatx/client) in browsers: join voice channels with the user's microphone and hear everyone else.
 
 ```bash
