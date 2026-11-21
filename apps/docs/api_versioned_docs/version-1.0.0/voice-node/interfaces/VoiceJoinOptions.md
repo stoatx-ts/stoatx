@@ -9,7 +9,6 @@ Options for BaseVoiceManager.join.
 > `optional` **forceDisconnect?**: `boolean`
 
 Disconnect the user's other voice connections first, e.g. a call they're in on another device.
-Without it, joining while connected elsewhere fails.
 
 ***
 
@@ -25,5 +24,4 @@ The voice node to use, by name from BaseVoiceManager.fetchNodes. Defaults to the
 
 > `optional` **recipients?**: `UserResolvable`[]
 
-Who to ring when starting a call in a DM or group. Only used when nobody is in the call yet.
-Defaults to everyone in the DM or group.
+Who to notify when starting a call in a DM or group. Only used when nobody is in the call yet.

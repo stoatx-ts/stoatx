@@ -92,6 +92,9 @@ jobs:
           # the Docusaurus build lifecycle, so running the real build here
           # ensures the API docs (docs/client and docs/voice*) are current even if they weren't rebuilt locally
           # before this PR was opened.
+          # The voice packages import @stoatx/client and @stoatx/voice through their build
+          # output, so build the packages first or TypeDoc can't resolve their types.
+          pnpm --filter "./packages/*" build
           pnpm --filter @stoatx/docs run build
 
       - name: Generate Versioned Docs and Commit
@@ -103,8 +106,16 @@ jobs:
           # Grab the branch name we extracted earlier
           BRANCH_NAME="${{ steps.extract-branch.outputs.branch }}"
 
-          echo "Snapshotting docs for version: $VERSION"
-          pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
+          # API docs are versioned by @stoatx/client. A release without a client bump (e.g. voice only)
+          # keeps the existing snapshot and only updates the current docs.
+          if node -e 'process.exit(require("./apps/docs/api_versions.json").includes(process.argv[1]) ? 0 : 1)' "$VERSION"; then
+            echo "API docs for v$VERSION are already snapshotted; updating the current docs only."
+            COMMIT_MESSAGE="docs: update api docs"
+          else
+            echo "Snapshotting docs for version: $VERSION"
+            pnpm --filter @stoatx/docs exec docusaurus docs:version:api $VERSION
+            COMMIT_MESSAGE="docs: snapshot api version v$VERSION"
+          fi
 
           # Configure Git
           git config user.name "stoatx-release[bot]"
@@ -114,15 +125,15 @@ jobs:
 
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then
-            git commit -m "docs: snapshot api version v$VERSION"
+            git commit -m "$COMMIT_MESSAGE"
 
             # Fetch, rebase, and explicitly push to the PR branch
             git fetch origin "$BRANCH_NAME"
             git pull --rebase --autostash origin "$BRANCH_NAME"
             git push origin "HEAD:$BRANCH_NAME"
-            else
-              echo "Docs are already up to date for this PR."
-            fi
+          else
+            echo "Docs are already up to date for this PR."
+          fi
 
       - name: Checkout Repo (Publish)
         if: ${{ steps.rp.outputs.releases_created == 'true' }}
