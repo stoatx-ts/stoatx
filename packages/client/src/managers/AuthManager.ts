@@ -89,6 +89,20 @@ export interface CreateAccountOptions {
   captcha?: string;
 }
 
+/** A Web Push subscription's endpoint and keys, as sent to Stoat. */
+export interface PushSubscriptionKeys {
+  endpoint: string;
+  /** The subscription's `p256dh` key, base64url-encoded. */
+  p256dh: string;
+  /** The subscription's `auth` secret, base64url-encoded. */
+  auth: string;
+}
+
+/** A browser `PushSubscription`, or anything else with the same `toJSON()`. */
+export interface PushSubscriptionLike {
+  toJSON(): { endpoint?: string; keys?: Record<string, string> };
+}
+
 /** A change to a platform policy, like the terms of service, that the user hasn't acknowledged yet. */
 export interface PendingPolicyChange {
   /** What changed. */
@@ -240,6 +254,49 @@ export class AuthManager {
     assertUserSession(this.client, "auth.completeOnboarding");
     const data = await this.client.rest.post("/onboard/complete", { username });
     return this.client.users._add(data);
+  }
+
+  /**
+   * Fetches the instance's VAPID public key, needed to create a Web Push subscription in the browser.
+   * @returns The key, base64url-encoded, or `null` if the instance doesn't support push notifications.
+   */
+  public async fetchVapidKey(): Promise<string | null> {
+    const config = await this.client.rest.get("/");
+    return config.vapid || null;
+  }
+
+  /**
+   * Sends push notifications for this session to a Web Push subscription.
+   * A session has at most one subscription, so this replaces any earlier one.
+   * @param subscription A browser `PushSubscription`, or its endpoint and keys.
+   * @example
+   * const registration = await navigator.serviceWorker.ready;
+   * const subscription = await registration.pushManager.subscribe({
+   *   userVisibleOnly: true,
+   *   applicationServerKey: await client.auth.fetchVapidKey(),
+   * });
+   * await client.auth.subscribePush(subscription);
+   */
+  public async subscribePush(subscription: PushSubscriptionLike | PushSubscriptionKeys): Promise<void> {
+    assertUserSession(this.client, "auth.subscribePush");
+    let body: PushSubscriptionKeys;
+    if ("toJSON" in subscription && typeof subscription.toJSON === "function") {
+      const json = subscription.toJSON();
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
+        throw new TypeError("The push subscription has no endpoint or keys.");
+      }
+      body = { endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth };
+    } else {
+      const { endpoint, p256dh, auth } = subscription as PushSubscriptionKeys;
+      body = { endpoint, p256dh, auth };
+    }
+    await this.client.rest.post("/push/subscribe", body);
+  }
+
+  /** Stops push notifications for this session. */
+  public async unsubscribePush(): Promise<void> {
+    assertUserSession(this.client, "auth.unsubscribePush");
+    await this.client.rest.post("/push/unsubscribe");
   }
 
   /**

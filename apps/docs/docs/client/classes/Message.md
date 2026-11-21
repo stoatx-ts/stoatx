@@ -512,6 +512,31 @@ await message.removeReaction("👍", undefined, true);
 
 ***
 
+### report()
+
+> **report**(`reason`, `options?`): `Promise`\<`void`\>
+
+Reports this message to Stoat's moderation team.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `reason` | `"NoneSpecified"` \| `"Illegal"` \| `"IllegalGoods"` \| `"IllegalExtortion"` \| `"IllegalPornography"` \| `"IllegalHacking"` \| `"ExtremeViolence"` \| `"PromotesHarm"` \| `"UnsolicitedSpam"` \| `"Raid"` \| `"SpamAbuse"` \| `"ScamsFraud"` \| `"Malware"` \| `"Harassment"` | Why it's being reported. |
+| `options?` | [`ReportOptions`](../interfaces/ReportOptions.md) | More details for the moderators. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Example
+
+```ts
+await message.report("SpamAbuse", { context: "Posted the same link in every channel" });
+```
+
+***
+
 ### toString()
 
 > **toString**(): `string`

@@ -15,6 +15,7 @@ import { MessageReaction } from "./MessageReaction";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { Message as RawMessage, Embed as RawEmbed } from "stoat-api";
 import { MessageMentions } from "./MessageMentions";
+import { sendReport, type ContentReportReason, type ReportOptions } from "../utils/report";
 
 export interface MessageOptions {
   content?: string;
@@ -137,6 +138,17 @@ export class Message extends Base {
     const channel = await this.resolveChannel();
 
     await channel.messages.delete(this.id);
+  }
+
+  /**
+   * Reports this message to Stoat's moderation team.
+   * @param reason Why it's being reported.
+   * @param options More details for the moderators.
+   * @example
+   * await message.report("SpamAbuse", { context: "Posted the same link in every channel" });
+   */
+  public async report(reason: ContentReportReason, options?: ReportOptions): Promise<void> {
+    await sendReport(this.client, { type: "Message", id: this.id, report_reason: reason }, options);
   }
 
   /**

@@ -3,6 +3,8 @@ import type { Client } from "../client/Client";
 import { Attachment } from "./Attachment";
 import type { User as RawUser, FieldsUser } from "stoat-api";
 import { decodeTime } from "ulid";
+import { sendReport, type ReportOptions, type UserReportReason } from "../utils/report";
+import type { MessageResolvable } from "../managers/MessageManager";
 
 export type UserRelationShip = "None" | "User" | "Friend" | "Outgoing" | "Incoming" | "Blocked" | "BlockedOther";
 
@@ -129,6 +131,30 @@ export class User extends Base {
    */
   public async fetch(force: boolean = false): Promise<this> {
     return (await this.client.users.fetch(this.id, force)) as this;
+  }
+
+  /**
+   * Reports this user to Stoat's moderation team.
+   * @param reason Why they're being reported.
+   * @param options More details for the moderators, and optionally the message that shows the problem.
+   * @example
+   * await user.report("Impersonation", { context: "Pretending to be a moderator", message });
+   */
+  public async report(
+    reason: UserReportReason,
+    options: ReportOptions & { message?: MessageResolvable } = {},
+  ): Promise<void> {
+    const messageId =
+      options.message === undefined
+        ? undefined
+        : typeof options.message === "string"
+          ? options.message
+          : options.message.id;
+    await sendReport(
+      this.client,
+      { type: "User", id: this.id, report_reason: reason, message_id: messageId ?? null },
+      options,
+    );
   }
 
   /**

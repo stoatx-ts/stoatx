@@ -466,6 +466,76 @@ const joined = await client.invites.accept("abc123"); // a Server, or a GroupCha
 
 The server or group is cached by the time `accept()` resolves. Bots can't accept invites.
 
+## Searching messages
+
+```ts
+const results = await channel.messages.search({ query: "meeting notes", sort: "Latest", limit: 20 });
+const pinned = await channel.messages.search({ pinned: true });
+```
+
+Pass `query` or `pinned`, not both. `before` and `after` page through results, and `includeUsers: true` also caches the authors. `sort` defaults to `"Relevance"`.
+
+## Calls
+
+When the user starts a call in a DM or group, the other members' clients ring. To stop ringing one of them, for example after they decline:
+
+```ts
+await channel.stopRinging(user); // the logged-in user has to be in the call
+```
+
+## Reporting
+
+Messages, servers and users can be reported to Stoat's moderation team:
+
+```ts
+await message.report("SpamAbuse", { context: "Posted the same link in every channel" });
+await server.report("ScamsFraud");
+await user.report("Impersonation", { message }); // optionally, the message that shows it
+```
+
+Messages and servers take a `ContentReportReason` (e.g. `"Illegal"`, `"Harassment"`, `"Malware"`), users a `UserReportReason` (e.g. `"InappropriateProfile"`, `"BanEvasion"`, `"Underage"`).
+
+## Push notifications
+
+In the browser, a service worker can receive notifications while your app is closed. Subscribe with the instance's VAPID key, then hand the subscription to Stoat:
+
+```ts
+const registration = await navigator.serviceWorker.ready;
+const subscription = await registration.pushManager.subscribe({
+  userVisibleOnly: true,
+  applicationServerKey: await client.auth.fetchVapidKey(),
+});
+await client.auth.subscribePush(subscription);
+```
+
+Each session has one subscription; subscribing again replaces it. `client.auth.unsubscribePush()` stops notifications for this session. `fetchVapidKey()` returns `null` if the instance doesn't support push.
+
+## Managing bots
+
+A user can create bots and manage them through `client.bots`:
+
+```ts
+const bot = await client.bots.create("my-bot");
+bot.token; // log the bot in with this, e.g. client.login(bot.token) in another process
+
+const bots = await client.bots.fetchOwned();
+
+await bot.edit({ public: true, defaultPermissions: ["SendMessage", "ViewChannel"] });
+await bot.resetToken(); // the old token stops working
+await bot.delete();
+```
+
+To add a bot to a server or group, including public bots made by others:
+
+```ts
+await bot.inviteToServer(server); // or pass permissions as the second argument
+await bot.inviteToGroup(group);
+
+// Show a public bot's details, e.g. on an invite page
+const info = await client.bots.fetchPublic(botId);
+await client.bots.inviteToServer(botId, server);
+```
+
 ## Bots vs. user accounts
 
 Everything else in this guide works the same for both. The differences:
@@ -479,3 +549,5 @@ Everything else in this guide works the same for both. The differences:
 | Unreads               | Always read, acks throw  | `channel.unread`, `mentionCount`, `ack()`            |
 | Synced settings       | Not available            | `client.settings`                                    |
 | Friends and invites   | Not allowed by Stoat     | `user.addFriend()`, `client.invites.accept()`, …     |
+| Push notifications    | Not available            | `client.auth.subscribePush()`                        |
+| Managing bots         | Not available            | `client.bots`                                        |

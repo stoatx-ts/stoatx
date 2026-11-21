@@ -421,6 +421,35 @@ This user, with `relationship` now `"None"`.
 
 ***
 
+### report()
+
+> **report**(`reason`, `options?`): `Promise`\<`void`\>
+
+Reports this user to Stoat's moderation team.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `reason` | `"NoneSpecified"` \| `"UnsolicitedSpam"` \| `"SpamAbuse"` \| `"InappropriateProfile"` \| `"Impersonation"` \| `"BanEvasion"` \| `"Underage"` | Why they're being reported. |
+| `options` | [`ReportOptions`](../interfaces/ReportOptions.md) & `object` | More details for the moderators, and optionally the message that shows the problem. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Example
+
+```ts
+await user.report("Impersonation", { context: "Pretending to be a moderator", message });
+```
+
+#### Inherited from
+
+[`User`](User.md).[`report`](User.md#report)
+
+***
+
 ### toString()
 
 > **toString**(): `string`

@@ -24,6 +24,7 @@ import {
 } from "../managers/AuthManager";
 import { UnreadManager } from "../managers/UnreadManager";
 import { SettingsManager, type SyncedSetting } from "../managers/SettingsManager";
+import { BotManager } from "../managers/BotManager";
 import { InviteManager } from "../managers/InviteManager";
 import type {
   RevoltConfig,
@@ -165,6 +166,8 @@ export class Client extends EventEmitter {
   public unreads: UnreadManager;
   /** Settings synced between the user's devices (user sessions only). */
   public settings: SettingsManager;
+  /** The logged-in user's bots (user sessions only). */
+  public bots: BotManager;
   /** Preview and accept invites by code. */
   public invites: InviteManager;
   public user: ClientUser | null = null;
@@ -184,6 +187,7 @@ export class Client extends EventEmitter {
     this.auth = new AuthManager(this);
     this.unreads = new UnreadManager(this);
     this.settings = new SettingsManager(this);
+    this.bots = new BotManager(this);
     this.invites = new InviteManager(this);
     // Set up front so requests that need no token (credential login) work before login().
     this.rest.setBaseURL(options.apiURL ?? StoatAPI);
@@ -295,6 +299,7 @@ export class Client extends EventEmitter {
     this.emojis.cache.clear();
     this.unreads.cache.clear();
     this.settings.cache.clear();
+    this.bots.cache.clear();
     this.auth.policyChanges = [];
     this.emit("logout");
   }

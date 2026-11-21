@@ -5,7 +5,13 @@ import type { Client } from "../client/Client";
 import { BaseManager } from "./BaseManager";
 import { UserResolvable } from "./UserManager";
 import { resolveAttachment } from "../utils/resolveAttachment";
-import { Message as RawMessage, DataMessageSend, DataEditMessage } from "stoat-api";
+import {
+  Message as RawMessage,
+  User as RawUser,
+  Member as RawMember,
+  DataMessageSend,
+  DataEditMessage,
+} from "stoat-api";
 import { RouteParams } from "../utils/schema";
 
 export type MessageResolvable = Message | string;
@@ -16,6 +22,24 @@ export interface MessageFetchOptions {
   after?: string;
   sort?: "Relevance" | "Latest" | "Oldest";
   nearby?: string;
+  includeUsers?: boolean;
+}
+
+/** Options for {@link MessageManager.search}. Pass `query` or `pinned`, not both. */
+export interface MessageSearchOptions {
+  /** Text to search for, 1–64 characters. */
+  query?: string;
+  /** Only find pinned messages. Can't be combined with `query`. */
+  pinned?: boolean;
+  /** How many messages to return, 1–100. */
+  limit?: number;
+  /** Only find messages sent before this message. */
+  before?: MessageResolvable;
+  /** Only find messages sent after this message. */
+  after?: MessageResolvable;
+  /** How to sort the results. Defaults to `"Relevance"`. */
+  sort?: "Relevance" | "Latest" | "Oldest";
+  /** Also fetch and cache the authors (and, in servers, their members). */
   includeUsers?: boolean;
 }
 
@@ -72,7 +96,41 @@ export class MessageManager extends BaseManager<string, Message, RawMessage> {
     if (options.includeUsers !== undefined) query.include_users = options.includeUsers;
 
     const data = await this.client.rest.get(endpoint, query);
+    return this.addBulk(data);
+  }
 
+  /**
+   * Searches this channel's messages.
+   * @param options What to search for, plus paging and sorting.
+   * @returns The matching messages, in the requested order.
+   * @throws {StoatAPIError} `InvalidOperation` if both `query` and `pinned` are passed.
+   * @example
+   * const results = await channel.messages.search({ query: "meeting notes", sort: "Latest" });
+   * const pinned = await channel.messages.search({ pinned: true });
+   */
+  public async search(options: MessageSearchOptions): Promise<Collection<string, Message>> {
+    const body: Record<string, unknown> = {};
+    if (options.query !== undefined) body.query = options.query;
+    if (options.pinned !== undefined) body.pinned = options.pinned;
+    if (options.limit !== undefined) body.limit = options.limit;
+    if (options.before !== undefined) body.before = this.resolveId(options.before);
+    if (options.after !== undefined) body.after = this.resolveId(options.after);
+    if (options.sort !== undefined) body.sort = options.sort;
+    if (options.includeUsers !== undefined) body.include_users = options.includeUsers;
+
+    // These keys share names with query parameters of other routes; `query: {}` keeps them in the body.
+    const data = await this.client.rest.post(`/channels/${this.channel.id}/search`, body, { query: {} });
+    return this.addBulk(data);
+  }
+
+  /**
+   * Caches the messages from a bulk response, plus the users and members it includes.
+   * @param data A message list, or messages with users and members.
+   * @returns The cached messages.
+   */
+  private async addBulk(
+    data: RawMessage[] | { messages: RawMessage[]; users: RawUser[]; members?: RawMember[] | null },
+  ): Promise<Collection<string, Message>> {
     let rawMessages: RawMessage[];
 
     if (Array.isArray(data)) {

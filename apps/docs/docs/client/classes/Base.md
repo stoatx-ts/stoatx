@@ -4,6 +4,7 @@ The base class for all structures.
 
 ## Extended by
 
+- [`Bot`](Bot.md)
 - [`Attachment`](Attachment.md)
 - [`BaseChannel`](BaseChannel.md)
 - [`Member`](Member.md)

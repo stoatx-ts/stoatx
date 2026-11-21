@@ -355,6 +355,25 @@ this server it will be deleted.
 
 ***
 
+### report()
+
+> **report**(`reason`, `options?`): `Promise`\<`void`\>
+
+Reports this server to Stoat's moderation team.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `reason` | `"NoneSpecified"` \| `"Illegal"` \| `"IllegalGoods"` \| `"IllegalExtortion"` \| `"IllegalPornography"` \| `"IllegalHacking"` \| `"ExtremeViolence"` \| `"PromotesHarm"` \| `"UnsolicitedSpam"` \| `"Raid"` \| `"SpamAbuse"` \| `"ScamsFraud"` \| `"Malware"` \| `"Harassment"` | Why it's being reported. |
+| `options?` | [`ReportOptions`](../interfaces/ReportOptions.md) | More details for the moderators. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### subscribe()
 
 > **subscribe**(): `boolean`

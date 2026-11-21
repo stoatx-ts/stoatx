@@ -106,7 +106,7 @@ Cleared when a user sends a message or stops typing, and on reconnect.
 
 #### Inherited from
 
-[`TextChannel`](TextChannel.md).[`typingUserIds`](TextChannel.md#typinguserids)
+[`BaseChannel`](BaseChannel.md).[`typingUserIds`](BaseChannel.md#typinguserids)
 
 ***
 
@@ -580,6 +580,28 @@ the message: sending ends the indicator.
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`startTyping`](BaseChannel.md#starttyping)
+
+***
+
+### stopRinging()
+
+> **stopRinging**(`user`): `Promise`\<`void`\>
+
+Stops ringing a user for the call in this DM. The logged-in user must be in the call.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`UserResolvable`](../type-aliases/UserResolvable.md) | The user to stop ringing. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Throws
+
+`NotConnected` if the logged-in user isn't in the call.
 
 ***
 

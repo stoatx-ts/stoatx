@@ -48,6 +48,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/classes/Bot",
+          label: "Bot"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/classes/BotManager",
+          label: "BotManager"
+        },
+        {
+          type: "doc",
           id: "../docs/client/classes/ChannelManager",
           label: "ChannelManager"
         },
@@ -264,6 +274,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/BotEditOptions",
+          label: "BotEditOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/BotInformation",
           label: "BotInformation"
         },
@@ -379,6 +394,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/MessageSearchOptions",
+          label: "MessageSearchOptions"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/MFAStatus",
           label: "MFAStatus"
         },
@@ -404,6 +424,21 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/PublicBot",
+          label: "PublicBot"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/PushSubscriptionKeys",
+          label: "PushSubscriptionKeys"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/PushSubscriptionLike",
+          label: "PushSubscriptionLike"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/ReactionCollectorOptions",
           label: "ReactionCollectorOptions"
         },
@@ -416,6 +451,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/interfaces/ReplyIntent",
           label: "ReplyIntent"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/interfaces/ReportOptions",
+          label: "ReportOptions"
         },
         {
           type: "doc",
@@ -530,6 +570,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/type-aliases/BotResolvable",
+          label: "BotResolvable"
+        },
+        {
+          type: "doc",
           id: "../docs/client/type-aliases/CDNTag",
           label: "CDNTag"
         },
@@ -542,6 +587,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/ChannelType",
           label: "ChannelType"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/ContentReportReason",
+          label: "ContentReportReason"
         },
         {
           type: "doc",
@@ -647,6 +697,11 @@ const typedocSidebar = {
           type: "doc",
           id: "../docs/client/type-aliases/UserRelationShip",
           label: "UserRelationShip"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/type-aliases/UserReportReason",
+          label: "UserReportReason"
         },
         {
           type: "doc",

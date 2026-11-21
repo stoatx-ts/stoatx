@@ -317,6 +317,37 @@ await channel.messages.removeReaction(messageId, "👍", undefined, true);
 
 ***
 
+### search()
+
+> **search**(`options`): `Promise`\<[`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>\>
+
+Searches this channel's messages.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`MessageSearchOptions`](../interfaces/MessageSearchOptions.md) | What to search for, plus paging and sorting. |
+
+#### Returns
+
+`Promise`\<[`Collection`](Collection.md)\<`string`, [`Message`](Message.md)\>\>
+
+The matching messages, in the requested order.
+
+#### Throws
+
+`InvalidOperation` if both `query` and `pinned` are passed.
+
+#### Example
+
+```ts
+const results = await channel.messages.search({ query: "meeting notes", sort: "Latest" });
+const pinned = await channel.messages.search({ pinned: true });
+```
+
+***
+
 ### send()
 
 > **send**(`contentOrOptions`): `Promise`\<[`Message`](Message.md)\>
