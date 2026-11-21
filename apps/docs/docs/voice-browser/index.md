@@ -10,6 +10,8 @@
 - [BrowserVoiceConnectionEvents](interfaces/BrowserVoiceConnectionEvents.md)
 - [BrowserVoiceOptions](interfaces/BrowserVoiceOptions.md)
 - [VoiceConnectionEvents](interfaces/VoiceConnectionEvents.md)
+- [VoiceJoinOptions](interfaces/VoiceJoinOptions.md)
+- [VoiceNode](interfaces/VoiceNode.md)
 
 ## Type Aliases
 

@@ -193,13 +193,11 @@ be checked against the generic `Events`.
 
 > `protected` **reportError**(`error`): `void`
 
-Emits `error` if anyone listens, so a failure inside the connection can't crash the process.
-
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `error` | `unknown` | The error. |
+| Parameter | Type |
+| ------ | ------ |
+| `error` | `unknown` |
 
 #### Returns
 

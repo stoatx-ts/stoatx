@@ -72,6 +72,24 @@ Every call the client is in, by channel ID.
 
 ## Methods
 
+### fetchNodes()
+
+> **fetchNodes**(): `Promise`\<[`VoiceNode`](../interfaces/VoiceNode.md)[]\>
+
+Fetches the instance's voice servers. Cached after the first call.
+
+#### Returns
+
+`Promise`\<[`VoiceNode`](../interfaces/VoiceNode.md)[]\>
+
+The nodes, empty if the instance has voice turned off.
+
+#### Inherited from
+
+`BaseVoiceManager.fetchNodes`
+
+***
+
 ### get()
 
 > **get**(`channel`): [`VoiceConnection`](VoiceConnection.md) \| `undefined`
@@ -98,7 +116,7 @@ The connection, or `undefined` if the client isn't in that call.
 
 ### join()
 
-> **join**(`channel`): `Promise`\<[`VoiceConnection`](VoiceConnection.md)\>
+> **join**(`channel`, `options?`): `Promise`\<[`VoiceConnection`](VoiceConnection.md)\>
 
 Joins a voice channel's call. Joining a channel the client is already in returns the existing
 connection, and joining while a join is in progress waits for it.
@@ -108,6 +126,7 @@ connection, and joining while a join is in progress waits for it.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `channel` | [`VoiceChannelResolvable`](../type-aliases/VoiceChannelResolvable.md) | The voice channel, DM or group, or its ID. |
+| `options?` | [`VoiceJoinOptions`](../interfaces/VoiceJoinOptions.md) | Whether to disconnect other devices, who to ring, and which voice node to use. Ignored when the client is already in the call. |
 
 #### Returns
 
