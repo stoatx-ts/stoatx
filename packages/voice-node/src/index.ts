@@ -1,7 +1,7 @@
-export { VoiceConnection } from "./VoiceConnection";
 export { VoiceManager } from "./VoiceManager";
+export { VoiceConnection } from "./VoiceConnection";
 export { AudioPlayer } from "./AudioPlayer";
 export { AudioResource } from "./AudioResource";
 export type { AudioPlayerStatus, AudioPlayerEvents } from "./AudioPlayer";
-export type { VoiceConnectionStatus, VoiceConnectionEvents } from "./VoiceConnection";
 export type { AudioSource, AudioResourceOptions } from "./AudioResource";
+export type { VoiceChannelResolvable, VoiceConnectionEvents, VoiceConnectionStatus } from "@stoatx/voice";

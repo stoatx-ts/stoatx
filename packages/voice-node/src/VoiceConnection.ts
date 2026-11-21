@@ -7,50 +7,40 @@ import {
   AudioFrame,
   AudioSource,
 } from "@livekit/rtc-node";
-import { EventEmitter } from "node:events";
-import { _registerVoiceConnection } from "./VoiceManager";
+import { BaseVoiceConnection } from "@stoatx/voice";
 import type { AudioPlayer } from "./AudioPlayer";
-
-export interface VoiceConnectionEvents {
-  ready: [];
-  disconnect: [];
-  error: [error: Error];
-}
-
-export type VoiceConnectionStatus = "connecting" | "ready" | "disconnecting" | "disconnected";
 
 const SAMPLE_RATE = 48000;
 const CHANNELS = 2;
 const SAMPLES_PER_FRAME = 960;
 const BYTES_PER_FRAME = SAMPLES_PER_FRAME * CHANNELS * 2;
 
-export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
-  readonly channelId: string;
-  readonly guildId: string | undefined;
-
+/**
+ * A connection to a voice channel's call in Node.js. Plays audio from an {@link AudioPlayer}.
+ * Get one from `VoiceManager.join()`.
+ */
+export class VoiceConnection extends BaseVoiceConnection {
   private readonly room: Room;
-  private _status: VoiceConnectionStatus = "connecting";
   private _player: AudioPlayer | null = null;
   private _audioTrack: LocalAudioTrack | null = null;
   private _publishing: Promise<AudioSource> | null = null;
   private _leftover: Buffer = Buffer.alloc(0);
 
-  constructor(channelId: string, guildId?: string) {
-    super();
-    this.channelId = channelId;
-    this.guildId = guildId;
+  /**
+   * @param channelId The voice channel's ID.
+   * @param serverId The ID of the server the channel is in, or `null` for DMs and groups.
+   */
+  constructor(channelId: string, serverId: string | null) {
+    super(channelId, serverId);
     this.room = new Room();
     this.room.on(RoomEvent.Disconnected, () => {
       this._status = "disconnected";
       this._player?.removeSubscriber(this);
-      this.emit("disconnect");
+      this.emitBase("disconnect");
     });
   }
 
-  get status(): VoiceConnectionStatus {
-    return this._status;
-  }
-
+  /** The player this connection plays audio from, if it's subscribed to one. */
   get player(): AudioPlayer | null {
     return this._player;
   }
@@ -59,15 +49,21 @@ export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
   async connect(url: string, token: string): Promise<void> {
     await this.room.connect(url, token);
     this._status = "ready";
-    this.emit("ready");
+    this.emitBase("ready");
   }
 
+  /**
+   * Plays audio from a player in this call. A connection plays from one player at a time;
+   * a player can play into several connections.
+   * @param player The player.
+   */
   subscribe(player: AudioPlayer): void {
     if (this._player) this._player.removeSubscriber(this);
     this._player = player;
     player.addSubscriber(this);
   }
 
+  /** Stops playing audio from the current player. */
   unsubscribe(): void {
     this._player?.removeSubscriber(this);
     this._player = null;
@@ -107,9 +103,7 @@ export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
 
       this._leftover = buf.subarray(offset);
     } catch (error) {
-      if (this.listenerCount("error") > 0) {
-        this.emit("error", error instanceof Error ? error : new Error(String(error)));
-      }
+      this.reportError(error);
     }
   }
 
@@ -136,6 +130,7 @@ export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
     return this._publishing;
   }
 
+  /** Leaves the call and stops sending audio. */
   async disconnect(): Promise<void> {
     this._status = "disconnecting";
     this.unsubscribe();
@@ -148,5 +143,3 @@ export class VoiceConnection extends EventEmitter<VoiceConnectionEvents> {
     await this.room.disconnect();
   }
 }
-
-_registerVoiceConnection((channelId, guildId) => new VoiceConnection(channelId, guildId));

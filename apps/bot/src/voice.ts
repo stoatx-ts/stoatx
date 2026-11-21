@@ -1,9 +1,16 @@
-import { type CommandContext, SimpleCommand, Stoat, AudioResource, AudioPlayer } from "stoatx";
+import { type Client, type CommandContext, SimpleCommand, Stoat } from "stoatx";
+import { AudioPlayer, AudioResource, VoiceManager } from "@stoatx/voice-node";
 import { join } from "node:path";
 
 @Stoat()
 export class VoiceCommands {
   private readonly players = new Map<string, AudioPlayer>();
+  private voice: VoiceManager | undefined;
+
+  /** One voice manager for the bot, created on first use. */
+  private voiceFor(client: Client): VoiceManager {
+    return (this.voice ??= new VoiceManager(client));
+  }
 
   @SimpleCommand({ name: "join", description: "Join the voice channel you're currently in." })
   async joinVoiceChannel(ctx: CommandContext) {
@@ -13,13 +20,13 @@ export class VoiceCommands {
     }
 
     const channel = ctx.message.channel;
-    const conn = await channel.join();
+    const conn = await this.voiceFor(ctx.client).join(channel);
 
     const player = new AudioPlayer();
     conn.subscribe(player);
     this.players.set(channel.id, player);
 
-    player.on("error", (err) => {
+    player.on("error", (err: Error) => {
       console.error(err);
       this.players.delete(channel.id);
     });
@@ -42,7 +49,7 @@ export class VoiceCommands {
   async leave(ctx: CommandContext) {
     if (!ctx.message.channel?.isVoice()) return;
     this.players.delete(ctx.message.channel.id);
-    await ctx.message.channel.leave();
+    await this.voiceFor(ctx.client).leave(ctx.message.channel);
     await ctx.reply("Left!");
   }
 }

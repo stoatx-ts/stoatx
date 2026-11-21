@@ -39,7 +39,6 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@livekit/rtc-node": "^0.13.29",
     "events": "^3.3.0",
     "stoat-api": "^0.16.0",
     "ulid": "^3.0.2"

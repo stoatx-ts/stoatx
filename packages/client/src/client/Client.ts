@@ -35,8 +35,6 @@ import type {
   Emoji as RawEmoji,
   ChannelUnread,
 } from "stoat-api";
-// Import the manager directly: "../voice" also loads VoiceConnection (@livekit/rtc-node), which breaks the browser build.
-import { VoiceManager } from "../voice/VoiceManager";
 import { StoatAPI } from "../utils/Constants";
 
 /** A change to a platform policy (terms of service, privacy policy) the user has to acknowledge. */
@@ -172,7 +170,6 @@ export class Client extends EventEmitter {
   public invites: InviteManager;
   public user: ClientUser | null = null;
   public options: ClientOptions;
-  readonly voice: VoiceManager;
 
   constructor(options: ClientOptions = {}) {
     super({ captureRejections: true });
@@ -183,7 +180,6 @@ export class Client extends EventEmitter {
     this.servers = new ServerManager(this, options.cacheLimits?.servers);
     this.users = new UserManager(this, options.cacheLimits?.users);
     this.emojis = new EmojiManager(this, undefined, options.cacheLimits?.emojis);
-    this.voice = new VoiceManager(this);
     this.auth = new AuthManager(this);
     this.unreads = new UnreadManager(this);
     this.settings = new SettingsManager(this);

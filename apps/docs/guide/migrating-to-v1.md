@@ -201,3 +201,45 @@ new CommandValidationError(paramName, paramKind, message);
 // e.g.
 new CommandValidationError("target", "arg", "Custom error message");
 ```
+
+## @stoatx/client
+
+### Voice moved to its own packages
+
+Voice is no longer part of `@stoatx/client`, so apps without voice don't install `@livekit/rtc-node`. Install the package for your platform:
+
+```bash
+npm install @stoatx/voice-node     # Node.js
+npm install @stoatx/voice-browser  # browsers, new in v1
+```
+
+Calls are joined through a `VoiceManager` you create, instead of `client.voice` and `channel.join()`. `VoiceConnection`, `AudioPlayer` and `AudioResource` are imported from `@stoatx/voice-node` instead of `@stoatx/client` or `stoatx`.
+
+**Before:**
+
+```ts
+import { AudioPlayer, AudioResource } from "stoatx";
+
+const connection = await channel.join();
+// or: await client.voice.join(channel.id, channel.serverId);
+
+await channel.leave();
+```
+
+**After:**
+
+```ts
+import { AudioPlayer, AudioResource, VoiceManager } from "@stoatx/voice-node";
+
+const voice = new VoiceManager(client); // once, e.g. next to your client
+const connection = await voice.join(channel);
+
+await voice.leave(channel);
+```
+
+Also changed:
+
+- `connection.guildId` is now `connection.serverId`, and it's `null` instead of `undefined` outside servers.
+- The `VOICE_UNAVAILABLE` error is gone: the browser now has its own package.
+
+See [Voice](./voice/intro.md) for the full API.

@@ -3,7 +3,7 @@ import type { Options } from "tsup";
 import { createTsupConfig } from "../../tsup.config.js";
 
 /** Modules the browser build must never import. `events` is left out because browsers get the npm polyfill. */
-const nodeOnly = new Set([...builtinModules.filter((m) => m !== "events"), "ws", "@livekit/rtc-node"]);
+const nodeOnly = new Set([...builtinModules.filter((m) => m !== "events"), "ws"]);
 
 /** Fails the build when anything reachable from src/browser.ts imports a Node-only module. */
 const rejectNodeImports: NonNullable<Options["esbuildPlugins"]>[number] = {
@@ -27,6 +27,6 @@ export default createTsupConfig({
   // tsup normally strips `node:` and externalizes dependencies before user plugins run;
   // turn both off for the Node-only modules so the guard below gets to see them.
   removeNodeProtocol: false,
-  noExternal: ["ws", "@livekit/rtc-node"],
+  noExternal: ["ws"],
   esbuildPlugins: [rejectNodeImports],
 });
