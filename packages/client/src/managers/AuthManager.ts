@@ -1,4 +1,4 @@
-import type { Client } from "../client/Client";
+import type { Client, PolicyChange as RawPolicyChange } from "../client/Client";
 import type { User } from "../structures/User";
 import type { DataLogin, MFAMethod as RawMFAMethod, MFATicket as RawMFATicket } from "stoat-api";
 import { assertUserSession } from "../utils/assertUserSession";
@@ -89,6 +89,18 @@ export interface CreateAccountOptions {
   captcha?: string;
 }
 
+/** A change to a platform policy, like the terms of service, that the user hasn't acknowledged yet. */
+export interface PendingPolicyChange {
+  /** What changed. */
+  description: string;
+  /** A link to the new policy or an announcement about it. */
+  url: string;
+  /** When the change was announced. */
+  createdAt: Date;
+  /** When the change takes effect. */
+  effectiveAt: Date;
+}
+
 /**
  * Thrown by `client.login()` when a user account has not picked a username yet.
  * The token stays set, so `client.auth.completeOnboarding(username)` works straight away.
@@ -107,6 +119,12 @@ export class OnboardingRequiredError extends Error {
 export class AuthManager {
   /** Two-factor authentication: TOTP, recovery codes and MFA tickets. */
   public readonly mfa: MFAManager;
+
+  /**
+   * Policy changes the user hasn't acknowledged yet, loaded when the client connects.
+   * Show them to the user, then call {@link acknowledgePolicyChanges}. Always empty for bots.
+   */
+  public policyChanges: PendingPolicyChange[] = [];
 
   /**
    * @param client The client this manager belongs to.
@@ -222,6 +240,35 @@ export class AuthManager {
     assertUserSession(this.client, "auth.completeOnboarding");
     const data = await this.client.rest.post("/onboard/complete", { username });
     return this.client.users._add(data);
+  }
+
+  /**
+   * Acknowledges every pending policy change and empties {@link policyChanges}.
+   * @example
+   * client.on("ready", () => {
+   *   if (client.auth.policyChanges.length > 0) showPolicyNotice(client.auth.policyChanges);
+   * });
+   * // When the user clicks "OK":
+   * await client.auth.acknowledgePolicyChanges();
+   */
+  public async acknowledgePolicyChanges(): Promise<void> {
+    assertUserSession(this.client, "auth.acknowledgePolicyChanges");
+    await this.client.rest.post("/policy/acknowledge");
+    this.policyChanges = [];
+  }
+
+  /**
+   * Replaces the pending policy changes with the ones from the `Ready` payload.
+   * @param data The `policy_changes` field.
+   * @internal
+   */
+  public _setPolicyChanges(data: RawPolicyChange[]): void {
+    this.policyChanges = data.map((change) => ({
+      description: change.description,
+      url: change.url,
+      createdAt: new Date(change.created_time),
+      effectiveAt: new Date(change.effective_time),
+    }));
   }
 
   /**

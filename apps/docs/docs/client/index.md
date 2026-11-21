@@ -79,6 +79,7 @@
 - [MessageOptions](interfaces/MessageOptions.md)
 - [MFAStatus](interfaces/MFAStatus.md)
 - [MFATicket](interfaces/MFATicket.md)
+- [PendingPolicyChange](interfaces/PendingPolicyChange.md)
 - [PolicyChange](interfaces/PolicyChange.md)
 - [ReactionCollectorOptions](interfaces/ReactionCollectorOptions.md)
 - [ReadyData](interfaces/ReadyData.md)

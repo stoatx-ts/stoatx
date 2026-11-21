@@ -384,6 +384,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/PendingPolicyChange",
+          label: "PendingPolicyChange"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/PolicyChange",
           label: "PolicyChange"
         },

@@ -232,6 +232,23 @@ await client.auth.deleteAccount(await client.auth.mfa.createTicket({ password })
 await client.auth.confirmAccountDeletion(token);
 ```
 
+## Policy changes
+
+When Stoat updates a platform policy, like its terms of service, users have to acknowledge the change. The pending changes are loaded when the client connects:
+
+```ts
+client.on("ready", () => {
+  for (const change of client.auth.policyChanges) {
+    // change.description, change.url, change.createdAt, change.effectiveAt
+  }
+});
+
+// Once the user has seen them:
+await client.auth.acknowledgePolicyChanges();
+```
+
+`acknowledgePolicyChanges()` acknowledges every pending change at once and empties the list.
+
 ## Synced settings
 
 Settings like the theme or notification preferences can be saved on the server, so they follow the user to every device. Stoat stores each setting as a string under a key you choose and never looks inside it, so most apps store JSON:
