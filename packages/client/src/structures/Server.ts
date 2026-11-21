@@ -14,6 +14,8 @@ import { RouteParams } from "../utils/schema";
 import { Collection } from "../utils/Collection";
 import { AuditLogEntry } from "./AuditLogEntry";
 import { sendReport, type ContentReportReason, type ReportOptions } from "../utils/report";
+import { toDiscoverRequest, type DiscoverRequest } from "../utils/discover";
+import { Permissions, type PermissionResolvable } from "../utils/permissions";
 
 export interface FetchAuditLogsOptions {
   /* Filter by who ran the action */
@@ -164,6 +166,42 @@ export class Server extends Base {
    */
   public subscribe(): boolean {
     return this.client.gateway.send({ type: "Subscribe", server_id: this.id });
+  }
+
+  /**
+   * Sets the permissions everyone in the server has by default (the `@everyone` role).
+   * @param permissions The permissions to allow.
+   * @returns This server, updated.
+   * @example
+   * await server.setDefaultPermissions(["ViewChannel", "ReadMessageHistory", "SendMessage"]);
+   */
+  public async setDefaultPermissions(permissions: PermissionResolvable): Promise<this> {
+    const data = await this.client.rest.put(`/servers/${this.id}/permissions/default`, {
+      permissions: Number(Permissions.resolve(permissions)),
+    });
+    this._patch(data);
+    return this;
+  }
+
+  /**
+   * Asks to list this server on Discover. Only does something on instances that run Discover;
+   * elsewhere the request is stored but never reviewed.
+   */
+  public async requestDiscover(): Promise<void> {
+    await this.client.rest.put(`/servers/${this.id}/discover`);
+  }
+
+  /**
+   * Fetches where this server's Discover request is.
+   * @returns The request's status, with the reviewers' reason once it's decided.
+   */
+  public async fetchDiscoverRequest(): Promise<DiscoverRequest> {
+    return toDiscoverRequest(await this.client.rest.get(`/servers/${this.id}/discover`));
+  }
+
+  /** Withdraws this server's Discover request. Only works while it's still in the queue. */
+  public async cancelDiscoverRequest(): Promise<void> {
+    await this.client.rest.delete(`/servers/${this.id}/discover`);
   }
 
   /**

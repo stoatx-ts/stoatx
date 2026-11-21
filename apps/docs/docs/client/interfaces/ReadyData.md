@@ -61,6 +61,6 @@ User sessions: synced settings, keyed by name, as `[updatedAt, value]`. Loaded i
 
 ### voice\_states?
 
-> `optional` **voice\_states?**: `unknown`[]
+> `optional` **voice\_states?**: [`RawChannelVoiceState`](RawChannelVoiceState.md)[]
 
-Voice channel participants. Not processed by the client yet.
+Who's in which voice call. Loaded into `client.voiceStates`.

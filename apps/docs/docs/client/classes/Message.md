@@ -127,7 +127,7 @@ The base class for all structures.
 
 ### mentions
 
-> **mentions**: `MessageMentions`
+> **mentions**: [`MessageMentions`](MessageMentions.md)
 
 ***
 

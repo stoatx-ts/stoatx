@@ -112,7 +112,7 @@ Cleared when a user sends a message or stops typing, and on reconnect.
 
 ### webhooks
 
-> **webhooks**: `WebhookManager`
+> **webhooks**: [`WebhookManager`](WebhookManager.md)
 
 #### Inherited from
 
@@ -144,8 +144,6 @@ How many unread messages in this channel mention the logged-in user. Always `0` 
 
 > **get** **unread**(): `boolean`
 
-Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
-
 ##### Returns
 
 `boolean`
@@ -153,6 +151,24 @@ Whether this channel has messages the logged-in user hasn't read. Always `false`
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`unread`](BaseChannel.md#unread)
+
+***
+
+### voiceStates
+
+#### Get Signature
+
+> **get** **voiceStates**(): [`Collection`](Collection.md)\<`string`, [`VoiceState`](VoiceState.md)\>
+
+Everyone in this channel's voice call, by user ID. Empty if nobody is in it.
+
+##### Returns
+
+[`Collection`](Collection.md)\<`string`, [`VoiceState`](VoiceState.md)\>
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`voiceStates`](BaseChannel.md#voicestates)
 
 ## Methods
 

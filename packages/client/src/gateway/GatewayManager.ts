@@ -186,6 +186,7 @@ export class GatewayManager {
         this.client.unreads._setAll(payload.channel_unreads ?? []);
         if (payload.user_settings) this.client.settings._setAll(payload.user_settings);
         this.client.auth._setPolicyChanges(payload.policy_changes ?? []);
+        if (payload.voice_states) this.client.voiceStates._setAll(payload.voice_states);
 
         // Typing state from before a reconnect is stale: nobody re-sends a stop event for it.
         this.clearTyping();
@@ -384,6 +385,7 @@ export class GatewayManager {
 
       case "ChannelDelete": {
         const channel = this.client.channels.cache.get(payload.id);
+        this.client.voiceStates._removeChannel(payload.id);
         if (channel) {
           this.client.channels.cache.delete(channel.id);
           this.client.emit("channelDelete", channel);
@@ -399,6 +401,7 @@ export class GatewayManager {
         for (const rawEmoji of payload.emojis ?? []) {
           server.emojis._add(rawEmoji);
         }
+        this.client.voiceStates._addChannels(payload.voice_states ?? []);
         this.client.emit("serverCreate", server);
         break;
       }
@@ -420,6 +423,10 @@ export class GatewayManager {
       }
 
       case "ServerDelete": {
+        for (const channelId of [...this.client.voiceStates.cache.keys()]) {
+          const channel = this.client.channels.cache.get(channelId) as { serverId?: string } | undefined;
+          if (channel?.serverId === payload.id) this.client.voiceStates._removeChannel(channelId);
+        }
         const server = this.client.servers.cache.get(payload.id);
         if (server) {
           this.client.servers.cache.delete(payload.id);
@@ -627,6 +634,52 @@ export class GatewayManager {
         this.client.emit("webhookDelete", webhook ?? { id: payload.id, channelId: payload.channel_id });
         break;
       }
+
+      case "VoiceChannelJoin":
+        this.client.emit("voiceChannelJoin", this.client.voiceStates._add(payload.id, payload.state));
+        break;
+
+      case "VoiceChannelLeave": {
+        const state = this.client.voiceStates._remove(payload.id, payload.user);
+        this.client.emit("voiceChannelLeave", state ?? { channelId: payload.id, userId: payload.user });
+        break;
+      }
+
+      case "VoiceChannelMove": {
+        this.client.voiceStates._remove(payload.from, payload.user);
+        this.client.emit("voiceChannelMove", this.client.voiceStates._add(payload.to, payload.state), payload.from);
+        break;
+      }
+
+      case "UserVoiceStateUpdate": {
+        const state = this.client.voiceStates.get(payload.channel_id).get(payload.id);
+        if (!state) {
+          this.client.emit("debug", `Ignoring UserVoiceStateUpdate for uncached voice state ${payload.id}`);
+          break;
+        }
+        const oldState = state._clone();
+        state._patch(payload.data ?? {});
+        this.client.emit("voiceStateUpdate", oldState, state);
+        break;
+      }
+
+      case "VoiceCallUpdate":
+        this.client.emit("voiceCallUpdate", {
+          channelId: payload.channel_id,
+          initiatorId: payload.initiator_id,
+          startedAt: payload.started_at ? new Date(payload.started_at) : null,
+          ended: payload.ended,
+        });
+        break;
+
+      case "UserMoveVoiceChannel":
+        this.client.emit("voiceMoveRequest", {
+          fromChannelId: payload.from,
+          toChannelId: payload.to,
+          node: payload.node,
+          token: payload.token,
+        });
+        break;
 
       case "UserSettingsUpdate": {
         // Only sent for the logged-in user, including the echo of this client's own changes.

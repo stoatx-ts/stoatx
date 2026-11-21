@@ -188,6 +188,18 @@ class instances (client, managers, other structures) are shared by reference.
 
 ***
 
+### cancelDiscoverRequest()
+
+> **cancelDiscoverRequest**(): `Promise`\<`void`\>
+
+Withdraws the bot's Discover request. Only works while it's still in the queue.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### delete()
 
 > **delete**(): `Promise`\<`void`\>
@@ -242,6 +254,20 @@ Compares this object with another to see if they represent the same entity.
 
 ***
 
+### fetchDiscoverRequest()
+
+> **fetchDiscoverRequest**(): `Promise`\<[`DiscoverRequest`](../interfaces/DiscoverRequest.md)\>
+
+Fetches where the bot's Discover request is.
+
+#### Returns
+
+`Promise`\<[`DiscoverRequest`](../interfaces/DiscoverRequest.md)\>
+
+The request's status, with the reviewers' reason once it's decided.
+
+***
+
 ### inviteToGroup()
 
 > **inviteToGroup**(`group`): `Promise`\<`void`\>
@@ -272,6 +298,19 @@ Adds the bot to a server the logged-in user can manage.
 | ------ | ------ | ------ |
 | `server` | `string` \| [`Server`](Server.md) | The server or its ID. |
 | `permissions?` | [`PermissionResolvable`](../type-aliases/PermissionResolvable.md) | The permissions to give the bot. Defaults to [defaultPermissions](#defaultpermissions). |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### requestDiscover()
+
+> **requestDiscover**(): `Promise`\<`void`\>
+
+Asks to list the bot on Discover. Needs `analytics` turned on. Only does something
+on instances that run Discover; elsewhere the request is stored but never reviewed.
 
 #### Returns
 

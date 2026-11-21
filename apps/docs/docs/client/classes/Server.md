@@ -49,7 +49,7 @@ The base class for all structures.
 
 ### bans
 
-> **bans**: `ServerBanManager`
+> **bans**: [`ServerBanManager`](ServerBanManager.md)
 
 ***
 
@@ -151,7 +151,7 @@ The base class for all structures.
 
 ### invites
 
-> **invites**: `ServerInviteManager`
+> **invites**: [`ServerInviteManager`](ServerInviteManager.md)
 
 ***
 
@@ -262,6 +262,18 @@ Marks every channel in this server as read (user sessions only).
 
 ***
 
+### cancelDiscoverRequest()
+
+> **cancelDiscoverRequest**(): `Promise`\<`void`\>
+
+Withdraws this server's Discover request. Only works while it's still in the queue.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### edit()
 
 > **edit**(`options`): `Promise`\<`Server`\>
@@ -304,7 +316,7 @@ Compares this object with another to see if they represent the same entity.
 
 ### fetchAuditLogs()
 
-> **fetchAuditLogs**(`options?`): `Promise`\<[`Collection`](Collection.md)\<`string`, `AuditLogEntry`\>\>
+> **fetchAuditLogs**(`options?`): `Promise`\<[`Collection`](Collection.md)\<`string`, [`AuditLogEntry`](AuditLogEntry.md)\>\>
 
 Fetch audit logs for this server
 
@@ -316,7 +328,21 @@ Fetch audit logs for this server
 
 #### Returns
 
-`Promise`\<[`Collection`](Collection.md)\<`string`, `AuditLogEntry`\>\>
+`Promise`\<[`Collection`](Collection.md)\<`string`, [`AuditLogEntry`](AuditLogEntry.md)\>\>
+
+***
+
+### fetchDiscoverRequest()
+
+> **fetchDiscoverRequest**(): `Promise`\<[`DiscoverRequest`](../interfaces/DiscoverRequest.md)\>
+
+Fetches where this server's Discover request is.
+
+#### Returns
+
+`Promise`\<[`DiscoverRequest`](../interfaces/DiscoverRequest.md)\>
+
+The request's status, with the reviewers' reason once it's decided.
 
 ***
 
@@ -371,6 +397,45 @@ Reports this server to Stoat's moderation team.
 #### Returns
 
 `Promise`\<`void`\>
+
+***
+
+### requestDiscover()
+
+> **requestDiscover**(): `Promise`\<`void`\>
+
+Asks to list this server on Discover. Only does something on instances that run Discover;
+elsewhere the request is stored but never reviewed.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### setDefaultPermissions()
+
+> **setDefaultPermissions**(`permissions`): `Promise`\<`Server`\>
+
+Sets the permissions everyone in the server has by default (the `@everyone` role).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `permissions` | [`PermissionResolvable`](../type-aliases/PermissionResolvable.md) | The permissions to allow. |
+
+#### Returns
+
+`Promise`\<`Server`\>
+
+This server, updated.
+
+#### Example
+
+```ts
+await server.setDefaultPermissions(["ViewChannel", "ReadMessageHistory", "SendMessage"]);
+```
 
 ***
 

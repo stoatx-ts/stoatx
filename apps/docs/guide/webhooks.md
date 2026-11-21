@@ -106,6 +106,32 @@ Sending requires the webhook's `token`. If you constructed a `Webhook` without a
 `fetch()` with the token first so `webhook.token` is populated.
 :::
 
+## Editing and Deleting Its Messages
+
+A webhook can edit and delete the messages it sent. Both need the token too:
+
+```typescript
+const message = await webhook.send("Deploying…");
+
+await webhook.editMessage(message, "Deployment finished successfully.");
+await webhook.editMessage(message, { embeds: [] }); // remove the embeds
+
+await webhook.deleteMessage(message); // a message or its ID
+```
+
+## GitHub Events
+
+Stoat can turn GitHub webhook events into messages. Point a GitHub webhook at
+`https://<api>/webhooks/<id>/<token>/github` (for stoat.chat, the API is `https://api.stoat.chat`)
+with the content type set to JSON.
+
+To forward events you receive some other way, pass the event name from GitHub's `X-GitHub-Event`
+header and the payload:
+
+```typescript
+await webhook.sendGitHubEvent("push", payload);
+```
+
 ## Editing a Webhook
 
 Use `edit()` to change the name, avatar, or permissions of a webhook. All fields are optional,

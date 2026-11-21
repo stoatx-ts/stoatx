@@ -5,11 +5,6 @@ import { BaseManager } from "./BaseManager";
 import { ServerBan } from "../structures/ServerBan";
 import { ServerBan as RawServerBan } from "stoat-api";
 
-export interface Ban {
-  userId: string;
-  reason: string | null;
-}
-
 export class ServerBanManager extends BaseManager<string, ServerBan, RawServerBan> {
   constructor(
     client: Client,

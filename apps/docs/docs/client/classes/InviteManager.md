@@ -47,6 +47,24 @@ banned from the server, or `TooManyServers` if you're at the server limit.
 
 ***
 
+### delete()
+
+> **delete**(`code`): `Promise`\<`void`\>
+
+Deletes an invite so it stops working.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `code` | `string` | The invite code. |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### fetch()
 
 > **fetch**(`code`): `Promise`\<[`InvitePreview`](../type-aliases/InvitePreview.md)\>

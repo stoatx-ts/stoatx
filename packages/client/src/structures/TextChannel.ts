@@ -5,6 +5,8 @@ import { PermissionResolvable } from "../utils/permissions";
 import { ChannelRolePermissionOptions } from "../managers/ChannelManager";
 import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
 import { decodeTime } from "ulid";
+import { ServerInvite, type InviteCreateOptions } from "./ServerInvite";
+import { requestInvite } from "../utils/invites";
 
 export type RawTextChannel = Extract<RawChannel, { channel_type: "TextChannel" }>;
 
@@ -78,6 +80,19 @@ export class TextChannel extends BaseChannel {
    */
   public async setRolePermissions(roleId: string, options: ChannelRolePermissionOptions): Promise<this> {
     return (await this.client.channels.setRolePermissions(this.id, roleId, options)) as this;
+  }
+
+  /**
+   * Creates an invite to this channel.
+   * @param options A use limit and expiry time.
+   * @returns The new invite. Share its `code`.
+   * @example
+   * const invite = await channel.createInvite({ maxUses: 10, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
+   */
+  public async createInvite(options: InviteCreateOptions = {}): Promise<ServerInvite> {
+    const server = this.client.servers.cache.get(this.serverId);
+    const data = await requestInvite(this.client, this.id, options);
+    return server ? server.invites._add(data) : new ServerInvite(this.client, data);
   }
 
   /**

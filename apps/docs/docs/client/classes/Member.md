@@ -104,7 +104,7 @@ Represents a member of a server on Stoat
 
 ### roles
 
-> **roles**: `MemberRoleManager`
+> **roles**: [`MemberRoleManager`](MemberRoleManager.md)
 
 ***
 

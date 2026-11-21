@@ -6,6 +6,7 @@ import type { GroupChannel } from "./GroupChannel";
 import type { BotEditOptions } from "../managers/BotManager";
 import type { PermissionResolvable } from "../utils/permissions";
 import type { Bot as RawBot, FieldsBot } from "stoat-api";
+import { toDiscoverRequest, type DiscoverRequest } from "../utils/discover";
 
 /**
  * A bot owned by the logged-in user. Get one from `client.bots`.
@@ -78,6 +79,27 @@ export class Bot extends Base {
     const { token } = await this.client.bots.edit(this.id, { resetToken: true });
     this.token = token;
     return token;
+  }
+
+  /**
+   * Asks to list the bot on Discover. Needs `analytics` turned on. Only does something
+   * on instances that run Discover; elsewhere the request is stored but never reviewed.
+   */
+  public async requestDiscover(): Promise<void> {
+    await this.client.rest.put(`/bots/${this.id}/discover`);
+  }
+
+  /**
+   * Fetches where the bot's Discover request is.
+   * @returns The request's status, with the reviewers' reason once it's decided.
+   */
+  public async fetchDiscoverRequest(): Promise<DiscoverRequest> {
+    return toDiscoverRequest(await this.client.rest.get(`/bots/${this.id}/discover`));
+  }
+
+  /** Withdraws the bot's Discover request. Only works while it's still in the queue. */
+  public async cancelDiscoverRequest(): Promise<void> {
+    await this.client.rest.delete(`/bots/${this.id}/discover`);
   }
 
   /** Deletes the bot. */

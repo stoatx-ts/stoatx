@@ -7,6 +7,7 @@ import { DMChannel } from "./DMChannel";
 import { GroupChannel } from "./GroupChannel";
 import { ChannelEditOptions } from "../managers/ChannelManager";
 import { Collection } from "../utils/Collection";
+import type { VoiceState } from "./VoiceState";
 import { MessageCollector, MessageCollectorOptions } from "../utils/MessageCollector";
 import { Channel as RawChannel } from "stoat-api";
 import type { VoiceChannel } from "./VoiceChannel";
@@ -83,6 +84,11 @@ export abstract class BaseChannel extends Base {
   /**
    * Whether this channel has messages the logged-in user hasn't read. Always `false` for bots.
    */
+  /** Everyone in this channel's voice call, by user ID. Empty if nobody is in it. */
+  public get voiceStates(): Collection<string, VoiceState> {
+    return this.client.voiceStates.get(this.id);
+  }
+
   public get unread(): boolean {
     return this.client.unreads.isUnread(this.id);
   }

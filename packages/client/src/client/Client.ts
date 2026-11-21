@@ -25,6 +25,8 @@ import {
 import { UnreadManager } from "../managers/UnreadManager";
 import { SettingsManager, type SyncedSetting } from "../managers/SettingsManager";
 import { BotManager } from "../managers/BotManager";
+import { VoiceStateManager, type RawChannelVoiceState } from "../managers/VoiceStateManager";
+import type { VoiceState } from "../structures/VoiceState";
 import { InviteManager } from "../managers/InviteManager";
 import type {
   RevoltConfig,
@@ -36,6 +38,27 @@ import type {
   ChannelUnread,
 } from "stoat-api";
 import { StoatAPI } from "../utils/Constants";
+
+/** A DM or group call starting or ending, from the `voiceCallUpdate` event. */
+export interface VoiceCallUpdate {
+  channelId: string;
+  /** The user who started the call. */
+  initiatorId: string;
+  /** When the call started, or `null` if it hasn't. */
+  startedAt: Date | null;
+  /** Whether the call is over. */
+  ended: boolean;
+}
+
+/** The server moving the logged-in user to another call, from the `voiceMoveRequest` event. */
+export interface VoiceMoveRequest {
+  fromChannelId: string;
+  toChannelId: string;
+  /** The voice node to connect to. */
+  node: string;
+  /** The token for the new call. */
+  token: string;
+}
 
 /** A change to a platform policy (terms of service, privacy policy) the user has to acknowledge. */
 export interface PolicyChange {
@@ -61,8 +84,8 @@ export interface ReadyData {
   channel_unreads?: ChannelUnread[];
   /** User sessions: policy changes the user hasn't acknowledged yet. Loaded into `client.auth.policyChanges`. */
   policy_changes?: PolicyChange[];
-  /** Voice channel participants. Not processed by the client yet. */
-  voice_states?: unknown[];
+  /** Who's in which voice call. Loaded into `client.voiceStates`. */
+  voice_states?: RawChannelVoiceState[];
 }
 
 /** How to log in with {@link Client.login}. A {@link UserSession} works as-is. */
@@ -117,6 +140,21 @@ export interface ClientEvents {
   userPlatformWipe: [userId: string, flags: number];
   /** Synced settings changed on another device (user sessions only). Only the changed keys are included. */
   settingsUpdate: [settings: Collection<string, SyncedSetting>];
+  /** Someone joined a voice call. */
+  voiceChannelJoin: [state: VoiceState];
+  /** Someone left a voice call. Partial if their state wasn't cached. */
+  voiceChannelLeave: [state: VoiceState | { channelId: string; userId: string }];
+  /** Someone moved from one call to another. */
+  voiceChannelMove: [state: VoiceState, fromChannelId: string];
+  /** Someone in a call muted, deafened, or turned screen sharing or their camera on or off. */
+  voiceStateUpdate: [oldState: VoiceState, newState: VoiceState];
+  /** A call in a DM or group started, or ended. */
+  voiceCallUpdate: [call: VoiceCallUpdate];
+  /**
+   * The server moved the logged-in user to another call, e.g. a moderator dragged them.
+   * A voice package needs to reconnect to `toChannelId` with the given `token` and `node`.
+   */
+  voiceMoveRequest: [move: VoiceMoveRequest];
   /** The session ended: logged out, revoked from another device, or the token was invalidated. The client has disconnected. */
   logout: [];
 }
@@ -166,6 +204,8 @@ export class Client extends EventEmitter {
   public settings: SettingsManager;
   /** The logged-in user's bots (user sessions only). */
   public bots: BotManager;
+  /** Who's in which voice call, without joining. */
+  public voiceStates: VoiceStateManager;
   /** Preview and accept invites by code. */
   public invites: InviteManager;
   public user: ClientUser | null = null;
@@ -184,6 +224,7 @@ export class Client extends EventEmitter {
     this.unreads = new UnreadManager(this);
     this.settings = new SettingsManager(this);
     this.bots = new BotManager(this);
+    this.voiceStates = new VoiceStateManager(this);
     this.invites = new InviteManager(this);
     // Set up front so requests that need no token (credential login) work before login().
     this.rest.setBaseURL(options.apiURL ?? StoatAPI);
@@ -296,6 +337,7 @@ export class Client extends EventEmitter {
     this.unreads.cache.clear();
     this.settings.cache.clear();
     this.bots.cache.clear();
+    this.voiceStates.cache.clear();
     this.auth.policyChanges = [];
     this.emit("logout");
   }

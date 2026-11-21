@@ -2,7 +2,7 @@
 
 ## Extends
 
-- `BaseManager`\<`string`, [`User`](User.md), `RawUser`\>
+- [`BaseManager`](BaseManager.md)\<`string`, [`User`](User.md), `RawUser`\>
 
 ## Constructors
 
@@ -23,7 +23,7 @@
 
 #### Overrides
 
-`BaseManager<string, User, RawUser>.constructor`
+[`BaseManager`](BaseManager.md).[`constructor`](BaseManager.md#constructor)
 
 ## Properties
 
@@ -33,7 +33,7 @@
 
 #### Inherited from
 
-`BaseManager.cache`
+[`BaseManager`](BaseManager.md).[`cache`](BaseManager.md#cache)
 
 ***
 
@@ -43,7 +43,7 @@
 
 #### Inherited from
 
-`BaseManager.client`
+[`BaseManager`](BaseManager.md).[`client`](BaseManager.md#client)
 
 ## Accessors
 

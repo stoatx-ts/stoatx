@@ -12,7 +12,7 @@ await bot.inviteToServer(server);
 
 ## Extends
 
-- `BaseManager`\<`string`, [`Bot`](Bot.md), `RawBot`\>
+- [`BaseManager`](BaseManager.md)\<`string`, [`Bot`](Bot.md), `RawBot`\>
 
 ## Constructors
 
@@ -32,7 +32,7 @@ await bot.inviteToServer(server);
 
 #### Overrides
 
-`BaseManager<string, Bot, RawBot>.constructor`
+[`BaseManager`](BaseManager.md).[`constructor`](BaseManager.md#constructor)
 
 ## Properties
 
@@ -42,7 +42,7 @@ await bot.inviteToServer(server);
 
 #### Inherited from
 
-`BaseManager.cache`
+[`BaseManager`](BaseManager.md).[`cache`](BaseManager.md#cache)
 
 ***
 
@@ -52,7 +52,7 @@ await bot.inviteToServer(server);
 
 #### Inherited from
 
-`BaseManager.client`
+[`BaseManager`](BaseManager.md).[`client`](BaseManager.md#client)
 
 ## Methods
 

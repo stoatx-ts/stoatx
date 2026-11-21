@@ -8,6 +8,8 @@ import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/ins
 import { PermissionResolvable } from "../utils/permissions";
 import type { Channel as RawChannel, FieldsChannel } from "stoat-api";
 import { decodeTime } from "ulid";
+import { ServerInvite, type InviteCreateOptions } from "./ServerInvite";
+import { requestInvite } from "../utils/invites";
 
 export type RawGroupChannel = Extract<RawChannel, { channel_type: "Group" }>;
 
@@ -122,6 +124,17 @@ export class GroupChannel extends BaseChannel {
   public async leave(options: { silent?: boolean } = {}): Promise<void> {
     await this.client.rest.delete(`/channels/${this.id}`, { leave_silently: options.silent ?? false });
     this.client.channels.cache.delete(this.id);
+  }
+
+  /**
+   * Creates an invite to this group.
+   * @param options A use limit and expiry time.
+   * @returns The new invite. Share its `code`.
+   * @example
+   * const invite = await channel.createInvite({ maxUses: 10, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
+   */
+  public async createInvite(options: InviteCreateOptions = {}): Promise<ServerInvite> {
+    return new ServerInvite(this.client, await requestInvite(this.client, this.id, options));
   }
 
   /**

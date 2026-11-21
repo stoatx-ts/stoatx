@@ -6,12 +6,14 @@ import {
   FieldsWebhook,
   Webhook as APIWebhook,
   Message as APIMessage,
+  DataEditMessage,
 } from "stoat-api";
 import { Attachment } from "./Attachment";
 import { resolveAttachment } from "../utils/resolveAttachment";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
 import { PermissionResolvable, Permissions } from "../utils/permissions";
 import { Message, MessageOptions } from "./Message";
+import type { MessageResolvable } from "../managers/MessageManager";
 
 export interface WebhookEditOptions {
   name?: string;
@@ -132,4 +134,71 @@ export class Webhook extends Base {
 
     return new Message(this.client, data);
   }
+
+  /**
+   * Edits a message this webhook sent. Needs the webhook's token.
+   * @param message The message or its ID.
+   * @param contentOrOptions The new content, or the new content and embeds. `embeds: []` removes them.
+   * @returns The edited message.
+   */
+  public async editMessage(message: MessageResolvable, contentOrOptions: string | MessageOptions): Promise<Message> {
+    const opts = typeof contentOrOptions === "string" ? { content: contentOrOptions } : contentOrOptions;
+    const payload: DataEditMessage = {};
+    if (opts.content !== undefined) payload.content = opts.content;
+    if (opts.embeds !== undefined) {
+      payload.embeds =
+        opts.embeds === null ? [] : opts.embeds.map((embed) => ("toJSON" in embed ? embed.toJSON() : embed));
+    }
+
+    const data = (await this.client.rest.patch(
+      `/webhooks/${this.id}/${this.requireToken("editMessage")}/${messageId(message)}`,
+      payload,
+    )) as APIMessage;
+    return new Message(this.client, data);
+  }
+
+  /**
+   * Deletes a message this webhook sent. Needs the webhook's token.
+   * @param message The message or its ID.
+   */
+  public async deleteMessage(message: MessageResolvable): Promise<void> {
+    await this.client.rest.delete(`/webhooks/${this.id}/${this.requireToken("deleteMessage")}/${messageId(message)}`);
+  }
+
+  /**
+   * Posts a GitHub webhook event through this webhook, which Stoat turns into a message.
+   * Usually GitHub calls this itself: point a GitHub webhook at `{apiURL}/webhooks/{id}/{token}/github`.
+   * Use this to forward events you received some other way.
+   * @param event The GitHub event name, from GitHub's `X-GitHub-Event` header, e.g. `"push"`.
+   * @param payload The event's JSON payload, as GitHub sent it.
+   */
+  public async sendGitHubEvent(event: string, payload: Record<string, unknown>): Promise<void> {
+    await this.client.rest.post(
+      `/webhooks/${this.id}/${this.requireToken("sendGitHubEvent")}/github`,
+      payload as never,
+      // `query: {}` keeps GitHub's payload keys (e.g. "type") in the body.
+      { headers: { "X-GitHub-Event": event }, query: {} },
+    );
+  }
+
+  /**
+   * Gets the token, which webhook routes need in the URL.
+   * @param method The method name, for the error message.
+   */
+  private requireToken(method: string): string {
+    if (!this.token) {
+      throw new Error(
+        `WEBHOOK_TOKEN_MISSING: webhook.${method}() needs the webhook's token. Fetch the webhook with it first.`,
+      );
+    }
+    return this.token;
+  }
+}
+
+/**
+ * Gets a message's ID.
+ * @param message The message or its ID.
+ */
+function messageId(message: MessageResolvable): string {
+  return typeof message === "string" ? message : message.id;
 }
