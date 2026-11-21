@@ -16,7 +16,9 @@
 
 ### embeds?
 
-> `optional` **embeds?**: ([`TextEmbedData`](TextEmbedData.md) \| [`EmbedBuilder`](../classes/EmbedBuilder.md))[]
+> `optional` **embeds?**: ([`TextEmbedData`](TextEmbedData.md) \| [`EmbedBuilder`](../classes/EmbedBuilder.md))[] \| `null`
+
+Embeds to send. When editing, `null` (or `[]`) removes the message's embeds.
 
 ***
 

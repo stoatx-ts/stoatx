@@ -182,7 +182,7 @@ Edits a message this webhook sent. Needs the webhook's token.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | [`MessageResolvable`](../type-aliases/MessageResolvable.md) | The message or its ID. |
-| `contentOrOptions` | `string` \| [`MessageOptions`](../interfaces/MessageOptions.md) | The new content, or the new content and embeds. `embeds: []` removes them. |
+| `contentOrOptions` | `string` \| [`MessageOptions`](../interfaces/MessageOptions.md) | The new content, or the new content and embeds. `embeds: null` removes them. |
 
 #### Returns
 

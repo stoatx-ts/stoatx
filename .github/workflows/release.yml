@@ -70,7 +70,7 @@ jobs:
         run: |
           # docusaurus-plugin-typedoc regenerates the API markdown as part of
           # the Docusaurus build lifecycle, so running the real build here
-          # ensures docs/client is current even if it wasn't rebuilt locally
+          # ensures the API docs (docs/client and docs/voice*) are current even if they weren't rebuilt locally
           # before this PR was opened.
           pnpm --filter @stoatx/docs run build
 
@@ -90,7 +90,7 @@ jobs:
           git config user.name "stoatx-release[bot]"
           git config user.email "stoatx-release[bot]@users.noreply.github.com"
 
-          git add apps/docs/api_versioned_docs apps/docs/api_versioned_sidebars apps/docs/api_versions.json apps/docs/docs/client
+          git add apps/docs/api_versioned_docs apps/docs/api_versioned_sidebars apps/docs/api_versions.json apps/docs/docs
 
           # Only commit and push if there are actual changes (prevents workflow failures on subsequent runs)
           if ! git diff --staged --quiet; then

@@ -114,7 +114,7 @@ A webhook can edit and delete the messages it sent. Both need the token too:
 const message = await webhook.send("Deploying…");
 
 await webhook.editMessage(message, "Deployment finished successfully.");
-await webhook.editMessage(message, { embeds: [] }); // remove the embeds
+await webhook.editMessage(message, { embeds: null }); // remove the embeds
 
 await webhook.deleteMessage(message); // a message or its ID
 ```

@@ -138,7 +138,7 @@ export class Webhook extends Base {
   /**
    * Edits a message this webhook sent. Needs the webhook's token.
    * @param message The message or its ID.
-   * @param contentOrOptions The new content, or the new content and embeds. `embeds: []` removes them.
+   * @param contentOrOptions The new content, or the new content and embeds. `embeds: null` removes them.
    * @returns The edited message.
    */
   public async editMessage(message: MessageResolvable, contentOrOptions: string | MessageOptions): Promise<Message> {

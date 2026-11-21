@@ -19,7 +19,8 @@ import { sendReport, type ContentReportReason, type ReportOptions } from "../uti
 
 export interface MessageOptions {
   content?: string;
-  embeds?: (TextEmbedData | EmbedBuilder)[];
+  /** Embeds to send. When editing, `null` (or `[]`) removes the message's embeds. */
+  embeds?: (TextEmbedData | EmbedBuilder)[] | null;
   attachments?: string[] | AttachmentBuilder[];
   interactions?: {
     reactions?: string[] | null;
