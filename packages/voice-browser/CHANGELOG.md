@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.1](https://github.com/stoatx-ts/stoatx/compare/voice-browser-v1.0.0...voice-browser-v1.0.1) (2026-11-21)
+
+
+### Documentation
+
+* **voice:** add npm badges to the voice package READMEs ([#180](https://github.com/stoatx-ts/stoatx/issues/180)) ([f60295d](https://github.com/stoatx-ts/stoatx/commit/f60295db5d553981ffe87499cab51e9c1f2ceb08))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @stoatx/voice bumped to 1.0.1
+
 ## 1.0.0 (2026-11-21)
 
 
