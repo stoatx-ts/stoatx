@@ -12,6 +12,7 @@ export class DMChannel extends BaseChannel {
 
   constructor(client: Client, data: RawDMChannel) {
     super(client, data);
+    this._patch(data);
   }
 
   public _patch(data: RawDMChannel): void {
