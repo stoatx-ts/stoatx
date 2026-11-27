@@ -1,7 +1,7 @@
 {
-  "packages/stoatx": "1.1.1",
-  "packages/client": "1.0.0",
-  "packages/voice": "1.0.1",
-  "packages/voice-node": "1.0.1",
-  "packages/voice-browser": "1.0.1"
+  "packages/stoatx": "1.1.2",
+  "packages/client": "1.1.0",
+  "packages/voice": "1.0.2",
+  "packages/voice-node": "1.0.2",
+  "packages/voice-browser": "1.0.2"
 }
