@@ -32,6 +32,21 @@ The API's base URL, without a trailing slash.
 
 ***
 
+### cdnURL
+
+#### Get Signature
+
+> **get** **cdnURL**(): `string`
+
+The CDN's base URL, without a trailing slash. Read from the instance's config on login, so
+it points at the right CDN for self-hosted instances too. Empty before login.
+
+##### Returns
+
+`string`
+
+***
+
 ### tokenType
 
 #### Get Signature

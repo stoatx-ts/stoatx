@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/voice-browser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Voice for @stoatx/client in browsers: join voice channels with the microphone and hear others.",
   "repository": {
@@ -38,7 +38,7 @@
     "livekit-client": "^2.23.0"
   },
   "peerDependencies": {
-    "@stoatx/client": "^1.0.0"
+    "@stoatx/client": "^1.1.0"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*"

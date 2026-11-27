@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/stoatx-ts/stoatx/compare/client-v1.0.0...client-v1.1.0) (2026-11-27)
+
+
+### Features
+
+* **client:** calculate permissions in channels ([#184](https://github.com/stoatx-ts/stoatx/issues/184)) ([0d251d9](https://github.com/stoatx-ts/stoatx/commit/0d251d999fa5cf1780e3700c5f49914e0a4f5c61))
+
+
+### Bug Fixes
+
+* **client:** DM channels, unreads, file URLs and system messages ([#183](https://github.com/stoatx-ts/stoatx/issues/183)) ([8dc30ec](https://github.com/stoatx-ts/stoatx/commit/8dc30ec38a6e4f62c73bd15050e297e35ff566b6))
+
 ## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.10.1...client-v1.0.0) (2026-11-21)
 
 

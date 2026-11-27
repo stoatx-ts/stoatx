@@ -147,6 +147,16 @@ The base class for all structures.
 
 > **replies**: `string`[] \| `null` = `[]`
 
+***
+
+### system
+
+> **system**: \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| \{ \} \| `null` = `null`
+
+What a system message is about, e.g. `{ type: "user_joined", id }` or
+`{ type: "message_pinned", id, by }`. `null` for messages written by a user or bot.
+System messages have no content, and their author ID is all zeros.
+
 ## Accessors
 
 ### author

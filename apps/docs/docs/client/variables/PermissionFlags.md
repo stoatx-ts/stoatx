@@ -38,5 +38,7 @@
 | <a id="property-speak"></a> `Speak` | `bigint` | - |
 | <a id="property-timeoutmembers"></a> `TimeoutMembers` | `bigint` | - |
 | <a id="property-uploadfiles"></a> `UploadFiles` | `bigint` | - |
+| <a id="property-useexternalemojis"></a> `UseExternalEmojis` | `bigint` | - |
 | <a id="property-video"></a> `Video` | `bigint` | - |
+| <a id="property-viewauditlogs"></a> `ViewAuditLogs` | `bigint` | - |
 | <a id="property-viewchannel"></a> `ViewChannel` | `bigint` | - |

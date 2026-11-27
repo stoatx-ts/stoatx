@@ -1,6 +1,6 @@
 {
   "name": "@stoatx/voice",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Shared voice connection and manager for @stoatx/voice-node and @stoatx/voice-browser.",
   "repository": {
@@ -37,7 +37,7 @@
     "events": "^3.3.0"
   },
   "peerDependencies": {
-    "@stoatx/client": "^1.0.0"
+    "@stoatx/client": "^1.1.0"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*",

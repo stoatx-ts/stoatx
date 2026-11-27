@@ -74,6 +74,8 @@ or `@stoatx/voice-browser`: `await voice.join(channel)`.
 
 > `optional` **defaultPermissions?**: \{ `a`: `number`; `d`: `number`; \} \| `null`
 
+The channel's override for everyone: `a` is allowed, `d` denied.
+
 #### Inherited from
 
 [`TextChannel`](TextChannel.md).[`defaultPermissions`](TextChannel.md#defaultpermissions)
@@ -147,6 +149,18 @@ or `@stoatx/voice-browser`: `await voice.join(channel)`.
 #### Inherited from
 
 [`TextChannel`](TextChannel.md).[`nsfw`](TextChannel.md#nsfw)
+
+***
+
+### rolePermissions
+
+> **rolePermissions**: `Record`\<`string`, \{ `a`: `number`; `d`: `number`; \}\> = `{}`
+
+The channel's overrides per role, by role ID: `a` is allowed, `d` denied.
+
+#### Inherited from
+
+[`TextChannel`](TextChannel.md).[`rolePermissions`](TextChannel.md#rolepermissions)
 
 ***
 
@@ -228,6 +242,30 @@ How many unread messages in this channel mention the logged-in user. Always `0` 
 #### Inherited from
 
 [`TextChannel`](TextChannel.md).[`mentionCount`](TextChannel.md#mentioncount)
+
+***
+
+### permissions
+
+#### Get Signature
+
+> **get** **permissions**(): [`Permissions`](Permissions.md)
+
+What the logged-in user can do in this channel, with the channel's overrides applied.
+
+##### Example
+
+```ts
+if (channel.permissions.has("SendMessage")) showComposer();
+```
+
+##### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Inherited from
+
+[`TextChannel`](TextChannel.md).[`permissions`](TextChannel.md#permissions)
 
 ***
 
@@ -672,6 +710,36 @@ console.log(`Fetched ${messages.size} messages sent around the specified message
 #### Inherited from
 
 [`TextChannel`](TextChannel.md).[`isVoice`](TextChannel.md#isvoice)
+
+***
+
+### permissionsFor()
+
+> **permissionsFor**(`user`): [`Permissions`](Permissions.md)
+
+What a user can do in this channel, with the channel's overrides applied, following the same
+rules as Stoat: role and channel overrides in servers, friends-only DMs, group permissions,
+and timeouts. Users that aren't in the channel, or aren't cached, have no permissions.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`Member`](Member.md) \| [`UserResolvable`](../type-aliases/UserResolvable.md) | The user, their ID, or their server member. |
+
+#### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Example
+
+```ts
+const canSee = channel.permissionsFor(member).has("ViewChannel");
+```
+
+#### Inherited from
+
+[`TextChannel`](TextChannel.md).[`permissionsFor`](TextChannel.md#permissionsfor)
 
 ***
 

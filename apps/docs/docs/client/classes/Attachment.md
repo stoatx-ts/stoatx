@@ -139,13 +139,31 @@ Helper boolean to quickly check if it's an image
 
 ***
 
+### previewURL
+
+#### Get Signature
+
+> **get** **previewURL**(): `string`
+
+The URL of a smaller version of an image, made by the CDN: a WebP that fits within a size
+set per tag (1280×1280 for attachments, 128×128 for avatars and icons by default).
+For files that aren't images, and animated images outside avatars and icons, the CDN
+redirects to the original file. Avatar and icon previews aren't animated.
+
+##### Returns
+
+`string`
+
+***
+
 ### url
 
 #### Get Signature
 
 > **get** **url**(): `string`
 
-Automatically constructs the direct CDN URL for this file
+The URL of the original file, at full size. Use it to download or open the file;
+use [previewURL](#previewurl) to show an image.
 
 ##### Returns
 

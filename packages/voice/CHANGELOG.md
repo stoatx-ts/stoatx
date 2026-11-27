@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.2](https://github.com/stoatx-ts/stoatx/compare/voice-v1.0.1...voice-v1.0.2) (2026-11-27)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @stoatx/client bumped to 1.1.0
+  * peerDependencies
+    * @stoatx/client bumped from ^1.0.0 to ^1.1.0
+
 ## [1.0.1](https://github.com/stoatx-ts/stoatx/compare/voice-v1.0.0...voice-v1.0.1) (2026-11-21)
 
 
