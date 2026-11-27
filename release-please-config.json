@@ -4,29 +4,7 @@
   "packages": {
     "packages/client": {
       "release-type": "node",
-      "package-name": "@stoatx/client",
-      "extra-files": [
-        {
-          "type": "json",
-          "path": "packages/stoatx/package.json",
-          "jsonpath": "$.peerDependencies['@stoatx/client']"
-        },
-        {
-          "type": "json",
-          "path": "packages/voice/package.json",
-          "jsonpath": "$.peerDependencies['@stoatx/client']"
-        },
-        {
-          "type": "json",
-          "path": "packages/voice-node/package.json",
-          "jsonpath": "$.peerDependencies['@stoatx/client']"
-        },
-        {
-          "type": "json",
-          "path": "packages/voice-browser/package.json",
-          "jsonpath": "$.peerDependencies['@stoatx/client']"
-        }
-      ]
+      "package-name": "@stoatx/client"
     }
   },
   "plugins": ["node-workspace"]
