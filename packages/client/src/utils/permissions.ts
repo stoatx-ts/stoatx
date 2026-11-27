@@ -30,6 +30,8 @@ export const PermissionFlags = {
   Masquerade: 1n << 28n,
   React: 1n << 29n,
   BypassSlowmode: 1n << 39n,
+  ViewAuditLogs: 1n << 40n,
+  UseExternalEmojis: 1n << 41n,
 
   // Voice permissions
   Connect: 1n << 30n,
