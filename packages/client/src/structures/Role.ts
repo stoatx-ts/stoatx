@@ -1,3 +1,4 @@
+import type { PermissionOverride } from "../utils/permissionCalculator";
 import { Base } from "./Base";
 import type { Client } from "../client/Client";
 import type { Server } from "./Server";
@@ -17,6 +18,7 @@ export class Role extends Base {
   public rank: number = 0;
   public icon: Attachment | null = null;
   private _permissions: bigint = 0n;
+  private _deniedPermissions: bigint = 0n;
   public createdAt!: Date;
   public createdTimestamp!: number;
 
@@ -44,13 +46,15 @@ export class Role extends Base {
     if (data.permissions !== undefined) {
       try {
         if (typeof data.permissions === "object" && data.permissions !== null) {
-          const allowPerms = data.permissions.a ?? 0;
-          this._permissions = BigInt(allowPerms);
+          this._permissions = BigInt(data.permissions.a ?? 0);
+          this._deniedPermissions = BigInt(data.permissions.d ?? 0);
         } else {
           this._permissions = BigInt(data.permissions);
+          this._deniedPermissions = 0n;
         }
       } catch {
         this._permissions = 0n;
+        this._deniedPermissions = 0n;
       }
     }
 
@@ -88,6 +92,16 @@ export class Role extends Base {
    */
   public get permissions(): Permissions {
     return new Permissions(this._permissions);
+  }
+
+  /** The permissions this role takes away from its members. */
+  public get deniedPermissions(): Permissions {
+    return new Permissions(this._deniedPermissions);
+  }
+
+  /** The role's override: the permissions it allows, then the ones it denies. */
+  public get permissionOverride(): PermissionOverride {
+    return { allow: this._permissions, deny: this._deniedPermissions };
   }
 
   /**

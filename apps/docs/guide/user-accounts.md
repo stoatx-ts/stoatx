@@ -347,7 +347,19 @@ server.subscribe();
 
 A subscription lasts 15 minutes, so subscribe again (for example every 10 minutes) while the server stays on screen. Each connection keeps at most 5 subscriptions; subscribing to a 6th drops the least recently used. Bots don't need this: they get updates from every server automatically.
 
-## Friends and blocking
+## Checking permissions
+
+To hide channels the user can't see, or disable the message box where they can't post, check their permissions in the channel. They're calculated the same way Stoat does it: the server's defaults, the member's roles, the channel's overrides, timeouts, and the rules for DMs and groups.
+
+```ts
+channel.permissions.has("ViewChannel"); // the logged-in user
+channel.permissions.has("SendMessage");
+channel.permissionsFor(member).has("ManageMessages"); // anyone else: a user, their ID or their member
+
+member.permissions.has("KickMembers"); // server-wide, before channel overrides
+```
+
+DMs can only be messaged between friends (or with a bot); other DMs, including with someone who blocked the user, are read-only.
 
 Everyone the user has a relationship with is loaded when the client connects, so the lists are ready straight away:
 

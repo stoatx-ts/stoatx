@@ -3,7 +3,8 @@ import type { Client } from "../client/Client";
 import type { User } from "./User";
 import type { Server } from "./Server";
 import type { DMChannel } from "./DMChannel";
-import { Permissions, PermissionFlags } from "../utils/permissions";
+import { Permissions } from "../utils/permissions";
+import { calculateServerPermissions } from "../utils/permissionCalculator";
 import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import { MemberBanOptions, MemberEditOptions } from "../managers/MemberManager";
 import { MemberRoleManager } from "../managers/MemberRoleManager";
@@ -119,22 +120,14 @@ export class Member extends Base {
     return this.client.servers.cache.get(this.serverId);
   }
 
-  /** Calculates the member's total permissions using BigInt */
+  /**
+   * The member's permissions in the server, before channel overrides: the server's default
+   * permissions, then each role's allowed and denied permissions, from the lowest role to the
+   * highest. The owner has every permission. While timed out, a member can only view channels
+   * and read their history. For a channel, use `channel.permissionsFor(member)`.
+   */
   public get permissions(): Permissions {
-    const server = this.server;
-    if (!server) return new Permissions(0n);
-
-    if (server.ownerId === this.id) {
-      return new Permissions(PermissionFlags.GrantAllSafe);
-    }
-
-    let totalPerms = server.defaultPermissions ?? 0n;
-
-    for (const role of this.roles.cache.values()) {
-      totalPerms |= BigInt(role.permissions.bitfield);
-    }
-
-    return new Permissions(totalPerms);
+    return new Permissions(calculateServerPermissions(this));
   }
 
   /**

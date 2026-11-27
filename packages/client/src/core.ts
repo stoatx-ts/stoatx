@@ -51,6 +51,7 @@ export * from "./builders/AttachmentBuilder";
 // Utils
 export * from "./utils/Collection";
 export * from "./utils/permissions";
+export * from "./utils/permissionCalculator";
 export * from "./utils/Collector";
 export * from "./utils/MessageCollector";
 export * from "./utils/ReactionCollector";
