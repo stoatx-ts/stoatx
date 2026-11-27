@@ -41,7 +41,7 @@
     "@stoatx/voice": "workspace:*"
   },
   "peerDependencies": {
-    "@stoatx/client": "^1.0.0"
+    "@stoatx/client": "^1.1.0"
   },
   "devDependencies": {
     "@stoatx/client": "workspace:*"
