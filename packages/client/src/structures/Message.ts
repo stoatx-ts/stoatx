@@ -13,9 +13,12 @@ import { ReactionCollector, ReactionCollectorOptions } from "../utils/ReactionCo
 import { Collection } from "../utils/Collection";
 import { MessageReaction } from "./MessageReaction";
 import { AttachmentBuilder } from "../builders/AttachmentBuilder";
-import { Message as RawMessage, Embed as RawEmbed } from "stoat-api";
+import { Message as RawMessage, Embed as RawEmbed, SystemMessage } from "stoat-api";
 import { MessageMentions } from "./MessageMentions";
 import { sendReport, type ContentReportReason, type ReportOptions } from "../utils/report";
+
+/** What a system message is about. See {@link Message.system}. */
+export type { SystemMessage };
 
 export interface MessageOptions {
   content?: string;
@@ -62,6 +65,12 @@ export class Message extends Base {
   public pinned: null | boolean = false;
   public reactions: Record<string, string[]> = {};
   public replies: string[] | null = [];
+  /**
+   * What a system message is about, e.g. `{ type: "user_joined", id }` or
+   * `{ type: "message_pinned", id, by }`. `null` for messages written by a user or bot.
+   * System messages have no content, and their author ID is all zeros.
+   */
+  public system: SystemMessage | null = null;
 
   constructor(client: Client, data: RawMessage) {
     super(client, data);
@@ -306,6 +315,7 @@ export class Message extends Base {
     if (data.pinned !== undefined) this.pinned = data.pinned;
     if (data.embeds !== undefined) this.embeds = data.embeds;
     if (data.flags !== undefined) this.flags = data.flags;
+    if (data.system !== undefined) this.system = data.system ?? null;
     if (data.reactions !== undefined) {
       this.reactions = Array.isArray(data.reactions) ? {} : data.reactions;
     }
