@@ -95,6 +95,7 @@
 - [MutualConnections](interfaces/MutualConnections.md)
 - [Patchable](interfaces/Patchable.md)
 - [PendingPolicyChange](interfaces/PendingPolicyChange.md)
+- [PermissionOverride](interfaces/PermissionOverride.md)
 - [PolicyChange](interfaces/PolicyChange.md)
 - [PublicBot](interfaces/PublicBot.md)
 - [PushSubscriptionKeys](interfaces/PushSubscriptionKeys.md)
@@ -162,4 +163,15 @@
 
 ## Variables
 
+- [ALLOW\_IN\_TIMEOUT](variables/ALLOW_IN_TIMEOUT.md)
+- [DEFAULT\_PERMISSION](variables/DEFAULT_PERMISSION.md)
+- [DEFAULT\_PERMISSION\_DIRECT\_MESSAGE](variables/DEFAULT_PERMISSION_DIRECT_MESSAGE.md)
+- [DEFAULT\_PERMISSION\_VIEW\_ONLY](variables/DEFAULT_PERMISSION_VIEW_ONLY.md)
 - [PermissionFlags](variables/PermissionFlags.md)
+
+## Functions
+
+- [applyOverride](functions/applyOverride.md)
+- [calculateChannelPermissions](functions/calculateChannelPermissions.md)
+- [calculateServerPermissions](functions/calculateServerPermissions.md)
+- [toPermissionOverride](functions/toPermissionOverride.md)

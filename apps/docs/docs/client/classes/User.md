@@ -167,7 +167,8 @@ The URL of the generated avatar Stoat shows for users without one. A PNG, served
 
 > **get** **displayAvatarURL**(): `string`
 
-The user's avatar URL, or the default avatar's if they haven't set one.
+A URL to show the user's avatar at: the CDN's small preview (not animated), or the default
+avatar if they haven't set one. `user.avatar?.url` is the original file.
 
 ##### Returns
 

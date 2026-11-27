@@ -108,6 +108,34 @@ The base class for all structures.
 
 ## Accessors
 
+### deniedPermissions
+
+#### Get Signature
+
+> **get** **deniedPermissions**(): [`Permissions`](Permissions.md)
+
+The permissions this role takes away from its members.
+
+##### Returns
+
+[`Permissions`](Permissions.md)
+
+***
+
+### permissionOverride
+
+#### Get Signature
+
+> **get** **permissionOverride**(): [`PermissionOverride`](../interfaces/PermissionOverride.md)
+
+The role's override: the permissions it allows, then the ones it denies.
+
+##### Returns
+
+[`PermissionOverride`](../interfaces/PermissionOverride.md)
+
+***
+
 ### permissions
 
 #### Get Signature

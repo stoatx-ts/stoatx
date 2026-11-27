@@ -120,6 +120,30 @@ How many unread messages in this channel mention the logged-in user. Always `0` 
 
 ***
 
+### permissions
+
+#### Get Signature
+
+> **get** **permissions**(): [`Permissions`](Permissions.md)
+
+What the logged-in user can do in this channel, with the channel's overrides applied.
+
+##### Example
+
+```ts
+if (channel.permissions.has("SendMessage")) showComposer();
+```
+
+##### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`permissions`](BaseChannel.md#permissions)
+
+***
+
 ### unread
 
 #### Get Signature
@@ -510,6 +534,36 @@ console.log(`Fetched ${messages.size} messages sent around the specified message
 #### Inherited from
 
 [`BaseChannel`](BaseChannel.md).[`isVoice`](BaseChannel.md#isvoice)
+
+***
+
+### permissionsFor()
+
+> **permissionsFor**(`user`): [`Permissions`](Permissions.md)
+
+What a user can do in this channel, with the channel's overrides applied, following the same
+rules as Stoat: role and channel overrides in servers, friends-only DMs, group permissions,
+and timeouts. Users that aren't in the channel, or aren't cached, have no permissions.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`Member`](Member.md) \| [`UserResolvable`](../type-aliases/UserResolvable.md) | The user, their ID, or their server member. |
+
+#### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Example
+
+```ts
+const canSee = channel.permissionsFor(member).has("ViewChannel");
+```
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`permissionsFor`](BaseChannel.md#permissionsfor)
 
 ***
 

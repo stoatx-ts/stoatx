@@ -117,6 +117,8 @@ class instances (client, managers, other structures) are shared by reference.
 
 > **avatarURL**(): `string` \| `null`
 
+The webhook's avatar, as a small preview to show, or `null` if it has none.
+
 #### Returns
 
 `string` \| `null`

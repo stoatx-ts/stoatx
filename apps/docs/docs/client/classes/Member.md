@@ -126,14 +126,13 @@ Represents a member of a server on Stoat
 
 > **get** **avatarURL**(): `string` \| `null`
 
-Get avatar URL for this member, or null if they don't have one.
+The member's server avatar, as a small preview to show (not animated), or `null` if they
+haven't set one for this server. `member.avatar?.url` is the original file.
 
 ##### Example
 
 ```ts
-// Get a member's avatar URL
-const avatarURL = member.avatarURL;
-console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/1234567890/avatar.png
+const avatarURL = member.avatarURL ?? member.user?.displayAvatarURL;
 ```
 
 ##### Returns
@@ -148,7 +147,10 @@ console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/
 
 > **get** **permissions**(): [`Permissions`](Permissions.md)
 
-Calculates the member's total permissions using BigInt
+The member's permissions in the server, before channel overrides: the server's default
+permissions, then each role's allowed and denied permissions, from the lowest role to the
+highest. The owner has every permission. While timed out, a member can only view channels
+and read their history. For a channel, use `channel.permissionsFor(member)`.
 
 ##### Returns
 

@@ -61,6 +61,15 @@ The base class for all structures.
 
 ***
 
+### defaultPermissions
+
+> **defaultPermissions**: `bigint` \| `null` = `null`
+
+What the group's members (other than the owner) may do, or `null` for the defaults.
+Viewing the group and reading its history are always allowed.
+
+***
+
 ### description?
 
 > `optional` **description?**: `string` \| `null` = `null`
@@ -185,6 +194,30 @@ Gets the User object of the person who owns this group
 ##### Returns
 
 [`User`](User.md) \| `undefined`
+
+***
+
+### permissions
+
+#### Get Signature
+
+> **get** **permissions**(): [`Permissions`](Permissions.md)
+
+What the logged-in user can do in this channel, with the channel's overrides applied.
+
+##### Example
+
+```ts
+if (channel.permissions.has("SendMessage")) showComposer();
+```
+
+##### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`permissions`](BaseChannel.md#permissions)
 
 ***
 
@@ -690,6 +723,36 @@ Leaves the group and removes it from the cache.
 #### Returns
 
 `Promise`\<`void`\>
+
+***
+
+### permissionsFor()
+
+> **permissionsFor**(`user`): [`Permissions`](Permissions.md)
+
+What a user can do in this channel, with the channel's overrides applied, following the same
+rules as Stoat: role and channel overrides in servers, friends-only DMs, group permissions,
+and timeouts. Users that aren't in the channel, or aren't cached, have no permissions.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `user` | [`Member`](Member.md) \| [`UserResolvable`](../type-aliases/UserResolvable.md) | The user, their ID, or their server member. |
+
+#### Returns
+
+[`Permissions`](Permissions.md)
+
+#### Example
+
+```ts
+const canSee = channel.permissionsFor(member).has("ViewChannel");
+```
+
+#### Inherited from
+
+[`BaseChannel`](BaseChannel.md).[`permissionsFor`](BaseChannel.md#permissionsfor)
 
 ***
 

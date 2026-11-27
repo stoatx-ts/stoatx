@@ -464,6 +464,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "../docs/client/interfaces/PermissionOverride",
+          label: "PermissionOverride"
+        },
+        {
+          type: "doc",
           id: "../docs/client/interfaces/PolicyChange",
           label: "PolicyChange"
         },
@@ -781,8 +786,54 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "../docs/client/variables/ALLOW_IN_TIMEOUT",
+          label: "ALLOW_IN_TIMEOUT"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/variables/DEFAULT_PERMISSION",
+          label: "DEFAULT_PERMISSION"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/variables/DEFAULT_PERMISSION_DIRECT_MESSAGE",
+          label: "DEFAULT_PERMISSION_DIRECT_MESSAGE"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/variables/DEFAULT_PERMISSION_VIEW_ONLY",
+          label: "DEFAULT_PERMISSION_VIEW_ONLY"
+        },
+        {
+          type: "doc",
           id: "../docs/client/variables/PermissionFlags",
           label: "PermissionFlags"
+        }
+      ]
+    },
+    {
+      type: "category",
+      label: "Functions",
+      items: [
+        {
+          type: "doc",
+          id: "../docs/client/functions/applyOverride",
+          label: "applyOverride"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/functions/calculateChannelPermissions",
+          label: "calculateChannelPermissions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/functions/calculateServerPermissions",
+          label: "calculateServerPermissions"
+        },
+        {
+          type: "doc",
+          id: "../docs/client/functions/toPermissionOverride",
+          label: "toPermissionOverride"
         }
       ]
     }
