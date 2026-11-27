@@ -12,6 +12,10 @@ import { MessageCollector, MessageCollectorOptions } from "../utils/MessageColle
 import { Channel as RawChannel } from "stoat-api";
 import type { VoiceChannel } from "./VoiceChannel";
 import { WebhookManager } from "../managers/WebhookManager";
+import type { Member } from "./Member";
+import type { UserResolvable } from "../managers/UserManager";
+import { Permissions } from "../utils/permissions";
+import { calculateChannelPermissions } from "../utils/permissionCalculator";
 
 export type ChannelType = "SavedMessages" | "DirectMessage" | "Group" | "TextChannel";
 
@@ -87,6 +91,28 @@ export abstract class BaseChannel extends Base {
   /** Everyone in this channel's voice call, by user ID. Empty if nobody is in it. */
   public get voiceStates(): Collection<string, VoiceState> {
     return this.client.voiceStates.get(this.id);
+  }
+
+  /**
+   * What the logged-in user can do in this channel, with the channel's overrides applied.
+   * @example
+   * if (channel.permissions.has("SendMessage")) showComposer();
+   */
+  public get permissions(): Permissions {
+    return this.client.user ? this.permissionsFor(this.client.user.id) : new Permissions(0n);
+  }
+
+  /**
+   * What a user can do in this channel, with the channel's overrides applied, following the same
+   * rules as Stoat: role and channel overrides in servers, friends-only DMs, group permissions,
+   * and timeouts. Users that aren't in the channel, or aren't cached, have no permissions.
+   * @param user The user, their ID, or their server member.
+   * @example
+   * const canSee = channel.permissionsFor(member).has("ViewChannel");
+   */
+  public permissionsFor(user: UserResolvable | Member): Permissions {
+    const id = typeof user === "string" ? user : user.id;
+    return new Permissions(calculateChannelPermissions(this.client, this, id));
   }
 
   public get unread(): boolean {
