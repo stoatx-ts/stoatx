@@ -7,7 +7,6 @@ import { Permissions, PermissionFlags } from "../utils/permissions";
 import { inspectCustom, type InspectFn, type InspectOptions } from "../utils/inspect";
 import { MemberBanOptions, MemberEditOptions } from "../managers/MemberManager";
 import { MemberRoleManager } from "../managers/MemberRoleManager";
-import { StoatCDN } from "../utils/Constants";
 import { Attachment } from "./Attachment";
 import { Message, MessageOptions } from "./Message";
 import { FieldsMember, Member as RawMember } from "stoat-api";
@@ -138,15 +137,14 @@ export class Member extends Base {
     return new Permissions(totalPerms);
   }
 
-  /** Get avatar URL for this member, or null if they don't have one.
+  /**
+   * The member's server avatar, as a small preview to show (not animated), or `null` if they
+   * haven't set one for this server. `member.avatar?.url` is the original file.
    * @example
-   * // Get a member's avatar URL
-   * const avatarURL = member.avatarURL;
-   * console.log(avatarURL); // https://cdn.stoatusercontent.com/attachments/avatars/1234567890/avatar.png
+   * const avatarURL = member.avatarURL ?? member.user?.displayAvatarURL;
    */
   public get avatarURL(): string | null {
-    if (!this.avatar) return null;
-    return `${StoatCDN}/attachments/avatars/${this.avatar.id}/${this.avatar.filename}`;
+    return this.avatar?.previewURL ?? null;
   }
 
   /**

@@ -53,4 +53,51 @@ describe("GatewayManager", () => {
       vi.useRealTimers();
     }
   });
+
+  describe("connection URL", () => {
+    /** Connects with a stubbed WebSocket and returns the URL it was opened with. */
+    async function connectURL(type: "bot" | "user") {
+      const urls: string[] = [];
+      vi.stubGlobal(
+        "WebSocket",
+        class {
+          constructor(url: string) {
+            urls.push(url);
+          }
+          close() {}
+        },
+      );
+      try {
+        const client = new Client();
+        client.rest.setToken("a token", type);
+        await client.gateway.connect("a token");
+        client.gateway.disconnect();
+        return new URL(urls[0]!);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    }
+
+    it("asks for the read state, and every other Ready field, for user sessions", async () => {
+      const url = await connectURL("user");
+      expect(url.searchParams.get("token")).toBe("a token");
+      // Listing any field turns off the rest, so all of them must be listed.
+      expect(url.searchParams.getAll("ready")).toEqual([
+        "users",
+        "servers",
+        "channels",
+        "members",
+        "emojis",
+        "voice_states",
+        "channel_unreads",
+        "policy_changes",
+      ]);
+    });
+
+    it("uses the server's default Ready fields for bots", async () => {
+      const url = await connectURL("bot");
+      expect(url.searchParams.get("version")).toBe("1");
+      expect(url.searchParams.has("ready")).toBe(false);
+    });
+  });
 });
