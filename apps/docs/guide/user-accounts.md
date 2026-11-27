@@ -404,7 +404,7 @@ mutual.channelIds; // groups and DMs you're both in
 
 Both also exist on the manager, for when you only have an ID: `client.users.fetchProfile(id)` and `client.users.fetchMutual(id)`.
 
-For avatars, `user.displayAvatarURL` is the user's avatar, or the generated default one if they haven't set any (`user.defaultAvatarURL`).
+For avatars, `user.displayAvatarURL` is the user's avatar, or the generated default one if they haven't set any (`user.defaultAvatarURL`). It's the CDN's small preview, which is what you want to show; `user.avatar?.url` is the original file. The same goes for any file: `attachment.previewURL` is a resized WebP for images (the CDN redirects to the original for other files), and `attachment.url` is the original, to open or download.
 
 ## Direct messages
 

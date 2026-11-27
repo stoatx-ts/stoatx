@@ -126,7 +126,7 @@ for (const routes of Object.values(queryParams)) {
 export class RESTManager {
   private baseURL: string = "";
 
-  private cdnURL: string = "";
+  private _cdnURL: string = "";
 
   private token: string | null = null;
 
@@ -191,12 +191,20 @@ export class RESTManager {
     return this.baseURL;
   }
 
+  /**
+   * The CDN's base URL, without a trailing slash. Read from the instance's config on login, so
+   * it points at the right CDN for self-hosted instances too. Empty before login.
+   */
+  public get cdnURL(): string {
+    return this._cdnURL;
+  }
+
   public setBaseURL(baseURL: string) {
     this.baseURL = baseURL.replace(/\/+$/, "");
   }
 
   public setCDNURL(cdnURL: string) {
-    this.cdnURL = cdnURL.replace(/\/+$/, "");
+    this._cdnURL = cdnURL.replace(/\/+$/, "");
   }
 
   /**
@@ -339,7 +347,7 @@ export class RESTManager {
   public async uploadFile(tag: CDNTag, file: AttachmentData, filename?: string): Promise<string> {
     if (!this.token) throw new Error("REST_NOT_READY: No token available.");
 
-    const url = `${this.cdnURL}/${tag}`;
+    const url = `${this._cdnURL}/${tag}`;
 
     const formData = new FormData();
     formData.append(

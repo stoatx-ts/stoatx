@@ -51,9 +51,9 @@ export class Webhook extends Base {
     if (data.token !== undefined) this.token = data.token ?? null;
   }
 
+  /** The webhook's avatar, as a small preview to show, or `null` if it has none. */
   avatarURL(): string | null {
-    if (!this.avatar) return null;
-    return this.avatar.url;
+    return this.avatar?.previewURL ?? null;
   }
 
   /** Edit this webhook's name/avatar (bot auth). */
