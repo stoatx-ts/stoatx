@@ -20,6 +20,22 @@ export type GatewayClientMessage =
 /** How long a typing indicator lasts without being refreshed. Matches the official client. */
 const TYPING_TIMEOUT_MS = 4000;
 
+/**
+ * What user sessions ask for in the Ready payload. The read state (`channel_unreads`) is only sent
+ * when asked for, and asking for any field turns off every field not listed, so all are listed.
+ * Bots connect without the parameter and get the server's defaults.
+ */
+const USER_READY_FIELDS = [
+  "users",
+  "servers",
+  "channels",
+  "members",
+  "emojis",
+  "voice_states",
+  "channel_unreads",
+  "policy_changes",
+] as const;
+
 export class GatewayManager {
   private ws: WebSocket | null = null;
   /** Expiry timers for typing indicators, keyed by `channelId:userId`. */
@@ -44,7 +60,11 @@ export class GatewayManager {
     this.detachSocket();
 
     const baseUrl = this.wsURL || StoatGateway;
-    const url = `${baseUrl}?version=1&format=json&token=${this.token}`;
+    const params = new URLSearchParams({ version: "1", format: "json", token: this.token });
+    if (this.client.rest.tokenType === "user") {
+      for (const field of USER_READY_FIELDS) params.append("ready", field);
+    }
+    const url = `${baseUrl}?${params}`;
 
     // Use the platform WebSocket (browsers, Deno, Bun and Node 22+) instead of the `ws` package.
     const ws = new WebSocket(url);
