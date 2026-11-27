@@ -14,6 +14,7 @@ This repository is a monorepo managed using modern Node tooling. It contains bot
 
 - **`apps/bot`** — A sample bot built using the `stoatx` command handler and `@stoatx/client`. This serves as mostly a testing ground for new features and a reference implementation for users.
 - **`apps/docs`** — Documentation site for the Stoatx ecosystem.
+- **`apps/example-client`** — An example Stoat client for user accounts, built with React, Mantine and `@stoatx/client`. It isn't hosted: run it locally with `mise run dev:example-client`.
 - **`packages/client`** (`@stoatx/client`) — The core REST and WebSocket API wrapper.
 - **`packages/stoatx`** (`stoatx`) — The decorator-based command framework.
 - **`packages/voice`** (`@stoatx/voice`) — The shared voice connection and manager.
@@ -62,9 +63,11 @@ You can run these tasks using `mise run <task>` (or `mise <task>` for short):
 - `build:bot`: Build the bot application
 - `build:check`: Check types are compiling, including tests
 - `build:client`: Build the `@stoatx/client` package
+- `build:example-client`: Build the example client
 - `build:stoatx`: Build the `stoatx` package
 - `ci`: Run the CI checks (build, type check, formatting and tests)
 - `dev:docs`: Start the documentation site locally
+- `dev:example-client`: Start the example client locally
 - `docs:version`: Snapshot a new version of the API documentation
 - `format`: Check if the codebase is formatted correctly (CI)
 - `format:fix`: Format the codebase using Prettier
@@ -108,5 +111,6 @@ Because this is a monorepo containing multiple distinct tools, **packages in thi
 - Core Client (`@stoatx/client`): MIT License
 - Command Handler (`stoatx`): MIT License
 - Voice (`@stoatx/voice`, `@stoatx/voice-node`, `@stoatx/voice-browser`): MIT License
+- Example client (`apps/example-client`): MIT License
 
 Please check the `LICENSE` file within each specific package directory for exact details.

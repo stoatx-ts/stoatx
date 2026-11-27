@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Build the example client"
+#MISE depends=["build:client"]
+set -e
+
+pnpm --filter @stoatx/example-client build

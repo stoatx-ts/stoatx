@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Start the example client locally (log in with your own Stoat account)"
+#MISE depends=["build:client"]
+set -e
+
+pnpm --filter @stoatx/example-client dev

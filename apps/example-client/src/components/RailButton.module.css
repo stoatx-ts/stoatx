@@ -1,0 +1,39 @@
+.root {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* The pill on the rail's left edge: small for unread, tall for the selected entry. */
+.pill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: var(--mantine-color-text);
+  transform: translateY(-50%);
+  transition: height 150ms ease;
+}
+
+.root[data-unread] .pill {
+  height: 8px;
+}
+
+.root:hover .pill {
+  height: 20px;
+}
+
+.root[data-active] .pill {
+  height: 36px;
+}
+
+.avatar {
+  transition: border-radius 150ms ease;
+}
+
+.avatar:hover {
+  border-radius: var(--mantine-radius-md);
+}
