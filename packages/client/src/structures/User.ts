@@ -120,9 +120,12 @@ export class User extends Base {
     return `${this.client.rest.apiURL}/users/${this.id}/default_avatar`;
   }
 
-  /** The user's avatar URL, or the default avatar's if they haven't set one. */
+  /**
+   * A URL to show the user's avatar at: the CDN's small preview (not animated), or the default
+   * avatar if they haven't set one. `user.avatar?.url` is the original file.
+   */
   public get displayAvatarURL(): string {
-    return this.avatar?.url ?? this.defaultAvatarURL;
+    return this.avatar?.previewURL ?? this.defaultAvatarURL;
   }
 
   /**

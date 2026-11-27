@@ -43,12 +43,27 @@ export class Attachment extends Base {
     this.objectId = data.object_id;
   }
 
+  /** The CDN the file is on: the instance's, once logged in, otherwise stoat.chat's. */
+  private get cdn(): string {
+    return this.client.rest.cdnURL || StoatCDN;
+  }
+
   /**
-   * Automatically constructs the direct CDN URL for this file
+   * The URL of the original file, at full size. Use it to download or open the file;
+   * use {@link previewURL} to show an image.
    */
   public get url(): string {
-    // Standard Autumn CDN format: cdn.domain.com/tag/id/filename
-    return `${StoatCDN}/${this.tag}/${this.id}/${this.filename}`;
+    return `${this.cdn}/${this.tag}/${this.id}/${encodeURIComponent(this.filename)}`;
+  }
+
+  /**
+   * The URL of a smaller version of an image, made by the CDN: a WebP that fits within a size
+   * set per tag (1280×1280 for attachments, 128×128 for avatars and icons by default).
+   * For files that aren't images, and animated images outside avatars and icons, the CDN
+   * redirects to the original file. Avatar and icon previews aren't animated.
+   */
+  public get previewURL(): string {
+    return `${this.cdn}/${this.tag}/${this.id}`;
   }
 
   /**
