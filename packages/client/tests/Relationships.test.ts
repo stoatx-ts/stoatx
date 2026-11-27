@@ -134,14 +134,23 @@ describe("relationship lists", () => {
 
 describe("fetchDMs", () => {
   it("fetches DM, group and Saved Messages channels into the cache", async () => {
-    const dm = { _id: id(), channel_type: "DirectMessage", active: true, recipients: [self, id()] };
+    const dm = {
+      _id: id(),
+      channel_type: "DirectMessage",
+      active: true,
+      recipients: [self, id()],
+      last_message_id: id(),
+    };
     const group = { _id: id(), channel_type: "Group", name: "Group", owner: self, recipients: [self] };
     mockApi({ "GET /users/dms": () => [dm, group] });
 
     const channels = await client.users.fetchDMs();
 
     expect([...channels.keys()]).toEqual([dm._id, group._id]);
-    expect(client.channels.cache.get(dm._id)!.isDM()).toBe(true);
+    const cachedDM = client.channels.cache.get(dm._id)!;
+    expect(cachedDM.isDM()).toBe(true);
+    // A new DM gets its fields from the raw data, not just the defaults.
+    expect(cachedDM).toMatchObject({ active: true, recipients: dm.recipients, lastMessageId: dm.last_message_id });
     expect(client.channels.cache.get(group._id)).toBeInstanceOf(GroupChannel);
   });
 });
