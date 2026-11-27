@@ -13,7 +13,10 @@ export type RawTextChannel = Extract<RawChannel, { channel_type: "TextChannel" }
 export class TextChannel extends BaseChannel {
   public name!: string;
   public serverId!: string;
+  /** The channel's override for everyone: `a` is allowed, `d` denied. */
   public defaultPermissions?: { a: number; d: number } | null | undefined;
+  /** The channel's overrides per role, by role ID: `a` is allowed, `d` denied. */
+  public rolePermissions: Record<string, { a: number; d: number }> = {};
   public description?: string | null | undefined;
   public icon?: Attachment | null;
   public lastMessageId?: string | null | undefined;
@@ -31,7 +34,6 @@ export class TextChannel extends BaseChannel {
     this.createdTimestamp = timestamp;
     this.createdAt = new Date(timestamp);
 
-    this.defaultPermissions = data.default_permissions;
     this.description = data.description;
     if (data.icon !== undefined) {
       this.icon = data.icon ? new Attachment(this.client, data.icon) : null;
@@ -45,6 +47,9 @@ export class TextChannel extends BaseChannel {
 
   public _patch(data: RawTextChannel, clear?: FieldsChannel[]) {
     if (data.name !== undefined) this.name = data.name;
+    // Also on updates, so permission changes made after connecting are picked up.
+    if (data.default_permissions !== undefined) this.defaultPermissions = data.default_permissions;
+    if (data.role_permissions !== undefined) this.rolePermissions = data.role_permissions ?? {};
     if (data.description !== undefined) this.description = data.description;
 
     if (clear && Array.isArray(clear)) {

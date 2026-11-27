@@ -21,6 +21,11 @@ export class GroupChannel extends BaseChannel {
   public icon: Attachment | null = null;
   public lastMessageId?: string | null = null;
   public nsfw: boolean = false;
+  /**
+   * What the group's members (other than the owner) may do, or `null` for the defaults.
+   * Viewing the group and reading its history are always allowed.
+   */
+  public defaultPermissions: bigint | null = null;
   public createdAt!: Date;
   public createdTimestamp!: number;
 
@@ -41,6 +46,9 @@ export class GroupChannel extends BaseChannel {
     if (data.description !== undefined) this.description = data.description;
     if (data.last_message_id !== undefined) this.lastMessageId = data.last_message_id;
     if (data.nsfw !== undefined) this.nsfw = data.nsfw;
+    if (data.permissions !== undefined) {
+      this.defaultPermissions = data.permissions === null ? null : BigInt(data.permissions);
+    }
 
     if (data.icon !== undefined) {
       this.icon = data.icon ? new Attachment(this.client, data.icon) : null;
@@ -54,6 +62,9 @@ export class GroupChannel extends BaseChannel {
             break;
           case "Icon":
             this.icon = null;
+            break;
+          case "DefaultPermissions":
+            this.defaultPermissions = null;
             break;
         }
       }
