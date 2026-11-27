@@ -1,6 +1,6 @@
 {
   "packages/stoatx": "1.1.1",
-  "packages/client": "1.0.0",
+  "packages/client": "1.0.1",
   "packages/voice": "1.0.0",
   "packages/voice-node": "1.0.0",
   "packages/voice-browser": "1.0.0"

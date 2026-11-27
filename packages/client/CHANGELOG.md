@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/stoatx-ts/stoatx/compare/client-v1.0.0...client-v1.0.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **client:** DM channels, unreads, file URLs and system messages ([#183](https://github.com/stoatx-ts/stoatx/issues/183)) ([#187](https://github.com/stoatx-ts/stoatx/issues/187)) ([a8f775c](https://github.com/stoatx-ts/stoatx/commit/a8f775c48423e6b79319397268bf2863e8e6f28f))
+
 ## [1.0.0](https://github.com/stoatx-ts/stoatx/compare/client-v0.10.1...client-v1.0.0) (2026-11-21)
 
 
